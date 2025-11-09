@@ -1,0 +1,40 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=5
+
+[application]
+
+config/name="SSCS"
+run/main_scene="uid://bvu7fbyxi5nab"
+config/features=PackedStringArray("4.4", "Forward Plus", "Redot")
+config/icon="res://assets/branding/icon.svg"
+
+[audio]
+
+buses/default_bus_layout="res://assets/defaults/default_bus_layout.tres"
+
+[autoload]
+
+SSCS="*res://scripts/SSCS.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=2
+
+[display]
+
+window/stretch/aspect="ignore"
+
+[dotnet]
+
+project/assembly_name="SSCS"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
