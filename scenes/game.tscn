@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://dxie0udrkwq8l"]
 
-[ext_resource type="Script" uid="uid://cpvhaddtqbkgb" path="res://scripts/NoteHandler.gd" id="1_uwrxv"]
+[ext_resource type="Script" uid="uid://cpvhaddtqbkgb" path="res://scripts/classes/NoteHandler.gd" id="1_uwrxv"]
 
 [node name="Game" type="Node3D"]
 

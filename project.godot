@@ -11,8 +11,14 @@ config_version=5
 [application]
 
 config/name="SSCS"
+config/version="0.1"
 run/main_scene="uid://bvu7fbyxi5nab"
+config/use_custom_user_dir=true
+config/custom_user_dir_name="SSCS"
 config/features=PackedStringArray("4.4", "Forward Plus", "Redot")
+boot_splash/bg_color=Color(0, 0, 0, 1)
+boot_splash/show_image=false
+boot_splash/use_filter=false
 config/icon="res://assets/branding/icon.svg"
 
 [audio]
@@ -21,7 +27,7 @@ buses/default_bus_layout="res://assets/defaults/default_bus_layout.tres"
 
 [autoload]
 
-SSCS="*res://scripts/SSCS.gd"
+SSCS="*res://scripts/singletons/SSCS.gd"
 
 [debug]
 
@@ -29,7 +35,10 @@ gdscript/warnings/untyped_declaration=2
 
 [display]
 
+window/size/viewport_width=1280
+window/size/viewport_height=720
 window/stretch/aspect="ignore"
+window/vsync/vsync_mode=0
 
 [dotnet]
 
@@ -38,3 +47,11 @@ project/assembly_name="SSCS"
 [editor_plugins]
 
 enabled=PackedStringArray()
+
+[file_customization]
+
+folder_colors={
+"res://assets/": "red",
+"res://scenes/": "purple",
+"res://scripts/": "blue"
+}

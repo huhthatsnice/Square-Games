@@ -3,12 +3,12 @@ extends Node3D
 
 func _ready() -> void:
 	#make sure directories exist
-	DirAccess.make_dir_recursive_absolute("user://maps")
-	
+	DirAccess.make_dir_absolute("user://maps")
+
 	#set up commands
 	%Terminal.line_entered.connect(func(line:String)->void:
 		var split:PackedStringArray = line.split(" ")
-		
+
 		var cmd:String = split[0]
 		if cmd=="clr" or cmd=="clear":
 			%terminal.consoleText=""
@@ -17,7 +17,7 @@ func _ready() -> void:
 			if len(split)!=3:
 				%terminal.print_console("Invalid argument count.\n")
 				return
-			
+
 			if SSCS.settings.has(split[1]):
 				var type:int = typeof(SSCS.settings[split[1]])
 				var out:Variant
@@ -43,9 +43,9 @@ func _ready() -> void:
 							%terminal.print_console("Failed to set {0} to {1} (invalid setting value).\n".format([split[1],split[2]]))
 				if valid:
 					%terminal.print_console("Set {0} to {1} successfully.\n".format([split[1],split[2]]))
-			else: 
+			else:
 				%terminal.print_console("Failed to set {0} to {1} (invalid setting name).\n".format([split[1],split[2]]))
-			
+
 		elif cmd =="lsm" or cmd =="listsongs" or cmd=="listmaps":
 			for v:String in DirAccess.get_directories_at("user://maps"):
 				%terminal.print_console(v+"\n")

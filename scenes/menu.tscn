@@ -1,7 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://bvu7fbyxi5nab"]
+[gd_scene load_steps=5 format=3 uid="uid://kvgxw6len3g5"]
 
 [ext_resource type="Script" uid="uid://0lufbwn5daio" path="res://scripts/menu.gd" id="1_yqjtg"]
-[ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/Terminal.gd" id="2_lnu2h"]
+[ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/terminal.gd" id="2_lnu2h"]
 
 [sub_resource type="SystemFont" id="SystemFont_noarx"]
 subpixel_positioning = 0
@@ -9,7 +9,7 @@ subpixel_positioning = 0
 [sub_resource type="LabelSettings" id="LabelSettings_a0tk4"]
 font = SubResource("SystemFont_noarx")
 
-[node name="Men" type="Control"]
+[node name="Menu" type="Control"]
 layout_mode = 3
 anchors_preset = 0
 script = ExtResource("1_yqjtg")
