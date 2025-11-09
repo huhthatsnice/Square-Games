@@ -6,7 +6,7 @@ func _ready() -> void:
 	DirAccess.make_dir_recursive_absolute("user://maps")
 	
 	#set up commands
-	%terminal.line_entered.connect(func(line:String)->void:
+	%Terminal.line_entered.connect(func(line:String)->void:
 		var split:PackedStringArray = line.split(" ")
 		
 		var cmd:String = split[0]

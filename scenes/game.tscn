@@ -1,26 +1,8 @@
-[gd_scene load_steps=5 format=3 uid="uid://bvu7fbyxi5nab"]
+[gd_scene load_steps=2 format=3 uid="uid://dxie0udrkwq8l"]
 
-[ext_resource type="Script" uid="uid://0lufbwn5daio" path="res://scripts/main.gd" id="1_yqjtg"]
-[ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/terminal.gd" id="2_lnu2h"]
+[ext_resource type="Script" uid="uid://cpvhaddtqbkgb" path="res://scripts/NoteHandler.gd" id="1_uwrxv"]
 
-[sub_resource type="SystemFont" id="SystemFont_noarx"]
-subpixel_positioning = 0
+[node name="Game" type="Node3D"]
 
-[sub_resource type="LabelSettings" id="LabelSettings_a0tk4"]
-font = SubResource("SystemFont_noarx")
-
-[node name="Node3D" type="Control"]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1_yqjtg")
-
-[node name="terminal" type="Label" parent="."]
-unique_name_in_owner = true
-layout_mode = 0
-offset_right = 1152.0
-offset_bottom = 648.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-label_settings = SubResource("LabelSettings_a0tk4")
-autowrap_mode = 2
-script = ExtResource("2_lnu2h")
+[node name="Notes" type="Node3D" parent="."]
+script = ExtResource("1_uwrxv")
