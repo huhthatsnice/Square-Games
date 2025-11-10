@@ -11,4 +11,5 @@ class Settings:
 var settings: Settings = Settings.new()
 
 func _ready() -> void:
-	pass
+	#make sure directories exist
+	DirAccess.make_dir_absolute("user://maps")

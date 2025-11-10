@@ -20,12 +20,6 @@ func update_console() -> void:
 
 func _ready() -> void:
 	update_console()
-	var root:Window = get_tree().get_root()
-
-	root.size_changed.connect(func() -> void:
-		print("resize ",root.size)
-		self.size=root.size
-	)
 
 func _input(event:InputEvent) -> void:
 	if not is_accepting_input:

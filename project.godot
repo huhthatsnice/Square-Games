@@ -28,6 +28,8 @@ buses/default_bus_layout="res://assets/defaults/default_bus_layout.tres"
 [autoload]
 
 SSCS="*res://scripts/singletons/SSCS.gd"
+Terminal="*res://scenes/terminal.tscn"
+CommandLoader="*res://scripts/CommandLoader.gd"
 
 [debug]
 
