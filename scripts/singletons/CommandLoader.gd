@@ -14,7 +14,8 @@ func register_command(command:Command) -> void:
 	commands.append(command)
 
 func _ready() -> void:
-	
+	if not Terminal.is_node_ready():
+		await Terminal.ready
 	Terminal.line_entered.connect(func(line:String)->void:
 		var split:PackedStringArray = line.split(" ")
 		var cmd:String = split[0]
@@ -56,7 +57,6 @@ func _ready() -> void:
 	register_command(Command.new(func(setting_name:String,setting_value:String) -> void:
 		if SSCS.settings.has(setting_name):
 			var type:int = typeof(SSCS.settings[setting_name])
-			var out:Variant
 			var valid:bool = true
 			match type:
 				TYPE_FLOAT:
@@ -82,58 +82,21 @@ func _ready() -> void:
 			Terminal.print_console("Failed to set {0} to {1} (invalid setting name).\n".format([setting_name,setting_value]))
 	,["set","setsetting"]))
 	
-	
-			#elif cmd =="lsm" or cmd =="listsongs" or cmd=="listmaps":
-			#for v:String in DirAccess.get_directories_at("user://maps"):
-				#%Terminal.print_console(v+"\n")
-		#elif cmd=="lss" or cmd=="listsettings":
-			#for i:String in SSCS.settings.keys():
-				#var v:Variant = SSCS.settings[i]
-				#%Terminal.print_console("{0}:{1}\n".format([i,v]))
-				
-	#if cmd=="clr" or cmd=="clear":
-			#%Terminal.consoleText=""
-		#elif cmd=="set" or cmd=="setsetting":
-			#print("got set command")
-			#if len(split)!=3:
-				#%Terminal.print_console("Invalid argument count.\n")
-				#return
-#
-			#if SSCS.settings.has(split[1]):
-				#var type:int = typeof(SSCS.settings[split[1]])
-				#var out:Variant
-				#var valid:bool = true
-				#match type:
-					#TYPE_FLOAT:
-						#if split[2].is_valid_float():
-							#SSCS.settings[split[1]]=split[2].to_float()
-						#else:
-							#valid = false
-							#%Terminal.print_console("Failed to set {0} to {1} (invalid setting value).\n".format([split[1],split[2]]))
-					#TYPE_INT:
-						#if split[2].is_valid_int():
-							#SSCS.settings[split[1]]=split[2].to_int()
-						#else:
-							#valid = false
-							#%Terminal.print_console("Failed to set {0} to {1} (invalid setting value).\n".format([split[1],split[2]]))
-					#TYPE_BOOL:
-						#if split[2]=="false" or split[2]=="true":
-							#SSCS.settings[split[1]]=split[2]=="true"
-						#else:
-							#valid = false
-							#%Terminal.print_console("Failed to set {0} to {1} (invalid setting value).\n".format([split[1],split[2]]))
-				#if valid:
-					#%Terminal.print_console("Set {0} to {1} successfully.\n".format([split[1],split[2]]))
-			#else:
-				#%Terminal.print_console("Failed to set {0} to {1} (invalid setting name).\n".format([split[1],split[2]]))
-#
-		#elif cmd =="lsm" or cmd =="listsongs" or cmd=="listmaps":
-			#for v:String in DirAccess.get_directories_at("user://maps"):
-				#%Terminal.print_console(v+"\n")
-		#elif cmd=="lss" or cmd=="listsettings":
-			#for i:String in SSCS.settings.keys():
-				#var v:Variant = SSCS.settings[i]
-				#%Terminal.print_console("{0}:{1}\n".format([i,v]))
-		#else:
-			#%Terminal.print_console("No valid command named {0}.\n".format([split[0]]))
-	
+	register_command(Command.new(func(map_name: String) -> void:
+		var map:MapLoader.Map = MapLoader.from_path_native("user://maps/{0}".format([map_name]))
+		var game_handler:GameHandler = GameHandler.new(map)
+		
+		var game_scene:Node = $"/root/Game"
+
+		game_scene.add_child(game_handler)
+		
+		game_handler.play()
+		
+		Terminal.visible = false
+		
+		await game_handler.ended
+		
+		game_handler.queue_free()
+		Terminal.visible = true
+		
+	,["play","playmap"]))

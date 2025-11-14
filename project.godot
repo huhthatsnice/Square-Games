@@ -12,7 +12,7 @@ config_version=5
 
 config/name="SSCS"
 config/version="0.1"
-run/main_scene="uid://bvu7fbyxi5nab"
+run/main_scene="uid://dxie0udrkwq8l"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="SSCS"
 config/features=PackedStringArray("4.4", "Forward Plus", "Redot")
@@ -28,8 +28,9 @@ buses/default_bus_layout="res://assets/defaults/default_bus_layout.tres"
 [autoload]
 
 SSCS="*res://scripts/singletons/SSCS.gd"
-Terminal="*res://scenes/terminal.tscn"
-CommandLoader="*res://scripts/CommandLoader.gd"
+Terminal="*res://scenes/singletons/terminal.tscn"
+CommandLoader="*res://scripts/singletons/CommandLoader.gd"
+AudioManager="*res://scripts/singletons/AudioManager.gd"
 
 [debug]
 
@@ -39,6 +40,7 @@ gdscript/warnings/untyped_declaration=2
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
+window/size/mode=3
 window/stretch/aspect="ignore"
 window/vsync/vsync_mode=0
 

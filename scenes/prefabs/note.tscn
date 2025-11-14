@@ -2,11 +2,9 @@
 
 [ext_resource type="ArrayMesh" uid="uid://hivf8c2sjwfg" path="res://assets/meshes/Rounded.obj" id="1_5ueft"]
 [ext_resource type="Script" uid="uid://cs75yljb0w6bw" path="res://scripts/classes/Note.gd" id="1_qg57c"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_0fjeg"]
-shading_mode = 0
+[ext_resource type="Material" uid="uid://cbx2t2ss3am4x" path="res://assets/materials/new_standard_material_3d.tres" id="2_0fjeg"]
 
 [node name="Note" type="MeshInstance3D"]
 mesh = ExtResource("1_5ueft")
-surface_material_override/0 = SubResource("StandardMaterial3D_0fjeg")
+surface_material_override/0 = ExtResource("2_0fjeg")
 script = ExtResource("1_qg57c")

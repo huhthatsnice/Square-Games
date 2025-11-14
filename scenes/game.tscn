@@ -1,8 +1,16 @@
-[gd_scene load_steps=2 format=3 uid="uid://dxie0udrkwq8l"]
+[gd_scene load_steps=3 format=3 uid="uid://dxie0udrkwq8l"]
 
-[ext_resource type="Script" uid="uid://cpvhaddtqbkgb" path="res://scripts/classes/NoteHandler.gd" id="1_uwrxv"]
+[ext_resource type="Texture2D" uid="uid://djm8y1mnluy33" path="res://assets/defaults/cursor.jpg" id="2_lnu2h"]
+[ext_resource type="Script" uid="uid://55f13iefthiq" path="res://scripts/classes/Cursor.gd" id="2_yqjtg"]
 
 [node name="Game" type="Node3D"]
 
-[node name="Notes" type="Node3D" parent="."]
-script = ExtResource("1_uwrxv")
+[node name="Cursor" type="Sprite3D" parent="."]
+unique_name_in_owner = true
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 10)
+texture = ExtResource("2_lnu2h")
+script = ExtResource("2_yqjtg")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+current = true

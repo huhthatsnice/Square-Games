@@ -1,6 +1,6 @@
 extends Label
 
-const character_whitelist: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
+const CHARACTER_WHITELIST: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
 
 var is_accepting_input: bool = true
 var console_text:String = ""
@@ -29,7 +29,7 @@ func _input(event:InputEvent) -> void:
 			var keylabel: int = event.key_label
 			#print(keylabel)
 
-			if OS.is_keycode_unicode(keylabel) and character_whitelist.contains(char(keylabel)):
+			if OS.is_keycode_unicode(keylabel) and CHARACTER_WHITELIST.contains(char(keylabel)):
 				var key: String = char(keylabel)
 				if key == "V" and event.ctrl_pressed:
 					key = DisplayServer.clipboard_get()
@@ -42,6 +42,7 @@ func _input(event:InputEvent) -> void:
 
 				match keylabel:
 					KEY_BACKSPACE:
+						if cursor==0: return
 						current_input = current_input.erase(cursor - 1, 1)
 						cursor = clamp(cursor - 1, 0, len(current_input))
 					KEY_ENTER:

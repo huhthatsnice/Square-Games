@@ -25,16 +25,19 @@ class NoteDataMinimal:
 static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 	var output_data: Array[NoteDataMinimal] = []
 
-	for v:String in data.split(","):
+	for v: String in data.split(","):
 		var split: PackedStringArray = v.split("|")
-		output_data.append(NoteDataMinimal.new(split[0].to_float(), split[1].to_float(), split[2].to_int()))
+		if len(split)==3:
+			output_data.append(NoteDataMinimal.new(1-split[0].to_float(), split[1].to_float()-1, split[2].to_int()))
 
 	return output_data
 
 static func from_path_native(path:String) -> Map:
 	var new_map: Map = Map.new()
 
-	var audio: AudioStream = load("%s/audio.mp3" % path)
+	var audio: AudioStreamMP3 = AudioStreamMP3.new()
+	audio.data = FileAccess.get_file_as_bytes("%s/audio.mp3" % path)
+	
 	var raw_data: String = FileAccess.get_file_as_string("%s/data.txt" % path)
 	var data: Array =  _parse_data(raw_data)
 

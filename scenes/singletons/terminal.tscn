@@ -1,6 +1,6 @@
-[gd_scene load_steps=4 format=3 uid="uid://cmhf6nd2laeuc"]
+[gd_scene load_steps=4 format=3 uid="uid://3plwyh6qwfvl"]
 
-[ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/Terminal.gd" id="1_m430i"]
+[ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/singletons/Terminal.gd" id="1_yjhey"]
 
 [sub_resource type="SystemFont" id="SystemFont_noarx"]
 subpixel_positioning = 0
@@ -18,4 +18,4 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 label_settings = SubResource("LabelSettings_a0tk4")
 autowrap_mode = 2
-script = ExtResource("1_m430i")
+script = ExtResource("1_yjhey")
