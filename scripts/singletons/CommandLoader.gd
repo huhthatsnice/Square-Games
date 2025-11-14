@@ -83,7 +83,14 @@ func _ready() -> void:
 	,["set","setsetting"]))
 	
 	register_command(Command.new(func(map_name: String) -> void:
-		var map:MapLoader.Map = MapLoader.from_path_native("user://maps/{0}".format([map_name]))
+		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
+		
+		var map:MapLoader.Map
+		if FileAccess.file_exists("user://maps/%s/sspm.sspm" % map_name):
+			map = MapLoader.from_path_sspm("user://maps/%s/sspm.sspm" % map_name)
+		else:
+			map = MapLoader.from_path_native("user://maps/%s" % map_name)
+		
 		var game_handler:GameHandler = GameHandler.new(map)
 		
 		var game_scene:Node = $"/root/Game"
@@ -92,11 +99,13 @@ func _ready() -> void:
 		
 		game_handler.play()
 		
+		Terminal.is_accepting_input = false
 		Terminal.visible = false
 		
 		await game_handler.ended
 		
 		game_handler.queue_free()
 		Terminal.visible = true
+		Terminal.is_accepting_input = true
 		
 	,["play","playmap"]))

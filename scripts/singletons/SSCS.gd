@@ -21,3 +21,9 @@ var modifiers: Modifiers = Modifiers.new()
 func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
+	
+	#set global shader parameters
+	RenderingServer.global_shader_parameter_set("approach_time",settings.spawn_distance/settings.approach_rate)
+	RenderingServer.global_shader_parameter_set("spawn_distance",settings.spawn_distance)
+	RenderingServer.global_shader_parameter_set("vanish_distance",-settings.vanish_distance)
+	

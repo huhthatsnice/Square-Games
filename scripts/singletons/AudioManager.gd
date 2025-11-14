@@ -4,7 +4,7 @@ var player: AudioStreamPlayer
 var stream: AudioStream
 
 var playing: bool = false
-var elapsed: float = 0
+var elapsed: float = 0.0
 var last_update: int = 0
 var playback_speed: float = 1
 
@@ -31,7 +31,7 @@ func set_playback_speed(speed: float) -> void:
 
 func play(from:float) -> void:
 	playing = true
-	player.play()
+	player.play(from)
 	elapsed=from
 	last_update = Time.get_ticks_usec()
 
@@ -45,5 +45,6 @@ func resume() -> void:
 func _process(_dt: float) -> void:
 	if not playing: return
 	var current_update: int = Time.get_ticks_usec()
-	elapsed += (float(current_update-last_update)/1_000_000)*playback_speed
+	elapsed += (float(current_update-last_update)/1_000_000.0)*playback_speed
 	last_update = current_update
+	RenderingServer.global_shader_parameter_set("elapsed_time",elapsed)

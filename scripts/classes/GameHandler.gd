@@ -59,6 +59,7 @@ func pause() -> void:
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	playing = false
 	AudioManager.stop()
+	#Input.warp_mouse(get_viewport().get_camera_3d().unproject_position(cursor.position))
 
 func unpause() -> void:
 	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
@@ -66,16 +67,16 @@ func unpause() -> void:
 	AudioManager.resume()
 
 func _register_hit() -> void:
-	print('hit')
+	#print('hit')
 	hits+=1
 	health=clamp(health+0.5,0,5)
-	print(health)
+	#print(health)
 
 func _register_miss() -> void:
-	print('miss')
+	#print('miss')
 	misses+=1
 	health=clamp(health-1,0,5)
-	print(health)
+	#print(health)
 
 func _check_death() -> void:
 	if health==0:
@@ -103,29 +104,47 @@ func _load_notes() -> void:
 
 
 func _check_hitreg() -> void:
+	var elapsed: float = AudioManager.elapsed
+
+	var to_remove: PackedInt32Array = []
+	var i: int = -1
 	for note: Note in notes:
-		if note.t<AudioManager.elapsed:
-			if note.t<AudioManager.elapsed-hit_time:
+		i+=1
+		if note.t<elapsed:
+			if note.t<elapsed-hit_time:
 				_register_miss()
-				note.queue_free()
-				notes.erase(note)
+				
+				to_remove.append(i)
 			else:
 				var diff:Vector2 = (note.pos-cursor.pos).abs()
 
 				if max(diff.x,diff.y)<hitbox_size:
-					note.queue_free()
-					notes.erase(note)
 					_register_hit()
+					
+					to_remove.append(i)
 		else:
 			break
+	
+	var shift: int = 0
+	for v in to_remove:
+		var note:Note = notes.pop_at(v-shift)
+		note.queue_free()
+		shift+=1
 
-func _update_render() -> void:
-	for note: Note in notes:
-		note._render(AudioManager.elapsed)
+#func _update_render() -> void:
+	#for note: Note in notes:
+		#note._render(AudioManager.elapsed)
 
 func _process(_dt:float) -> void:
 	if not playing or stopped: return
 	_load_notes()
 	_check_hitreg()
-	_check_death()
-	_update_render()
+	#_check_death()
+	#_update_render()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"pause"):
+		if playing:
+			pause()
+		else:
+			unpause()

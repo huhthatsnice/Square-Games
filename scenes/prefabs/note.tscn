@@ -2,7 +2,7 @@
 
 [ext_resource type="ArrayMesh" uid="uid://hivf8c2sjwfg" path="res://assets/meshes/Rounded.obj" id="1_5ueft"]
 [ext_resource type="Script" uid="uid://cs75yljb0w6bw" path="res://scripts/classes/Note.gd" id="1_qg57c"]
-[ext_resource type="Material" uid="uid://cbx2t2ss3am4x" path="res://assets/materials/new_standard_material_3d.tres" id="2_0fjeg"]
+[ext_resource type="Material" uid="uid://c7hfkafb5b54w" path="res://assets/materials/note_shader_material.tres" id="2_0fjeg"]
 
 [node name="Note" type="MeshInstance3D"]
 mesh = ExtResource("1_5ueft")

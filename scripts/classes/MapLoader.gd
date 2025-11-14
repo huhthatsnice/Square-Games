@@ -3,6 +3,7 @@ class_name MapLoader
 
 enum MapType {
 	Native,
+	SSPM
 }
 
 class Map:
@@ -32,7 +33,7 @@ static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 
 	return output_data
 
-static func from_path_native(path:String) -> Map:
+static func from_path_native(path: String) -> Map: #path to a folder with a data.txt file and audio.mp3 file
 	var new_map: Map = Map.new()
 
 	var audio: AudioStreamMP3 = AudioStreamMP3.new()
@@ -48,3 +49,18 @@ static func from_path_native(path:String) -> Map:
 	new_map.data = data
 
 	return new_map
+
+static func from_path_sspm(path: String) -> Map: #path to a .sspm file
+	var new_map: Map = Map.new()
+	
+	var sspm_parsed: SSPMUtil.SSPM = SSPMUtil.load_from_path(path)
+	var data: Array =  _parse_data(sspm_parsed.data_csv)
+	
+	new_map.map_type = MapType.SSPM
+	new_map.path = path
+	new_map.audio = sspm_parsed.audio
+	new_map.raw_data = sspm_parsed.data_csv
+	new_map.data = data
+	
+	return new_map
+	
