@@ -43,8 +43,13 @@ func _input(event:InputEvent) -> void:
 				match keylabel:
 					KEY_BACKSPACE:
 						if cursor==0: return
-						current_input = current_input.erase(cursor - 1, 1)
-						cursor = clamp(cursor - 1, 0, len(current_input))
+						if event.is_command_or_control_pressed():
+							var space: int = max(current_input.rfind(" ",cursor),0)
+							current_input = current_input.erase(space, 0xffff)
+							cursor = clamp(space, 0, len(current_input))
+						else:
+							current_input = current_input.erase(cursor - 1, 1)
+							cursor = clamp(cursor - 1, 0, len(current_input))
 					KEY_ENTER:
 						console_text += ">" + current_input + "\n"
 						line_entered.emit(current_input)

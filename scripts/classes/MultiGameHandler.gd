@@ -1,0 +1,217 @@
+extends MultiMeshInstance3D
+class_name MultiGameHandler
+
+const note_base: PackedScene = preload("res://scenes/prefabs/note.tscn")
+const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
+const note_material: ShaderMaterial = preload("res://assets/materials/multi_note_shader_material.tres")
+
+
+const nan_transform: Transform3D = Transform3D(Basis(),Vector3(NAN,NAN,NAN))
+
+var map: MapLoader.Map
+
+var notes: Array[MultiNote]
+var allocated_notes: PackedByteArray = []
+var cursor: Cursor
+
+var max_loaded_notes: int = 0
+
+var misses: int = 0 
+var hits: int = 0
+
+var last_loaded_note_id: int=0
+
+var ran: bool = false
+var stopped: bool = false
+
+var playing: bool = false
+
+var hit_time: float = SSCS.modifiers.hit_time/1000
+var hitbox_size: float = SSCS.modifiers.hitbox_size
+
+var approach_time: float = SSCS.settings.spawn_distance/SSCS.settings.approach_rate
+
+var health: float = 5
+var reset_timer: int = -1
+
+signal ended
+
+func _init(map_arg: MapLoader.Map) -> void:
+	map = map_arg
+	
+	var max_t: int = ceil(((SSCS.settings.spawn_distance+0.1)/SSCS.settings.approach_rate)*1000) + SSCS.modifiers.hit_time
+	var note_counter: PackedInt32Array = []
+	
+	for v: MapLoader.NoteDataMinimal in map.data:
+		var ct: int = v.t
+		var to_remove: int = 0
+		
+		for t in note_counter:
+			if ct-t>max_t:
+				to_remove += 1
+			else:
+				break
+		
+		note_counter = note_counter.slice(to_remove)
+		note_counter.append(ct)
+		if len(note_counter) > max_loaded_notes:
+			max_loaded_notes=len(note_counter)
+	max_loaded_notes+=1
+	
+	allocated_notes.resize(max_loaded_notes)
+	allocated_notes.fill(0)
+
+func _ready() -> void:
+	cursor = $"../Cursor"
+	
+	self.multimesh = MultiMesh.new()
+	
+	update_note_mesh(note_mesh)
+	self.multimesh.transform_format=MultiMesh.TRANSFORM_3D
+	self.multimesh.use_custom_data=true
+	
+	self.multimesh.instance_count=max_loaded_notes
+
+func update_note_mesh(mesh: Mesh) -> void:
+	var new_note_mesh: Mesh = mesh.duplicate()
+	
+	new_note_mesh.surface_set_material(0,note_material)
+	self.multimesh.mesh=new_note_mesh
+
+func play() -> void:
+	assert(not ran, "Tried to run game manager more than once")
+	ran = true
+	
+	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
+	cursor.pos=Vector2()
+	cursor.update_position()
+	playing = true
+	AudioManager.set_stream(map.audio)
+	AudioManager.set_playback_speed(SSCS.modifiers.speed)
+	AudioManager.play(0)
+
+func stop() -> void:
+	assert(not stopped, "Tried to stop game manager more than once")
+	stopped = true
+	
+	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+	ended.emit()
+	playing = false
+	AudioManager.stop()
+
+func pause() -> void:
+	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
+	playing = false
+	AudioManager.stop()
+	#Input.warp_mouse(get_viewport().get_camera_3d().unproject_position(cursor.position))
+
+func unpause() -> void:
+	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
+	playing = true
+	AudioManager.resume()
+
+var last_find: int = 0
+func spawn_note(note_id: int, pos: Vector2, t: float) -> MultiNote:
+	var new_index: int = allocated_notes.find(0,last_find)
+	if new_index==-1:
+		last_find=0
+		new_index = allocated_notes.find(0,last_find)
+	last_find=new_index
+	#print("spawn note ",new_index)
+	allocated_notes[new_index]=1
+	var new_note:MultiNote = MultiNote.new(note_id, pos, t, multimesh, new_index)
+	self.add_child(new_note)
+	
+	return new_note
+
+func remove_note(note: MultiNote) -> void:
+	allocated_notes[note.multimesh_index]=0
+	multimesh.set_instance_transform(note.multimesh_index,nan_transform)
+	
+	note.queue_free()
+
+func _register_hit() -> void:
+	#print('hit')
+	hits+=1
+	health=clamp(health+0.5,0,5)
+	#print(health)
+
+func _register_miss() -> void:
+	#print('miss')
+	misses+=1
+	health=clamp(health-1,0,5)
+	#print(health)
+
+func _check_death() -> void:
+	if health==0:
+		stop()
+
+var last_load:float = 0
+func _load_notes() -> void:
+	while last_loaded_note_id<len(map.data):
+		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
+		if float(note_data.t)/1000 <= AudioManager.elapsed+approach_time:
+			var note:MultiNote = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
+			notes.append(note)
+			
+			last_loaded_note_id += 1
+		else:
+			break
+	
+	#debug loader, just loads a string of notes at 10 notes per second
+	#if AudioManager.elapsed-0.1>last_load:
+		#last_load = AudioManager.elapsed
+		#var note:Note = Note.new(last_loaded_note_id, Vector2(0, 0), AudioManager.elapsed+approach_time, note_mesh)
+		#notes.append(note)
+		#self.add_child(note)
+		#last_loaded_note_id += 1
+
+
+func _check_hitreg() -> void:
+	var elapsed: float = AudioManager.elapsed
+
+	var to_remove: PackedInt32Array = []
+	var i: int = -1
+	for note: MultiNote in notes:
+		i+=1
+		if note.t<elapsed:
+			if note.t<elapsed-hit_time:
+				_register_miss()
+				
+				to_remove.append(i)
+			else:
+				var diff: Vector2 = (note.pos-cursor.pos).abs()
+
+				if max(diff.x,diff.y)<hitbox_size:
+					_register_hit()
+					
+					to_remove.append(i)
+		else:
+			break
+	
+	var shift: int = 0
+	for v in to_remove:
+		var note: MultiNote = notes.pop_at(v-shift)
+		remove_note(note)
+		shift+=1
+
+func _process(_dt: float) -> void:
+	if not playing or stopped: return
+	_load_notes()
+	_check_hitreg()
+	#_check_death()
+	
+	if Input.is_action_pressed(&"reset"):
+		if reset_timer == -1:
+			reset_timer=Time.get_ticks_msec()
+		elif Time.get_ticks_msec()-reset_timer > 500:
+			stop()
+	elif reset_timer != -1:
+		reset_timer = -1
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed(&"pause"):
+		if playing:
+			pause()
+		else:
+			unpause()

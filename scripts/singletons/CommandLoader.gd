@@ -91,7 +91,7 @@ func _ready() -> void:
 		else:
 			map = MapLoader.from_path_native("user://maps/%s" % map_name)
 		
-		var game_handler:GameHandler = GameHandler.new(map)
+		var game_handler: MultiGameHandler = MultiGameHandler.new(map)
 		
 		var game_scene:Node = $"/root/Game"
 

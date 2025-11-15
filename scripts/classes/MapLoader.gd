@@ -54,7 +54,7 @@ static func from_path_sspm(path: String) -> Map: #path to a .sspm file
 	var new_map: Map = Map.new()
 	
 	var sspm_parsed: SSPMUtil.SSPM = SSPMUtil.load_from_path(path)
-	var data: Array =  _parse_data(sspm_parsed.data_csv)
+	var data: Array =  sspm_parsed.data_parsed
 	
 	new_map.map_type = MapType.SSPM
 	new_map.path = path

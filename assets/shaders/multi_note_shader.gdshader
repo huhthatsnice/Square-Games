@@ -6,14 +6,13 @@ global uniform float approach_time;
 global uniform float spawn_distance;
 global uniform float vanish_distance;
 
-instance uniform float note_time;
-instance uniform lowp vec3 note_color;
-
 varying flat lowp int alpha;
+varying lowp vec3 color;
 
 void vertex() {
+	color = INSTANCE_CUSTOM.rgb;
 	
-	float time_til_hit = note_time-elapsed_time;
+	float time_til_hit = INSTANCE_CUSTOM.a-elapsed_time;
 	float note_lerp = time_til_hit/approach_time;
 	float new_pos = spawn_distance*note_lerp;
 	
@@ -23,7 +22,7 @@ void vertex() {
 }
 
 void fragment() {
-	ALBEDO = note_color;
+	ALBEDO = color;
 	if (alpha==1) {
 		ALPHA = 0.0;
 	}
