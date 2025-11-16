@@ -136,11 +136,11 @@ static func load_from_path(path: String) -> SSPM:
 		if !isQuantum:
 			var x:int = -file.get_8()+2
 			var y:int = -file.get_8()+2
-			note_data.append(MapLoader.NoteDataMinimal.new(x-1,y-1,ms))
+			note_data.append(MapLoader.NoteDataMinimal.new(1-x,y-1,ms))
 		else:
 			var x:float = -file.get_float()+2
 			var y:float = -file.get_float()+2
-			note_data.append(MapLoader.NoteDataMinimal.new(x-1,y-1,ms))
+			note_data.append(MapLoader.NoteDataMinimal.new(1-x,y-1,ms))
 	
 	note_data.sort_custom(
 		func(a:MapLoader.NoteDataMinimal,b:MapLoader.NoteDataMinimal) -> bool:

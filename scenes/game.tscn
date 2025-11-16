@@ -15,6 +15,7 @@ unique_name_in_owner = true
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 10)
 cast_shadow = 0
 gi_mode = 0
+transparent = false
 double_sided = false
 texture = ExtResource("2_lnu2h")
 script = ExtResource("2_yqjtg")

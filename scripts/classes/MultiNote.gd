@@ -22,7 +22,6 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	multimesh=multimesh_arg
 	multimesh_index=multimesh_index_arg
 	
-func _ready() -> void:
 	if not color_assigned:
 		color_assigned = true
 		color = color_set[note_id % len(color_set)]
@@ -42,4 +41,5 @@ func _ready() -> void:
 	multimesh.set_instance_transform(multimesh_index,note_transform)
 	
 	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
+
 	

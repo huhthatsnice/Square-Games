@@ -104,6 +104,8 @@ func _ready() -> void:
 		
 		await game_handler.ended
 		
+		print("map ended")
+		
 		game_handler.queue_free()
 		Terminal.visible = true
 		Terminal.is_accepting_input = true

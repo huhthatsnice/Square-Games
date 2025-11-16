@@ -6,7 +6,7 @@ const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
 const note_material: ShaderMaterial = preload("res://assets/materials/multi_note_shader_material.tres")
 
 
-const nan_transform: Transform3D = Transform3D(Basis(),Vector3(NAN,NAN,NAN))
+const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
 
 var map: MapLoader.Map
 
@@ -15,6 +15,9 @@ var allocated_notes: PackedByteArray = []
 var cursor: Cursor
 
 var max_loaded_notes: int = 0
+
+var last_top_note_id: int = 0
+var note_added_or_removed: bool = false
 
 var misses: int = 0 
 var hits: int = 0
@@ -71,12 +74,35 @@ func _ready() -> void:
 	self.multimesh.use_custom_data=true
 	
 	self.multimesh.instance_count=max_loaded_notes
+	self.multimesh.visible_instance_count=1
+
+
+func spawn_note(note_id: int, pos: Vector2, t: float) -> MultiNote:
+	note_added_or_removed=true
+	
+	var new_index: int = allocated_notes.find(0,0)
+	
+	allocated_notes[new_index]=1
+	var new_note:MultiNote = MultiNote.new(note_id, pos, t, multimesh, new_index)
+	#self.add_child(new_note)
+	
+	return new_note
+
+func remove_note(note: MultiNote) -> void:
+	note_added_or_removed=true
+	
+	allocated_notes[note.multimesh_index]=0
+	multimesh.set_instance_transform(note.multimesh_index,nan_transform)
+	
+	note.queue_free()
+
 
 func update_note_mesh(mesh: Mesh) -> void:
 	var new_note_mesh: Mesh = mesh.duplicate()
 	
 	new_note_mesh.surface_set_material(0,note_material)
 	self.multimesh.mesh=new_note_mesh
+
 
 func play() -> void:
 	assert(not ran, "Tried to run game manager more than once")
@@ -110,25 +136,6 @@ func unpause() -> void:
 	playing = true
 	AudioManager.resume()
 
-var last_find: int = 0
-func spawn_note(note_id: int, pos: Vector2, t: float) -> MultiNote:
-	var new_index: int = allocated_notes.find(0,last_find)
-	if new_index==-1:
-		last_find=0
-		new_index = allocated_notes.find(0,last_find)
-	last_find=new_index
-	#print("spawn note ",new_index)
-	allocated_notes[new_index]=1
-	var new_note:MultiNote = MultiNote.new(note_id, pos, t, multimesh, new_index)
-	self.add_child(new_note)
-	
-	return new_note
-
-func remove_note(note: MultiNote) -> void:
-	allocated_notes[note.multimesh_index]=0
-	multimesh.set_instance_transform(note.multimesh_index,nan_transform)
-	
-	note.queue_free()
 
 func _register_hit() -> void:
 	#print('hit')
@@ -143,14 +150,15 @@ func _register_miss() -> void:
 	#print(health)
 
 func _check_death() -> void:
-	if health==0:
+	if health==-1 or (len(notes)==0 and last_loaded_note_id==len(map.data)):
 		stop()
 
 var last_load:float = 0
 func _load_notes() -> void:
+	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
-		if float(note_data.t)/1000 <= AudioManager.elapsed+approach_time:
+		if note_data.t <= threshold:
 			var note:MultiNote = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
 			notes.append(note)
 			
@@ -172,6 +180,7 @@ func _check_hitreg() -> void:
 
 	var to_remove: PackedInt32Array = []
 	var i: int = -1
+	
 	for note: MultiNote in notes:
 		i+=1
 		if note.t<elapsed:
@@ -199,7 +208,14 @@ func _process(_dt: float) -> void:
 	if not playing or stopped: return
 	_load_notes()
 	_check_hitreg()
-	#_check_death()
+	_check_death()
+	
+	if note_added_or_removed:
+		note_added_or_removed = false
+		var top_note_id: int = allocated_notes.rfind(1)+1
+		if top_note_id != last_top_note_id:
+			self.multimesh.visible_instance_count = top_note_id
+			last_top_note_id = top_note_id
 	
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:
