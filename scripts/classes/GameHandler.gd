@@ -1,13 +1,23 @@
-extends Node3D
+extends MultiMeshInstance3D
 class_name GameHandler
 
-const note_base: PackedScene = preload("res://scenes/prefabs/note.tscn")
+const cursor_base: PackedScene = preload("res://scenes/prefabs/cursor.tscn")
 const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
+const note_material: ShaderMaterial = preload("res://assets/materials/note_shader_material.tres")
+
+
+const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
 
 var map: MapLoader.Map
 
 var notes: Array[Note]
+var allocated_notes: PackedByteArray = []
 var cursor: Cursor
+
+var max_loaded_notes: int = 0
+
+var last_top_note_id: int = 0
+var note_added_or_removed: bool = false
 
 var misses: int = 0 
 var hits: int = 0
@@ -19,20 +29,91 @@ var stopped: bool = false
 
 var playing: bool = false
 
-var hit_time: float = SSCS.modifiers.hit_time/1000
+var hit_time: float = (SSCS.modifiers.hit_time/1000) * SSCS.modifiers.speed
 var hitbox_size: float = SSCS.modifiers.hitbox_size
 
-var approach_time: float = SSCS.settings.spawn_distance/SSCS.settings.approach_rate
+var approach_time: float = (SSCS.settings.spawn_distance/SSCS.settings.approach_rate) * SSCS.modifiers.speed
 
 var health: float = 5
+var reset_timer: int = -1
 
 signal ended
 
 func _init(map_arg: MapLoader.Map) -> void:
 	map = map_arg
+	
+	var max_t: int = ceil(((SSCS.settings.spawn_distance+0.1)/SSCS.settings.approach_rate)*1000) + SSCS.modifiers.hit_time
+	var note_counter: PackedInt32Array = []
+	
+	for v: MapLoader.NoteDataMinimal in map.data:
+		var ct: int = v.t
+		var to_remove: int = 0
+		
+		for t in note_counter:
+			if ct-t>max_t:
+				to_remove += 1
+			else:
+				break
+		
+		note_counter = note_counter.slice(to_remove)
+		note_counter.append(ct)
+		if len(note_counter) > max_loaded_notes:
+			max_loaded_notes=len(note_counter)
+	max_loaded_notes+=1
+	
+	allocated_notes.resize(max_loaded_notes)
+	allocated_notes.fill(0)
 
 func _ready() -> void:
-	cursor = $"../Cursor"
+	print(SSCS.modifiers.speed)
+	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
+	RenderingServer.global_shader_parameter_set("spawn_distance",SSCS.settings.spawn_distance)
+	RenderingServer.global_shader_parameter_set("vanish_distance",-SSCS.settings.vanish_distance)
+	
+	
+	cursor = cursor_base.instantiate()
+	self.add_child(cursor)
+	
+	self.multimesh = MultiMesh.new()
+	
+	update_note_mesh(note_mesh)
+	self.multimesh.transform_format=MultiMesh.TRANSFORM_3D
+	self.multimesh.use_custom_data=true
+	
+	self.multimesh.instance_count=max_loaded_notes
+	self.multimesh.visible_instance_count=1
+
+
+#region note creation and deletion
+
+func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
+	note_added_or_removed=true
+	
+	var new_index: int = allocated_notes.find(0,0)
+	
+	allocated_notes[new_index]=1
+	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
+	#self.add_child(new_note)
+	
+	return new_note
+
+func remove_note(note: Note) -> void:
+	note_added_or_removed=true
+	
+	allocated_notes[note.multimesh_index]=0
+	multimesh.set_instance_transform(note.multimesh_index,nan_transform)
+	
+	note.queue_free()
+
+
+func update_note_mesh(mesh: Mesh) -> void:
+	var new_note_mesh: Mesh = mesh.duplicate()
+	
+	new_note_mesh.surface_set_material(0,note_material)
+	self.multimesh.mesh=new_note_mesh
+
+#endregion
+#region time control
 
 func play() -> void:
 	assert(not ran, "Tried to run game manager more than once")
@@ -66,6 +147,9 @@ func unpause() -> void:
 	playing = true
 	AudioManager.resume()
 
+#endregion
+#region note functionality
+
 func _register_hit() -> void:
 	#print('hit')
 	hits+=1
@@ -79,17 +163,18 @@ func _register_miss() -> void:
 	#print(health)
 
 func _check_death() -> void:
-	if health==0:
+	if health==-1 or (len(notes)==0 and last_loaded_note_id==len(map.data)):
 		stop()
 
 var last_load:float = 0
 func _load_notes() -> void:
+	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
-		if float(note_data.t)/1000 <= AudioManager.elapsed+approach_time:
-			var note:Note = Note.new(last_loaded_note_id, Vector2(note_data.x, note_data.y), float(note_data.t)/1000, note_mesh)
+		if note_data.t <= threshold:
+			var note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
 			notes.append(note)
-			self.add_child(note)
+			
 			last_loaded_note_id += 1
 		else:
 			break
@@ -108,6 +193,7 @@ func _check_hitreg() -> void:
 
 	var to_remove: PackedInt32Array = []
 	var i: int = -1
+	
 	for note: Note in notes:
 		i+=1
 		if note.t<elapsed:
@@ -116,7 +202,7 @@ func _check_hitreg() -> void:
 				
 				to_remove.append(i)
 			else:
-				var diff:Vector2 = (note.pos-cursor.pos).abs()
+				var diff: Vector2 = (note.pos-cursor.pos).abs()
 
 				if max(diff.x,diff.y)<hitbox_size:
 					_register_hit()
@@ -127,20 +213,32 @@ func _check_hitreg() -> void:
 	
 	var shift: int = 0
 	for v in to_remove:
-		var note:Note = notes.pop_at(v-shift)
-		note.queue_free()
+		var note: Note = notes.pop_at(v-shift)
+		remove_note(note)
 		shift+=1
 
-#func _update_render() -> void:
-	#for note: Note in notes:
-		#note._render(AudioManager.elapsed)
-
-func _process(_dt:float) -> void:
+func _process(_dt: float) -> void:
 	if not playing or stopped: return
 	_load_notes()
 	_check_hitreg()
-	#_check_death()
-	#_update_render()
+	_check_death()
+	
+	if note_added_or_removed:
+		note_added_or_removed = false
+		var top_note_id: int = allocated_notes.rfind(1)+1
+		if top_note_id != last_top_note_id:
+			self.multimesh.visible_instance_count = top_note_id
+			last_top_note_id = top_note_id
+	
+	if Input.is_action_pressed(&"reset"):
+		if reset_timer == -1:
+			reset_timer=Time.get_ticks_msec()
+		elif Time.get_ticks_msec()-reset_timer > 500:
+			stop()
+	elif reset_timer != -1:
+		reset_timer = -1
+
+#endregion
 
 func _input(event: InputEvent) -> void:
 	if event.is_action_pressed(&"pause"):

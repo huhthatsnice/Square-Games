@@ -1,6 +1,6 @@
 extends Label
 
-const CHARACTER_WHITELIST: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 "
+const CHARACTER_WHITELIST: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 -"
 
 var is_accepting_input: bool = true
 var console_text:String = ""
@@ -35,6 +35,9 @@ func _input(event:InputEvent) -> void:
 					key = DisplayServer.clipboard_get()
 				elif not event.shift_pressed:
 					key = key.to_lower()
+				elif key=="-":
+					key="_"
+					
 				current_input = current_input.insert(cursor, key)
 				cursor = clamp(cursor + 1, 0, len(current_input))
 

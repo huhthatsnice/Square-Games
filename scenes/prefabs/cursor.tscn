@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://djcla5aesjm4c"]
+
+[ext_resource type="Texture2D" uid="uid://djm8y1mnluy33" path="res://assets/defaults/cursor.jpg" id="1_mnqj6"]
+[ext_resource type="Script" uid="uid://55f13iefthiq" path="res://scripts/classes/Cursor.gd" id="2_j4t12"]
+
+[node name="Cursor" type="Sprite3D"]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+cast_shadow = 0
+gi_mode = 0
+transparent = false
+double_sided = false
+texture = ExtResource("1_mnqj6")
+script = ExtResource("2_j4t12")

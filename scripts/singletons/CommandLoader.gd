@@ -49,38 +49,24 @@ func _ready() -> void:
 	,["lsm","listsongs","listmaps"]))
 	
 	register_command(Command.new(func() -> void:
-		for i:String in SSCS.settings.keys():
-			var v:Variant = SSCS.settings[i]
+		for i:Dictionary in SSCS.settings.get_property_list():
+			var v:Variant = SSCS.settings[i.name]
 			Terminal.print_console("{0}:{1}\n".format([i,v]))
 	,["lss","listsettings"]))
 	
-	register_command(Command.new(func(setting_name:String,setting_value:String) -> void:
-		if SSCS.settings.has(setting_name):
-			var type:int = typeof(SSCS.settings[setting_name])
-			var valid:bool = true
-			match type:
-				TYPE_FLOAT:
-					if setting_value.is_valid_float():
-						SSCS.settings[setting_name]=setting_value.to_float()
-					else:
-						valid = false
-				TYPE_INT:
-					if setting_value.is_valid_int():
-						SSCS.settings[setting_name]=setting_value.to_int()
-					else:
-						valid = false
-				TYPE_BOOL:
-					if setting_value=="false" or setting_value=="true":
-						SSCS.settings[setting_name]=setting_value=="true"
-					else:
-						valid = false
-			if valid:
-				Terminal.print_console("Set {0} to {1} successfully.\n".format([setting_name,setting_value]))
-			else:
-				Terminal.print_console("Failed to set {0} to {1} (invalid setting value).\n".format([setting_name,setting_value]))
+	register_command(Command.new(func(setting_name: String, setting_value: String) -> void:
+		if SSCS.set_setting(setting_name, setting_value, true):
+			Terminal.print_console("Successfully set setting.\n")
 		else:
-			Terminal.print_console("Failed to set {0} to {1} (invalid setting name).\n".format([setting_name,setting_value]))
-	,["set","setsetting"]))
+			Terminal.print_console("Failed to set setting.\n")
+	,["set","sets","setsetting"]))
+	
+	register_command(Command.new(func(modifier_name: String, modifier_value: String) -> void:
+		if SSCS.set_modifier(modifier_name, modifier_value, true):
+			Terminal.print_console("Successfully set modifier.\n")
+		else:
+			Terminal.print_console("Failed to set modifier.\n")
+	,["setm","setmodifier"]))
 	
 	register_command(Command.new(func(map_name: String) -> void:
 		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
@@ -91,7 +77,7 @@ func _ready() -> void:
 		else:
 			map = MapLoader.from_path_native("user://maps/%s" % map_name)
 		
-		var game_handler: MultiGameHandler = MultiGameHandler.new(map)
+		var game_handler: GameHandler = GameHandler.new(map)
 		
 		var game_scene:Node = $"/root/Game"
 

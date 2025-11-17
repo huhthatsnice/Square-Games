@@ -10,16 +10,10 @@ var grid_distance: float = SSCS.settings.grid_distance
 var pixels_per_grid_unit: float = SSCS.settings.pixels_per_grid_unit
 var inverted_pixels_per_grid_unit: float = 1/pixels_per_grid_unit
 
-func _update_settings() -> void:
-	grid_distance = SSCS.settings.grid_distance
-	pixels_per_grid_unit = SSCS.settings.pixels_per_grid_unit
-	inverted_pixels_per_grid_unit = 1/pixels_per_grid_unit
-	pos_world=Vector3(pos.x,pos.y,grid_distance)
-
 func _ready() -> void:
 	var texture_size:Vector2 = self.texture.get_size()
 	self.scale=(Vector3(texture_size.x,texture_size.y,1)*self.pixel_size).inverse() * Vector3(0.28,0.28,1.0)
-	print(self.scale)
+	#print(self.scale)
 	
 	pos_world=Vector3(pos.x,pos.y,grid_distance)
 	self.position=pos_world
