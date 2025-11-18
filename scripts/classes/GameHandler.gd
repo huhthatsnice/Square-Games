@@ -4,6 +4,7 @@ class_name GameHandler
 const cursor_base: PackedScene = preload("res://scenes/prefabs/cursor.tscn")
 const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
 const note_material: ShaderMaterial = preload("res://assets/materials/note_shader_material.tres")
+const hud_base: PackedScene = preload("res://scenes/prefabs/hud.tscn")
 
 
 const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
@@ -13,6 +14,7 @@ var map: MapLoader.Map
 var notes: Array[Note]
 var allocated_notes: PackedByteArray = []
 var cursor: Cursor
+var hud: Hud
 
 var max_loaded_notes: int = 0
 
@@ -33,6 +35,8 @@ var hit_time: float = (SSCS.modifiers.hit_time/1000) * SSCS.modifiers.speed
 var hitbox_size: float = SSCS.modifiers.hitbox_size
 
 var approach_time: float = (SSCS.settings.spawn_distance/SSCS.settings.approach_rate) * SSCS.modifiers.speed
+
+var no_fail: bool = SSCS.modifiers.no_fail
 
 var health: float = 5
 var reset_timer: int = -1
@@ -73,6 +77,9 @@ func _ready() -> void:
 	
 	cursor = cursor_base.instantiate()
 	self.add_child(cursor)
+	
+	hud = hud_base.instantiate()
+	self.add_child(hud)
 	
 	self.multimesh = MultiMesh.new()
 	
@@ -125,7 +132,7 @@ func play() -> void:
 	playing = true
 	AudioManager.set_stream(map.audio)
 	AudioManager.set_playback_speed(SSCS.modifiers.speed)
-	AudioManager.play(0)
+	AudioManager.play(-1)
 
 func stop() -> void:
 	assert(not stopped, "Tried to stop game manager more than once")
@@ -134,7 +141,7 @@ func stop() -> void:
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	ended.emit()
 	playing = false
-	AudioManager.stop()
+	AudioManager.full_stop()
 
 func pause() -> void:
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
@@ -156,14 +163,16 @@ func _register_hit() -> void:
 	health=clamp(health+0.5,0,5)
 	#print(health)
 
+
 func _register_miss() -> void:
 	#print('miss')
 	misses+=1
 	health=clamp(health-1,0,5)
 	#print(health)
 
+
 func _check_death() -> void:
-	if health==-1 or (len(notes)==0 and last_loaded_note_id==len(map.data)):
+	if (health==0 and !no_fail) or (len(notes)==0 and last_loaded_note_id==len(map.data)):
 		stop()
 
 var last_load:float = 0
@@ -225,6 +234,7 @@ func _process(_dt: float) -> void:
 	
 	if note_added_or_removed:
 		note_added_or_removed = false
+		hud.update_info_right(hits,misses)
 		var top_note_id: int = allocated_notes.rfind(1)+1
 		if top_note_id != last_top_note_id:
 			self.multimesh.visible_instance_count = top_note_id

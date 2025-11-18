@@ -7,14 +7,16 @@ class Settings:
 		Color.from_string("#ffffff", Color.WHITE),
 		Color.from_string("#66ffff", Color.WHITE),
 	]
-	var grid_distance: float = 5
+	var grid_distance: float = 4
 	var vanish_distance: float = 0.2
 	var pixels_per_grid_unit: float = 80.0
+	var parallax: float = 0.1
 
 class Modifiers:
-	var hit_time: float = 50.0
+	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
+	var no_fail: bool = false
 
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
 signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant)
@@ -56,6 +58,12 @@ func set_setting(setting: String, value: Variant, generic: bool = false) -> bool
 				TYPE_INT:
 					if !value.is_valid_int(): valid = false
 					new_value = value.to_int()
+				TYPE_BOOL:
+					var value_lower: String = value.to_lower()
+					if value_lower=="true" or value_lower=="false":
+						new_value = value_lower=="true"
+					else:
+						valid = false
 		
 		if !valid:
 			return false
@@ -90,6 +98,12 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 				TYPE_INT:
 					if !value.is_valid_int(): valid = false
 					new_value = value.to_int()
+				TYPE_BOOL:
+					var value_lower: String = value.to_lower()
+					if value_lower=="true" or value_lower=="false":
+						new_value = value_lower=="true"
+					else:
+						valid = false
 		
 		if !valid:
 			return false

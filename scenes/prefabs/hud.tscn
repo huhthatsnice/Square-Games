@@ -1,0 +1,88 @@
+[gd_scene load_steps=8 format=3 uid="uid://dahe8rudiub87"]
+
+[ext_resource type="Script" uid="uid://cwtqd0wplij0p" path="res://scripts/classes/Hud.gd" id="1_eo3kg"]
+[ext_resource type="FontFile" uid="uid://cda1luwsuw12j" path="res://assets/fonts/Comfortaa-VariableFont_wght.ttf" id="2_ijk2n"]
+
+[sub_resource type="Gradient" id="Gradient_eo3kg"]
+interpolation_mode = 1
+colors = PackedColorArray(0, 0, 0, 0, 1, 1, 1, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_ijk2n"]
+gradient = SubResource("Gradient_eo3kg")
+width = 302
+height = 302
+fill = 2
+fill_from = Vector2(0.5, 0.5)
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_brmql"]
+viewport_path = NodePath("InfoLeft/InfoLeftViewport")
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_jxby8"]
+viewport_path = NodePath("InfoRight/InfoRightViewport")
+
+[sub_resource type="Theme" id="Theme_f20qw"]
+default_font = ExtResource("2_ijk2n")
+default_font_size = 25
+
+[node name="Hud" type="Node3D"]
+script = ExtResource("1_eo3kg")
+
+[node name="GridOutline" type="Sprite3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+double_sided = false
+texture = SubResource("GradientTexture2D_ijk2n")
+
+[node name="InfoLeft" type="Sprite3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 2.25, 0, 0)
+double_sided = false
+texture = SubResource("ViewportTexture_brmql")
+
+[node name="InfoLeftViewport" type="SubViewport" parent="InfoLeft"]
+unique_name_in_owner = true
+disable_3d = true
+transparent_bg = true
+size = Vector2i(150, 300)
+render_target_clear_mode = 2
+render_target_update_mode = 1
+
+[node name="InfoRight" type="Sprite3D" parent="."]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.25, 0, 0)
+double_sided = false
+texture = SubResource("ViewportTexture_jxby8")
+
+[node name="InfoRightViewport" type="SubViewport" parent="InfoRight"]
+unique_name_in_owner = true
+disable_3d = true
+transparent_bg = true
+size = Vector2i(150, 300)
+render_target_clear_mode = 2
+render_target_update_mode = 1
+
+[node name="Control" type="Control" parent="InfoRight/InfoRightViewport"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="InfoRightText" type="RichTextLabel" parent="InfoRight/InfoRightViewport/Control"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme = SubResource("Theme_f20qw")
+text = " 
+HITS
+0
+ 
+ 
+ 
+
+MISSES
+0"
+scroll_active = false
+horizontal_alignment = 1

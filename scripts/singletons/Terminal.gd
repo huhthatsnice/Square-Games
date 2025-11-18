@@ -10,6 +10,9 @@ var cursor: int = 0
 var selection_start: int = cursor
 var selection_end: int = cursor
 
+var command_history: Array[String] = []
+var command_history_cursor: int = -1
+
 signal line_entered
 
 func print_console(txt:String) -> void:
@@ -55,12 +58,27 @@ func _input(event:InputEvent) -> void:
 							cursor = clamp(cursor - 1, 0, len(current_input))
 					KEY_ENTER:
 						console_text += ">" + current_input + "\n"
+						command_history.insert(0,current_input)
 						line_entered.emit(current_input)
 						current_input = ""
+						command_history_cursor=-1
 						cursor = 0
 					KEY_LEFT:
 						cursor = clamp(cursor - 1, 0, len(current_input))
 					KEY_RIGHT:
 						cursor = clamp(cursor + 1, 0, len(current_input))
+					KEY_UP:
+						if len(command_history)==0: return
+						command_history_cursor = clamp(command_history_cursor + 1, -1, len(command_history)-1)
+						current_input = command_history[command_history_cursor]
+						cursor = len(current_input)
+					KEY_DOWN:
+						if len(command_history)==0: return
+						command_history_cursor = clamp(command_history_cursor - 1, -1, len(command_history)-1)
+						if command_history_cursor==-1:
+							current_input = ""
+						else:
+							current_input = command_history[command_history_cursor]
+						cursor = len(current_input)
 
 			update_console()

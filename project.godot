@@ -84,6 +84,15 @@ buffering/agile_event_flushing=true
 
 limits/debugger/max_queued_messages=4096
 
+[physics]
+
+2d/run_on_separate_thread=true
+3d/run_on_separate_thread=true
+common/physics_ticks_per_second=1
+common/max_physics_steps_per_frame=1
+3d/solver/solver_iterations=1
+2d/solver/solver_iterations=1
+
 [rendering]
 
 occlusion_culling/bvh_build_quality=0
