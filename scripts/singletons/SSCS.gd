@@ -16,7 +16,7 @@ class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
-	var no_fail: bool = false
+	var no_fail: bool = true
 
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
 signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant)

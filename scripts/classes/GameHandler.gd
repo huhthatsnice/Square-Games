@@ -19,7 +19,9 @@ var hud: Hud
 var max_loaded_notes: int = 0
 
 var last_top_note_id: int = 0
-var note_added_or_removed: bool = false
+
+var note_added: int = -1
+var note_removed:int = -1
 
 var misses: int = 0 
 var hits: int = 0
@@ -94,9 +96,11 @@ func _ready() -> void:
 #region note creation and deletion
 
 func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
-	note_added_or_removed=true
 	
 	var new_index: int = allocated_notes.find(0,0)
+	
+	if new_index>note_added:
+		note_added=new_index
 	
 	allocated_notes[new_index]=1
 	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
@@ -105,10 +109,12 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 	return new_note
 
 func remove_note(note: Note) -> void:
-	note_added_or_removed=true
+	var index:int = note.multimesh_index
+	if index>note_removed:
+		note_removed=index
 	
-	allocated_notes[note.multimesh_index]=0
-	multimesh.set_instance_transform(note.multimesh_index,nan_transform)
+	allocated_notes[index]=0
+	multimesh.set_instance_transform(index,nan_transform)
 	
 	note.queue_free()
 
@@ -232,13 +238,20 @@ func _process(_dt: float) -> void:
 	_check_hitreg()
 	_check_death()
 	
-	if note_added_or_removed:
-		note_added_or_removed = false
-		hud.update_info_right(hits,misses)
-		var top_note_id: int = allocated_notes.rfind(1)+1
-		if top_note_id != last_top_note_id:
-			self.multimesh.visible_instance_count = top_note_id
-			last_top_note_id = top_note_id
+	if note_added>last_top_note_id:
+		last_top_note_id = note_added
+		self.multimesh.visible_instance_count=note_added+1
+	if note_removed==last_top_note_id:
+		var top_note_id: int = allocated_notes.rfind(1)
+		last_top_note_id=top_note_id
+		self.multimesh.visible_instance_count=top_note_id+1
+	#if note_added_or_removed:
+		#note_added_or_removed = false
+		#hud.update_info_right(hits,misses)
+		#var top_note_id: int = allocated_notes.rfind(1)+1
+		#if top_note_id != last_top_note_id:
+			#self.multimesh.visible_instance_count = top_note_id
+			#last_top_note_id = top_note_id
 	
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:
