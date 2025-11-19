@@ -1,5 +1,7 @@
 extends Node3D 
 
+## any setting which is related to track position is on a scale of 0-1 where 0 is hitting the grid and 1 is freshly spawned
+
 class Settings:
 	var approach_rate: float = 50.0
 	var spawn_distance: float = 25.0
@@ -11,6 +13,16 @@ class Settings:
 	var vanish_distance: float = 0.2
 	var pixels_per_grid_unit: float = 80.0
 	var parallax: float = 0.1
+	
+	var note_transparency: float = 0.3
+	var note_begin_transparency: float = 1
+	var note_end_transparency: float = 1
+	
+	var note_fade_in_begin: float = 1
+	var note_fade_in_end: float = 0.8
+	
+	var note_fade_out_begin: float = 0.4
+	var note_fade_out_end: float = 0
 
 class Modifiers:
 	var hit_time: float = 45.0

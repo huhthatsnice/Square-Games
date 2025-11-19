@@ -76,6 +76,15 @@ func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("spawn_distance",SSCS.settings.spawn_distance)
 	RenderingServer.global_shader_parameter_set("vanish_distance",-SSCS.settings.vanish_distance)
 	
+	RenderingServer.global_shader_parameter_set("note_begin_transparency",SSCS.settings.note_begin_transparency)
+	RenderingServer.global_shader_parameter_set("note_transparency",SSCS.settings.note_transparency)
+	RenderingServer.global_shader_parameter_set("note_end_transparency",SSCS.settings.note_end_transparency)
+	
+	RenderingServer.global_shader_parameter_set("note_fade_in_begin",SSCS.settings.note_fade_in_begin)
+	RenderingServer.global_shader_parameter_set("note_fade_in_end",SSCS.settings.note_fade_in_end)
+	
+	RenderingServer.global_shader_parameter_set("note_fade_out_begin",SSCS.settings.note_fade_out_begin)
+	RenderingServer.global_shader_parameter_set("note_fade_out_end",SSCS.settings.note_fade_out_end)
 	
 	cursor = cursor_base.instantiate()
 	self.add_child(cursor)
@@ -245,13 +254,7 @@ func _process(_dt: float) -> void:
 		var top_note_id: int = allocated_notes.rfind(1)
 		last_top_note_id=top_note_id
 		self.multimesh.visible_instance_count=top_note_id+1
-	#if note_added_or_removed:
-		#note_added_or_removed = false
-		#hud.update_info_right(hits,misses)
-		#var top_note_id: int = allocated_notes.rfind(1)+1
-		#if top_note_id != last_top_note_id:
-			#self.multimesh.visible_instance_count = top_note_id
-			#last_top_note_id = top_note_id
+		hud.update_info_right(hits,misses)
 	
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:

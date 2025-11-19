@@ -9,13 +9,15 @@ func benchmark() -> void:
 	#debug function for testing some stuff
 	pass
 	
+	const num_trials: int = 1000
+	
 	var t1s: Array[int] = []
-	t1s.resize(100)
+	t1s.resize(num_trials)
 	
 	var t2s: Array[int] = []
-	t2s.resize(100)
+	t2s.resize(num_trials)
 	
-	for trial in range(100):
+	for trial in range(num_trials):
 	
 		var t1: int = Time.get_ticks_usec()
 		
@@ -50,5 +52,5 @@ func benchmark() -> void:
 
 func _ready() -> void:
 	pass
-	benchmark()
+	#benchmark()
 	

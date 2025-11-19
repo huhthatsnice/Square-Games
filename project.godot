@@ -137,6 +137,34 @@ vanish_distance={
 "type": "float",
 "value": 0.0
 }
+note_transparency={
+"type": "float",
+"value": 0.0
+}
+note_end_transparency={
+"type": "float",
+"value": 0.0
+}
+note_begin_transparency={
+"type": "float",
+"value": 0.0
+}
+note_fade_in_begin={
+"type": "float",
+"value": 0.0
+}
+note_fade_in_end={
+"type": "float",
+"value": 0.0
+}
+note_fade_out_begin={
+"type": "float",
+"value": 0.0
+}
+note_fade_out_end={
+"type": "float",
+"value": 0.0
+}
 
 [threading]
 
