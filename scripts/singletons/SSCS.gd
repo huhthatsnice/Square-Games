@@ -31,7 +31,7 @@ class Modifiers:
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
 	var no_fail: bool = true
-	var autoplay: bool = true
+	var autoplay: bool = false
 
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
 signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant)
@@ -136,7 +136,7 @@ func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
 	
-	setting_updated.connect(func(setting: String, old: Variant, new: Variant) -> void:
+	setting_updated.connect(func(setting: String, _old: Variant, new: Variant) -> void:
 		match setting:
 			
 			"fov":

@@ -212,8 +212,15 @@ func _load_notes() -> void:
 	while last_loaded_note_id<len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
 		if note_data.t <= threshold:
-			var note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
-			notes.append(note)
+			var new_index: int = allocated_notes.find(0,0)
+	
+			if new_index>note_added:
+				note_added=new_index
+	
+			allocated_notes[new_index]=1
+			var new_note:Note = Note.new(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000, multimesh, new_index)
+	
+			notes.append(new_note)
 			
 			last_loaded_note_id += 1
 		else:
@@ -238,14 +245,16 @@ func _check_hitreg() -> void:
 		i+=1
 		if note.t<elapsed:
 			if note.t<elapsed-hit_time:
-				_register_miss()
+				misses+=1
+				health=clamp(health-1,0,5)
 				
 				to_remove.append(i)
 			else:
 				var diff: Vector2 = (note.pos-cursor.pos).abs()
 
 				if max(diff.x,diff.y)<hitbox_size:
-					_register_hit()
+					hits+=1
+					health=clamp(health+0.5,0,5)
 					
 					to_remove.append(i)
 		else:
@@ -254,7 +263,16 @@ func _check_hitreg() -> void:
 	var shift: int = 0
 	for v in to_remove:
 		var note: Note = notes.pop_at(v-shift)
-		remove_note(note)
+		
+		var index:int = note.multimesh_index
+		if index>note_removed:
+			note_removed=index
+	
+		allocated_notes[index]=0
+		multimesh.set_instance_transform(index,nan_transform)
+	
+		note.queue_free()
+	
 		shift+=1
 
 func _process(_dt: float) -> void:

@@ -33,7 +33,6 @@ SSCS="*res://scripts/singletons/SSCS.gd"
 Terminal="*res://scenes/singletons/terminal.tscn"
 CommandLoader="*res://scripts/singletons/CommandLoader.gd"
 AudioManager="*res://scripts/singletons/AudioManager.gd"
-SplineManager="*res://scripts/singletons/SplineManager.gd"
 
 [debug]
 

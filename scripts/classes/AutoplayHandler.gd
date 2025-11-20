@@ -79,7 +79,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		i += 1
 
 func get_cursor_position() -> Vector2:
-	var elapsed: int = AudioManager.elapsed*1000.0
+	var elapsed: int = int(AudioManager.elapsed*1000.0)
 	while last_loaded_note+1<len(processed_data):
 		var note: MapLoader.NoteDataMinimal = processed_data[last_loaded_note+1]
 		if note.t>elapsed:

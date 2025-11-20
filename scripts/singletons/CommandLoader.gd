@@ -5,10 +5,10 @@ class Command:
 	var names:Array[String]
 	var argument_count:int
 	
-	func _init(function_arg:Callable,names_arg:Array[String], argument_count: int = -1) -> void:
+	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1) -> void:
 		function=function_arg
 		names=names_arg
-		argument_count = function.get_argument_count() if argument_count == -1 else argument_count
+		argument_count = function.get_argument_count() if argument_count_arg == -1 else argument_count_arg
 
 var commands:Array[Command]=[]
 
