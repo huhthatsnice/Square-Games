@@ -145,7 +145,7 @@ func update_note_mesh(mesh: Mesh) -> void:
 #endregion
 #region time control
 
-func play() -> void:
+func play(from: float) -> void:
 	assert(not ran, "Tried to run game manager more than once")
 	ran = true
 	
@@ -155,7 +155,15 @@ func play() -> void:
 	playing = true
 	AudioManager.set_stream(map.audio)
 	AudioManager.set_playback_speed(SSCS.modifiers.speed)
-	AudioManager.play(-1)
+	AudioManager.play(from - 1)
+	
+	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
+	while last_loaded_note_id<len(map.data):
+		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
+		if note_data.t <= threshold:
+			last_loaded_note_id += 1
+		else:
+			break
 
 func stop() -> void:
 	assert(not stopped, "Tried to stop game manager more than once")

@@ -68,7 +68,7 @@ func _ready() -> void:
 			Terminal.print_console("Failed to set modifier.\n")
 	,["setm","setmodifier"]))
 	
-	register_command(Command.new(func(map_name: String) -> void:
+	register_command(Command.new(func(map_name: String, start_from: String = "0") -> void:
 		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
 		
 		var map:MapLoader.Map
@@ -82,13 +82,20 @@ func _ready() -> void:
 		else:
 			map = MapLoader.from_path_native("user://maps/%s" % map_name)
 		
+		var start_from_time: float = 0
+		
+		if start_from.is_valid_float():
+			start_from_time = start_from.to_float()
+		elif start_from == "beginning" or start_from == "b":
+			start_from_time = map.data[0].t/1000.0
+		
 		var game_handler: GameHandler = GameHandler.new(map)
 		
 		var game_scene:Node = $"/root/Game"
 
 		game_scene.add_child(game_handler)
 		
-		game_handler.play()
+		game_handler.play(start_from_time)
 		
 		Terminal.is_accepting_input = false
 		Terminal.visible = false

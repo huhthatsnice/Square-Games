@@ -5,12 +5,11 @@ var map: MapLoader.Map
 
 var processed_data: Array[MapLoader.NoteDataMinimal] = []
 
-const shift_multi: float = 0.1
-const max_shift_multi: float = 0.5
+const max_shift_multi: float = 0.25
 
 var cursor: Cursor
 
-var max_range: float = SSCS.modifiers.hitbox_size*0.25
+var max_range: float = SSCS.modifiers.hitbox_size*max_shift_multi
 
 var last_loaded_note: int = 0
 
