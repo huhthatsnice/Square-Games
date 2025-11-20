@@ -155,7 +155,7 @@ func play(from: float) -> void:
 	playing = true
 	AudioManager.set_stream(map.audio)
 	AudioManager.set_playback_speed(SSCS.modifiers.speed)
-	AudioManager.play(from - 1)
+	AudioManager.play(from - 1*SSCS.modifiers.speed)
 	
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):

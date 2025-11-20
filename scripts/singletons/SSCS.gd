@@ -23,6 +23,8 @@ class Settings:
 	
 	var note_fade_out_begin: float = 0.4
 	var note_fade_out_end: float = 0
+	
+	var fov: float = 75
 
 class Modifiers:
 	var hit_time: float = 45.0
@@ -133,4 +135,11 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
+	
+	setting_updated.connect(func(setting: String, old: Variant, new: Variant) -> void:
+		match setting:
+			
+			"fov":
+				get_viewport().get_camera_3d().fov = new
+	)
 	
