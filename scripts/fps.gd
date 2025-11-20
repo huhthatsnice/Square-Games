@@ -52,5 +52,6 @@ func benchmark() -> void:
 
 func _ready() -> void:
 	pass
+
 	#benchmark()
 	

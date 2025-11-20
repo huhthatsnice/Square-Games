@@ -1,6 +1,6 @@
 extends Label
 
-const CHARACTER_WHITELIST: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 -"
+const CHARACTER_WHITELIST: String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890 -."
 
 var is_accepting_input: bool = true
 var console_text:String = ""

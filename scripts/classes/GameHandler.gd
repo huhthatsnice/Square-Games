@@ -38,10 +38,14 @@ var hitbox_size: float = SSCS.modifiers.hitbox_size
 
 var approach_time: float = (SSCS.settings.spawn_distance/SSCS.settings.approach_rate) * SSCS.modifiers.speed
 
-var no_fail: bool = SSCS.modifiers.no_fail
+var no_fail: bool = SSCS.modifiers.no_fail or SSCS.modifiers.autoplay
+
+var autoplay:bool = SSCS.modifiers.autoplay
 
 var health: float = 5
 var reset_timer: int = -1
+
+var autoplay_handler: AutoplayHandler
 
 signal ended
 
@@ -69,6 +73,7 @@ func _init(map_arg: MapLoader.Map) -> void:
 	
 	allocated_notes.resize(max_loaded_notes)
 	allocated_notes.fill(0)
+	
 
 func _ready() -> void:
 	print(SSCS.modifiers.speed)
@@ -91,6 +96,9 @@ func _ready() -> void:
 	
 	hud = hud_base.instantiate()
 	self.add_child(hud)
+	
+	if autoplay:
+		autoplay_handler = AutoplayHandler.new(map,cursor)
 	
 	self.multimesh = MultiMesh.new()
 	
@@ -187,7 +195,7 @@ func _register_miss() -> void:
 
 
 func _check_death() -> void:
-	if (health==0 and !no_fail) or (len(notes)==0 and last_loaded_note_id==len(map.data)):
+	if (health==0 and !no_fail) or (AudioManager.elapsed > map.data[-1].t/1000.0):
 		stop()
 
 var last_load:float = 0
@@ -243,6 +251,9 @@ func _check_hitreg() -> void:
 
 func _process(_dt: float) -> void:
 	if not playing or stopped: return
+	if autoplay:
+		cursor.pos=autoplay_handler.get_cursor_position()
+		cursor.update_position()
 	_load_notes()
 	_check_hitreg()
 	_check_death()

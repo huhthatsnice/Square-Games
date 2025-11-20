@@ -72,7 +72,12 @@ func _ready() -> void:
 		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
 		
 		var map:MapLoader.Map
-		if FileAccess.file_exists("user://maps/%s/sspm.sspm" % map_name):
+		var is_sspm: bool = false
+		for file: String in DirAccess.get_files_at("user://maps/%s" % map_name):
+			if file.contains(".sspm"):
+				is_sspm = true
+				break
+		if is_sspm:
 			map = MapLoader.from_path_sspm("user://maps/%s/sspm.sspm" % map_name)
 		else:
 			map = MapLoader.from_path_native("user://maps/%s" % map_name)

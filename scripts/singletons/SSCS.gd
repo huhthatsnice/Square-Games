@@ -16,7 +16,7 @@ class Settings:
 	
 	var note_transparency: float = 0.3
 	var note_begin_transparency: float = 1
-	var note_end_transparency: float = 1
+	var note_end_transparency: float = 0.9
 	
 	var note_fade_in_begin: float = 1
 	var note_fade_in_end: float = 0.8
@@ -29,6 +29,7 @@ class Modifiers:
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
 	var no_fail: bool = true
+	var autoplay: bool = true
 
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
 signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant)
