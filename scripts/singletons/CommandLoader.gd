@@ -3,10 +3,12 @@ extends Node
 class Command:
 	var function:Callable
 	var names:Array[String]
+	var argument_count:int
 	
-	func _init(function_arg:Callable,names_arg:Array[String]) -> void:
+	func _init(function_arg:Callable,names_arg:Array[String], argument_count: int = -1) -> void:
 		function=function_arg
 		names=names_arg
+		argument_count = function.get_argument_count() if argument_count == -1 else argument_count
 
 var commands:Array[Command]=[]
 
@@ -26,7 +28,7 @@ func _ready() -> void:
 		
 		for command:Command in commands:
 			if command.names.has(cmd):
-				if argc>=command.function.get_argument_count():
+				if argc>=command.argument_count:
 					ran=true
 					command.function.callv(args)
 				else:
@@ -108,4 +110,4 @@ func _ready() -> void:
 		Terminal.visible = true
 		Terminal.is_accepting_input = true
 		
-	,["play","playmap"]))
+	,["play","playmap"],1))
