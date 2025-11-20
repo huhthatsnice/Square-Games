@@ -14,6 +14,9 @@ MISSES
 @onready var viewport_right: SubViewport = %InfoRightViewport
 @onready var text_right: RichTextLabel = %InfoRightText
 
+@onready var viewport_bottom: SubViewport = %InfoBottomViewport
+@onready var health_bar: ProgressBar = %HealthBar
+
 func _ready() -> void:
 	self.position=Vector3(0,0,SSCS.settings.grid_distance)
 
@@ -21,3 +24,8 @@ func update_info_right(hits: int, misses: int) -> void:
 	text_right.text = info_right_base.format([hits,misses])
 	viewport_right.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
 	viewport_right.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+func update_info_bottom(health: float) -> void:
+	health_bar.value = health
+	#viewport_bottom.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
+	viewport_bottom.render_target_update_mode = SubViewport.UPDATE_ONCE

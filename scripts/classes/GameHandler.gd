@@ -274,6 +274,7 @@ func _process(_dt: float) -> void:
 		last_top_note_id=top_note_id
 		self.multimesh.visible_instance_count=top_note_id+1
 		hud.update_info_right(hits,misses)
+		hud.update_info_bottom(health)
 	
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:
