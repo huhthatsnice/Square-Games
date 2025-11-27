@@ -21,7 +21,7 @@ func benchmark() -> void:
 		var t1: int = Time.get_ticks_usec()
 		
 		for i in range(trial_iterations):
-			pass
+			var _a: int = randi()%10000
 			
 			
 		t1s[trial]=(Time.get_ticks_usec()-t1)
@@ -29,7 +29,7 @@ func benchmark() -> void:
 		var t2: int = Time.get_ticks_usec()
 		
 		for i in range(trial_iterations):
-			pass
+			var _a: int = randi()%10000
 			
 		t2s[trial]=(Time.get_ticks_usec()-t2)
 	

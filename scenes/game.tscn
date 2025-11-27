@@ -26,4 +26,5 @@ offset_bottom = 50.0
 grow_horizontal = 0
 theme_override_colors/default_color = Color(0.842094, 0.000559857, 0.842088, 1)
 text = "tuff"
+scroll_active = false
 script = ExtResource("3_lnu2h")

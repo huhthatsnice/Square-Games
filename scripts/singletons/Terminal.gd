@@ -42,7 +42,7 @@ func _input(event:InputEvent) -> void:
 					key="_"
 					
 				current_input = current_input.insert(cursor, key)
-				cursor = clamp(cursor + 1, 0, len(current_input))
+				cursor = clamp(cursor + len(key), 0, len(current_input))
 
 			else:
 

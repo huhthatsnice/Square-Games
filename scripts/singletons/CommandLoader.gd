@@ -111,3 +111,17 @@ func _ready() -> void:
 		Terminal.is_accepting_input = true
 		
 	,["play","playmap"],1))
+	
+	register_command(Command.new(func() -> void:
+		if SSCS.lobby != null: print("lobby exists"); return
+		
+		print("attempt create")
+		SSCS.lobby = Lobby.new()
+	,["createlobby","cl"]))
+	
+	register_command(Command.new(func(uid: String) -> void:
+		if SSCS.lobby != null or !uid.is_valid_int(): print("lobby exists"); return
+		
+		print("attempt join")
+		SSCS.lobby = Lobby.new(uid.to_int())
+	,["joinlobby","jl"]))

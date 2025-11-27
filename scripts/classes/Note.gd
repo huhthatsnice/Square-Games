@@ -15,6 +15,12 @@ var note_transform: Transform3D
 var color_set:Array[Color]=SSCS.settings.color_set
 var grid_distance:float = SSCS.settings.grid_distance
 
+func change_id(new_note_id: int) -> void:
+	multimesh_index = new_note_id
+	
+	multimesh.set_instance_transform(multimesh_index,note_transform)
+	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
+
 func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:MultiMesh, multimesh_index_arg: int) -> void:
 	note_id=note_id_arg
 	pos=pos_arg
@@ -39,7 +45,4 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	note_transform=Transform3D(basis,origin)
 	
 	multimesh.set_instance_transform(multimesh_index,note_transform)
-	
 	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
-
-	

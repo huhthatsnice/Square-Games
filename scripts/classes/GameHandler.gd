@@ -21,7 +21,8 @@ var max_loaded_notes: int = 0
 var last_top_note_id: int = 0
 
 var note_added: int = -1
-var note_removed:int = -1
+var note_removed: int = -1
+
 
 var misses: int = 0 
 var hits: int = 0
@@ -76,7 +77,6 @@ func _init(map_arg: MapLoader.Map) -> void:
 	
 
 func _ready() -> void:
-	print(SSCS.modifiers.speed)
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
 	RenderingServer.global_shader_parameter_set("spawn_distance",SSCS.settings.spawn_distance)
 	RenderingServer.global_shader_parameter_set("vanish_distance",-SSCS.settings.vanish_distance)
@@ -117,19 +117,19 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 	var new_index: int = allocated_notes.find(0,0)
 	
 	if new_index>note_added:
-		note_added=new_index
-	
+		note_added = new_index
+		
 	allocated_notes[new_index]=1
 	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
-	#self.add_child(new_note)
 	
 	return new_note
 
 func remove_note(note: Note) -> void:
 	var index:int = note.multimesh_index
-	if index>note_removed:
-		note_removed=index
 	
+	if index>note_removed:
+		note_removed = index
+		
 	allocated_notes[index]=0
 	multimesh.set_instance_transform(index,nan_transform)
 	
@@ -212,13 +212,7 @@ func _load_notes() -> void:
 	while last_loaded_note_id<len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
 		if note_data.t <= threshold:
-			var new_index: int = allocated_notes.find(0,0)
-	
-			if new_index>note_added:
-				note_added=new_index
-	
-			allocated_notes[new_index]=1
-			var new_note:Note = Note.new(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000, multimesh, new_index)
+			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
 	
 			notes.append(new_note)
 			
@@ -263,15 +257,7 @@ func _check_hitreg() -> void:
 	var shift: int = 0
 	for v in to_remove:
 		var note: Note = notes.pop_at(v-shift)
-		
-		var index:int = note.multimesh_index
-		if index>note_removed:
-			note_removed=index
-	
-		allocated_notes[index]=0
-		multimesh.set_instance_transform(index,nan_transform)
-	
-		note.queue_free()
+		remove_note(note)
 	
 		shift+=1
 
@@ -280,19 +266,20 @@ func _process(_dt: float) -> void:
 	if autoplay:
 		cursor.pos=autoplay_handler.get_cursor_position()
 		cursor.update_position()
-	_load_notes()
+	
 	_check_hitreg()
+	_load_notes()
 	_check_death()
 	
-	if note_added>last_top_note_id:
-		last_top_note_id = note_added
-		self.multimesh.visible_instance_count=note_added+1
 	if note_removed==last_top_note_id:
 		var top_note_id: int = allocated_notes.rfind(1)
 		last_top_note_id=top_note_id
 		self.multimesh.visible_instance_count=top_note_id+1
 		hud.update_info_right(hits,misses)
 		hud.update_info_bottom(health)
+	elif note_added>last_top_note_id:
+		last_top_note_id = note_added
+		self.multimesh.visible_instance_count=note_added+1
 	
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:

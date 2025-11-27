@@ -33,6 +33,7 @@ SSCS="*res://scripts/singletons/SSCS.gd"
 Terminal="*res://scenes/singletons/terminal.tscn"
 CommandLoader="*res://scripts/singletons/CommandLoader.gd"
 AudioManager="*res://scripts/singletons/AudioManager.gd"
+SteamHandler="*res://scripts/singletons/SteamHandler.gd"
 
 [debug]
 
@@ -43,7 +44,7 @@ gdscript/warnings/untyped_declaration=2
 
 window/size/viewport_width=1280
 window/size/viewport_height=720
-window/size/mode=3
+window/size/mode=2
 window/stretch/aspect="ignore"
 window/vsync/vsync_mode=0
 
@@ -86,19 +87,32 @@ limits/debugger/max_queued_messages=4096
 
 [physics]
 
-2d/run_on_separate_thread=true
-3d/run_on_separate_thread=true
 common/physics_ticks_per_second=1
 common/max_physics_steps_per_frame=1
+2d/physics_engine="Dummy"
+3d/physics_engine="Dummy"
 3d/solver/solver_iterations=1
 2d/solver/solver_iterations=1
 
 [rendering]
 
 occlusion_culling/bvh_build_quality=0
+rendering_device/vulkan/max_descriptors_per_pool=256
+driver/threads/thread_model=2
+lights_and_shadows/directional_shadow/size=256
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
+2d/shadow_atlas/size=128
 shader_compiler/shader_cache/strip_debug=true
+reflections/sky_reflections/roughness_layers=1
+reflections/sky_reflections/texture_array_reflections=false
+reflections/sky_reflections/ggx_samples=0
+reflections/sky_reflections/ggx_samples.mobile=0
+reflections/reflection_atlas/reflection_size=0
+reflections/reflection_atlas/reflection_size.mobile=0
+reflections/reflection_atlas/reflection_count=0
+global_illumination/gi/use_half_resolution=true
+shading/overrides/force_vertex_shading=true
 driver/depth_prepass/enable=false
 textures/default_filters/anisotropic_filtering_level=0
 camera/depth_of_field/depth_of_field_bokeh_shape=0
@@ -112,8 +126,16 @@ environment/glow/upscale_mode=0
 environment/screen_space_reflection/roughness_quality=0
 environment/subsurface_scattering/subsurface_scattering_quality=0
 limits/global_shader_variables/buffer_size=1048576
+lightmapping/probe_capture/update_speed=0.001
 lightmapping/lightmap_gi/use_bicubic_filter=false
+global_illumination/sdfgi/probe_ray_count=0
+global_illumination/sdfgi/frames_to_converge=0
+global_illumination/sdfgi/frames_to_update_lights=4
 environment/volumetric_fog/use_filter=0
+limits/spatial_indexer/update_iterations_per_frame=1
+lights_and_shadows/tighter_shadow_caster_culling=false
+mesh_lod/lod_change/threshold_pixels=0.0
+lights_and_shadows/positional_shadow/atlas_size=256
 lights_and_shadows/positional_shadow/atlas_quadrant_0_subdiv=0
 lights_and_shadows/positional_shadow/atlas_quadrant_1_subdiv=0
 lights_and_shadows/positional_shadow/atlas_quadrant_2_subdiv=0
@@ -165,6 +187,12 @@ note_fade_out_end={
 "type": "float",
 "value": 0.0
 }
+
+[steam]
+
+initialization/app_id=0
+initialization/initialize_on_startup=false
+initialization/embed_callbacks=false
 
 [threading]
 

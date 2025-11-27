@@ -1,4 +1,4 @@
-extends Node3D 
+extends Node
 
 ## any setting which is related to track position is on a scale of 0-1 where 0 is hitting the grid and 1 is freshly spawned
 
@@ -38,6 +38,7 @@ signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant
 
 var settings: Settings = Settings.new()
 var modifiers: Modifiers = Modifiers.new()
+var lobby: Lobby
 
 var setting_parse_overrides: Dictionary[String,Callable] = {
 	color_set = func(value: String) -> Array:
@@ -131,6 +132,16 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 	
 	modifier_updated.emit(modifier,cur_value,value)
 	return true
+
+const blacklisted_properties: Array[String] = ["RefCounted","script","Built-in script"]
+func encode_class(obj: Variant) -> Dictionary:
+	var encoded: Dictionary = {}
+	
+	for p: Dictionary in obj.get_property_list():
+		if p.name not in blacklisted_properties:
+			encoded[p.name]=obj.get(p.name)
+	
+	return encoded
 
 func _ready() -> void:
 	#make sure directories exist
