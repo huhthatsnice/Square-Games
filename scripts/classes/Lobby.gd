@@ -60,8 +60,8 @@ func _client_removed_host(_connection_handle: int, connection_data: Dictionary) 
 	}))
 
 func _packet_received_host(packet: Dictionary) -> void:
-	var type: int = packet.payload.to_ascii_buffer()[0]
-	var raw_data: String = packet.payload.substr(1)
+	var type: int = packet.payload[0]
+	var raw_data: String = packet.payload.get_string_from_ascii().substr(1)
 	print("host received packet")
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
@@ -77,14 +77,13 @@ func _packet_received_host(packet: Dictionary) -> void:
 
 #endregion
 #region client functions
-func _connection_removed_client(_connection_handle: int, connection_data: Dictionary) -> void:
+func _connection_removed_client(_connection_handle: int, _connection_data: Dictionary) -> void:
 	print("host connection gone")
-	Steam.CONNECTION_END_APP_EXCEPTION_GENERIC
 	self.queue_free()
 
 func _packet_received_client(packet: Dictionary) -> void:
-	var type: int = packet.payload.to_ascii_buffer()[0]
-	var raw_data: String = packet.payload.substr(1)
+	var type: int = packet.payload[0]
+	var raw_data: String = packet.payload.get_string_from_ascii().substr(1)
 	print("client received packet")
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
