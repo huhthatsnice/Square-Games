@@ -121,7 +121,7 @@ func _init(host_user_id: int = 0) -> void:
 		host_id = SteamHandler.steam_id
 		
 		SteamHandler.connection_received.connect(_client_connected_host)
-		SteamHandler.connection_received.connect(_client_removed_host)
+		SteamHandler.connection_ended.connect(_client_removed_host)
 		SteamHandler.packet_received.connect(_packet_received_host)
 		
 		SteamHandler.accepting_connections = true
@@ -129,7 +129,7 @@ func _init(host_user_id: int = 0) -> void:
 		return
 	host_id = host_user_id
 	
-	SteamHandler.connection_received.connect(_connection_removed_client)
+	SteamHandler.connection_ended.connect(_connection_removed_client)
 	SteamHandler.packet_received.connect(_packet_received_client)
 	
 	
