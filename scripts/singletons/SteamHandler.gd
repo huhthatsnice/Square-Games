@@ -84,8 +84,8 @@ func _ready() -> void:
 func _process(_dt: float) -> void:
 	Steam.run_callbacks()
 	
-	if listen_socket!=0:
-		for packet: Dictionary in Steam.receiveMessagesOnConnection(listen_socket,100):
+	for client: int in clients:
+		for packet: Dictionary in Steam.receiveMessagesOnConnection(client,100):
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):

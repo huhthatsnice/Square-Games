@@ -28,6 +28,7 @@ func send_chat_message(msg: String) -> void:
 	if is_host:
 		_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,msg.to_ascii_buffer())
 	else:
+		print("send to host")
 		SteamHandler.send_message(SteamHandler.connection,HOST_PACKET.CHAT_MESSAGE,msg.to_ascii_buffer())
 
 #endregion
