@@ -41,6 +41,7 @@ func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] 
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)
 	for client: int in lobby_users:
+		if client == connection_handle: continue
 		var client_data: Dictionary = lobby_users[client]
 		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, _to_json_buffer({
 			user_id=client_data.user_id,
@@ -62,7 +63,8 @@ func _client_removed_host(_connection_handle: int, connection_data: Dictionary) 
 
 func _packet_received_host(packet: Dictionary) -> void:
 	var type: int = packet.payload[0]
-	var raw_data: String = packet.payload.get_string_from_ascii().substr(1)
+	packet.payload.remove_at(0)
+	var raw_data: String = packet.payload.get_string_from_ascii()
 	print("host received packet")
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
@@ -84,7 +86,8 @@ func _connection_removed_client(_connection_handle: int, _connection_data: Dicti
 
 func _packet_received_client(packet: Dictionary) -> void:
 	var type: int = packet.payload[0]
-	var raw_data: String = packet.payload.get_string_from_ascii().substr(1)
+	packet.payload.remove_at(0)
+	var raw_data: String = packet.payload.get_string_from_ascii()
 	print("client received packet")
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:

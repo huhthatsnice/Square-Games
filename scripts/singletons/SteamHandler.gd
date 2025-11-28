@@ -46,7 +46,7 @@ func leave_lobby() -> bool:
 	return true
 
 func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> Dictionary:
-	data.push_back(packet_id)
+	data.insert(0,packet_id)
 	return Steam.sendMessageToConnection(connection_handle,data,Steam.NETWORKING_SEND_RELIABLE)
 
 func _ready() -> void:
