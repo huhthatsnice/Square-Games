@@ -77,8 +77,9 @@ func _packet_received_host(packet: Dictionary) -> void:
 
 #endregion
 #region client functions
-func _connection_removed_client(_connection_handle: int) -> void:
+func _connection_removed_client(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("host connection gone")
+	Steam.CONNECTION_END_APP_EXCEPTION_GENERIC
 	self.queue_free()
 
 func _packet_received_client(packet: Dictionary) -> void:
@@ -109,6 +110,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
+		print("lobby closed")
 		SteamHandler.leave_lobby()
 		SteamHandler.accepting_connections = false
 
