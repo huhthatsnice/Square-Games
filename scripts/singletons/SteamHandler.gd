@@ -77,6 +77,9 @@ func _ready() -> void:
 			Steam.CONNECTION_STATE_CLOSED_BY_PEER:
 				connection_ended.emit(connection_handle, connection_data)
 				clients.erase(connection_handle)
+			Steam.CONNECTION_STATE_PROBLEM_DETECTED_LOCALLY:
+				connection_ended.emit(connection_handle, connection_data)
+				clients.erase(connection_handle)
 	)
 
 func _process(_dt: float) -> void:

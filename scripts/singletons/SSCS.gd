@@ -49,8 +49,11 @@ var setting_parse_overrides: Dictionary[String,Callable] = {
 }
 
 var modifier_parse_overrides: Dictionary[String,Callable] = {
-	color_set = func() -> void:
-		pass
+	color_set = func(value: String) -> Array[Color]:
+		var colorset: Array[Color] = []
+		for color: String in value.split(","):
+			colorset.append(Color.from_string(color, Color.WHITE))
+		return colorset
 }
 
 func set_setting(setting: String, value: Variant, generic: bool = false) -> bool:

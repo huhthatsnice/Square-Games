@@ -4,11 +4,13 @@ class Command:
 	var function:Callable
 	var names:Array[String]
 	var argument_count:int
+	var variadic:bool
 	
-	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1) -> void:
+	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, variadic_arg: bool = false) -> void:
 		function=function_arg
 		names=names_arg
 		argument_count = function.get_argument_count() if argument_count_arg == -1 else argument_count_arg
+		variadic = variadic_arg
 
 var commands:Array[Command]=[]
 
@@ -30,7 +32,10 @@ func _ready() -> void:
 			if command.names.has(cmd):
 				if argc>=command.argument_count:
 					ran=true
-					command.function.callv(args)
+					if command.variadic:
+						command.function.call(args)
+					else:
+						command.function.callv(args)
 				else:
 					Terminal.print_console("Too few arguments (Expected at least {0} arguments, got {1}).\n".format([command.function.get_argument_count(),argc]))
 				break
@@ -125,3 +130,10 @@ func _ready() -> void:
 		print("attempt join")
 		SSCS.lobby = Lobby.new(uid.to_int())
 	,["joinlobby","jl"]))
+	
+	register_command(Command.new(func(msg: Array[String]) -> void:
+		if SSCS.lobby == null: print("lobby doesnt exist"); return
+		
+		SSCS.lobby.send_chat_message(" ".join(msg))
+		
+	,["message","msg","chat"],1,true))
