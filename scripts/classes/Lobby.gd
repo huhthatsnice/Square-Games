@@ -1,7 +1,7 @@
 extends Node
 class_name Lobby
 
-var lobby_users: Dictionary[int,Dictionary] = {}
+var lobby_users: Dictionary[String,Dictionary] = {}
 
 var is_host: bool = false
 var host_id: int = 0
@@ -34,14 +34,14 @@ func send_chat_message(msg: String) -> void:
 #endregion
 #region host functions
 func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] = []) -> void:
-	for client: int in lobby_users:
-		if client in except: continue
-		SteamHandler.send_message(client,packet_id,data)
+	for client: String in lobby_users:
+		if int(client) in except: continue
+		SteamHandler.send_message(int(client),packet_id,data)
 	
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)
-	for client: int in lobby_users:
-		if client == connection_handle: continue
+	for client: String in lobby_users:
+		if int(client) == connection_handle: continue
 		var client_data: Dictionary = lobby_users[client]
 		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
 			user_id=client_data.user_id,
@@ -55,8 +55,8 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
-	if !lobby_users.has(connection_data.identity): return
-	lobby_users.erase(connection_data.identity)
+	if !lobby_users.has(connection_data.identity.to_string()): return
+	lobby_users.erase(connection_data.identity.to_string())
 	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
 	}))
@@ -69,14 +69,14 @@ func _packet_received_host(packet: Dictionary) -> void:
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			lobby_users[int(packet.identity)].settings=data
+			lobby_users[packet.identity.to_string()].settings=data
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=int(packet.identity),
 				settings=data
 			}))
 		HOST_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
-			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[int(packet.identity)])
+			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[packet.identity.to_string()])
 
 #endregion
 #region client functions
@@ -93,18 +93,18 @@ func _packet_received_client(packet: Dictionary) -> void:
 		CLIENT_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users[data.user_id]={
+			lobby_users[data.user_id.to_string()]={
 				user_id=data.user_id,
 				settings=data.settings
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users.erase(data.user_id)
+			lobby_users.erase(data.user_id.to_string())
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users[data.user_id].settings=data.settings
+			lobby_users[data.user_id.to_string()].settings=data.settings
 		CLIENT_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
 
