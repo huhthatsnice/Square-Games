@@ -43,11 +43,11 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 	for client: int in lobby_users:
 		if client == connection_handle: continue
 		var client_data: Dictionary = lobby_users[client]
-		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, _to_json_buffer({
+		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
 			user_id=client_data.user_id,
 			settings=client_data.settings
 		}))
-	SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, _to_json_buffer({
+	SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
 		user_id=SteamHandler.steam_id,
 		settings=SSCS.encode_class(SSCS.settings)
 	}))
@@ -57,7 +57,7 @@ func _client_removed_host(_connection_handle: int, connection_data: Dictionary) 
 	print("client gone ",connection_data.identity)
 	if !lobby_users.has(connection_data.identity): return
 	lobby_users.erase(connection_data.identity)
-	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,_to_json_buffer({
+	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
 	}))
 
@@ -70,7 +70,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = JSON.parse_string(raw_data)
 			lobby_users[packet.identity].settings=data
-			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,_to_json_buffer({
+			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
 				settings=data
 			}))
@@ -91,19 +91,18 @@ func _packet_received_client(packet: Dictionary) -> void:
 	print("client received packet")
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
-			var data: Dictionary = JSON.parse_string(raw_data.substr(1))
+			var data: Dictionary = bytes_to_var(packet.payload)
 			
 			lobby_users[data.user_id]={
 				user_id=data.user_id,
-				name=data.name,
 				settings=data.settings
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
-			var data: Dictionary = JSON.parse_string(raw_data.substr(1))
+			var data: Dictionary = bytes_to_var(packet.payload)
 			
 			lobby_users.erase(data.user_id)
 		CLIENT_PACKET.PLAYER_CHANGED:
-			var data: Dictionary = JSON.parse_string(raw_data.substr(1))
+			var data: Dictionary = bytes_to_var(packet.payload)
 			
 			lobby_users[data.user_id].settings=data.settings
 		CLIENT_PACKET.CHAT_MESSAGE:
@@ -140,4 +139,4 @@ func _init(host_user_id: int = 0) -> void:
 		print("Failed to connect lobby, will cause major issues")
 		return
 	
-	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, JSON.stringify(SSCS.encode_class(SSCS.settings)).to_ascii_buffer())
+	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, var_to_bytes(SSCS.encode_class(SSCS.settings)))

@@ -56,8 +56,8 @@ func _ready() -> void:
 	,["lsm","listsongs","listmaps"]))
 	
 	register_command(Command.new(func() -> void:
-		for i:Dictionary in SSCS.settings.get_property_list():
-			var v:Variant = SSCS.settings[i.name]
+		for i:String in SSCS.encode_class(SSCS.settings):
+			var v:Variant = SSCS.settings[i]
 			Terminal.print_console("{0}:{1}\n".format([i,v]))
 	,["lss","listsettings"]))
 	

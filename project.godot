@@ -15,6 +15,7 @@ config/version="0.1"
 run/main_scene="uid://dxie0udrkwq8l"
 config/use_custom_user_dir=true
 config/custom_user_dir_name="SSCS"
+config/auto_accept_quit=false
 config/features=PackedStringArray("4.4", "Forward Plus", "Redot")
 run/delta_smoothing=false
 boot_splash/bg_color=Color(0, 0, 0, 1)
