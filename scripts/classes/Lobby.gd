@@ -68,7 +68,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 	print("host received packet")
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
-			var data: Dictionary = JSON.parse_string(raw_data)
+			var data: Dictionary = bytes_to_var(packet.payload)
 			lobby_users[packet.identity].settings=data
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
