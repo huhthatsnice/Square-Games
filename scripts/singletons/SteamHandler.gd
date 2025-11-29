@@ -3,7 +3,7 @@ extends Node
 var steam_enabled: bool = false
 var steam_id: int = 0
 
-var clients: Array[int] = []
+var clients: Dictionary[int,int] = {}
 var listen_socket: int = 0
 var connection: int = 0
 var accepting_connections: bool = false
@@ -73,19 +73,20 @@ func _ready() -> void:
 					Steam.acceptConnection(connection_handle)
 			Steam.CONNECTION_STATE_CONNECTED:
 				connection_received.emit(connection_handle, connection_data)
-				clients.append(connection_handle)
+				clients[connection_data.identity]=connection_handle
 			_:
 				if connection_data.end_reason != 0:
 					print("connection ended")
 					connection_ended.emit(connection_handle, connection_data)
-					clients.erase(connection_handle)
+					clients.erase(connection_data.identity)
 	)
 
 func _process(_dt: float) -> void:
 	Steam.run_callbacks()
 	
-	for client: int in clients:
-		for packet: Dictionary in Steam.receiveMessagesOnConnection(client,100):
+	for client_id: int in clients:
+		var client_connection: int = clients[client_id]
+		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):

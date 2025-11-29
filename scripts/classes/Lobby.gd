@@ -26,6 +26,7 @@ func send_chat_message(msg: String) -> void:
 	msg = Steam.getPersonaName()+": "+msg
 	Terminal.print_console(msg+"\n")
 	if is_host:
+		print("send message")
 		_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,msg.to_ascii_buffer())
 	else:
 		print("send to host")
@@ -36,7 +37,8 @@ func send_chat_message(msg: String) -> void:
 func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] = []) -> void:
 	for client: int in lobby_users:
 		if client in except: continue
-		SteamHandler.send_message(client,packet_id,data)
+		print("send to ", client)
+		SteamHandler.send_message(SteamHandler.clients[client],packet_id,data)
 	
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)
