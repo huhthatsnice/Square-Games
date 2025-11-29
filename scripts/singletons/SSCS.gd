@@ -156,9 +156,7 @@ func _ready() -> void:
 		print("decode")
 		var settings_data: Dictionary = bytes_to_var(raw_settings_data)
 		for setting: String in settings_data:
-			print(setting)
 			var value: Variant = settings_data[setting]
-			print(value)
 			settings[setting]=value
 	
 	setting_updated.connect(func(setting: String, _old: Variant, new: Variant) -> void:
