@@ -78,8 +78,6 @@ func _packet_received_host(packet: Dictionary) -> void:
 				settings=data
 			}),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
-			print("print")
-			print(raw_data)
 			Terminal.print_console(raw_data+"\n")
 			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[packet.identity])
 
@@ -111,8 +109,6 @@ func _packet_received_client(packet: Dictionary) -> void:
 			
 			lobby_users[str(data.user_id)].settings=data.settings
 		CLIENT_PACKET.CHAT_MESSAGE:
-			print("print")
-			print(raw_data)
 			Terminal.print_console(raw_data+"\n")
 
 #endregion

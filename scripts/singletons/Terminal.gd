@@ -17,6 +17,7 @@ signal line_entered
 
 func print_console(txt:String) -> void:
 	console_text += txt
+	update_console()
 
 func update_console() -> void:
 	self.text=console_text+">"+current_input.insert(cursor,"❘")
