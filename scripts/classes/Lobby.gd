@@ -55,8 +55,8 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
-	if !lobby_users.has(connection_data.identity.to_string()): return
-	lobby_users.erase(connection_data.identity.to_string())
+	if !lobby_users.has(str(connection_data.identity)): return
+	lobby_users.erase(str(connection_data.identity))
 	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
 	}))
@@ -69,14 +69,14 @@ func _packet_received_host(packet: Dictionary) -> void:
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			lobby_users[packet.identity.to_string()].settings=data
+			lobby_users[str(packet.identity)].settings=data
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=int(packet.identity),
 				settings=data
-			}))
+			}),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
-			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[packet.identity.to_string()])
+			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[packet.identity])
 
 #endregion
 #region client functions
@@ -93,18 +93,18 @@ func _packet_received_client(packet: Dictionary) -> void:
 		CLIENT_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users[data.user_id.to_string()]={
+			lobby_users[str(data.user_id)]={
 				user_id=data.user_id,
 				settings=data.settings
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users.erase(data.user_id.to_string())
+			lobby_users.erase(str(data.user_id))
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			
-			lobby_users[data.user_id.to_string()].settings=data.settings
+			lobby_users[str(data.user_id)].settings=data.settings
 		CLIENT_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
 
