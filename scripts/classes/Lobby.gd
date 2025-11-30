@@ -58,6 +58,7 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
 	if !lobby_users.has(connection_data.identity): return
+	Terminal.print_console("Player %s has left the lobby." % lobby_users[connection_data.identity].name)
 	lobby_users.erase(connection_data.identity)
 	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
@@ -71,13 +72,17 @@ func _packet_received_host(packet: Dictionary) -> void:
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
+			Terminal.print_console("Player %s has joined the lobby." % data.name)
+			
 			lobby_users[packet.identity]={
 				user_id=packet.identity,
-				settings=data
+				name=data.name,
+				settings=data.settings
 			}
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
-				settings=data
+				name=data.name,
+				settings=data.settings
 			}),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
@@ -97,14 +102,16 @@ func _packet_received_client(packet: Dictionary) -> void:
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
+			Terminal.print_console("Player %s has joined the lobby." % data.name)
 			
 			lobby_users[data.user_id]={
 				user_id=data.user_id,
+				name=data.name,
 				settings=data.settings
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			
+			Terminal.print_console("Player %s has left the lobby." % lobby_users[data.user_id].name)
 			lobby_users.erase(data.user_id)
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
@@ -144,4 +151,7 @@ func _init(host_user_id: int = 0) -> void:
 		print("Failed to connect lobby, will cause major issues")
 		return
 	
-	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, var_to_bytes(SSCS.encode_class(SSCS.settings)))
+	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, var_to_bytes({
+		name=Steam.getPersonaName(),
+		settings=SSCS.encode_class(SSCS.settings)
+	}))
