@@ -14,6 +14,59 @@ class Command:
 
 var commands:Array[Command]=[]
 
+const command_help:Dictionary = {
+	clear = {
+		aliases = ["clr"],
+		arguments = [],
+		use = "Clears the output terminal."
+	},
+	listsongs = {
+		aliases = ["listmaps", "lsm"],
+		arguments = [],
+		use = "Lists all maps in your maps folder."
+	},
+	listsettings = {
+		aliases = ["lss"],
+		arguments = [],
+		use = "Lists all settings alongside their values."
+	},
+	setsetting = {
+		aliases = ["set", "sets"],
+		arguments = ["Setting", "Value"],
+		use = "Sets the setting Setting to Value."
+	},
+	setmodifier = {
+		aliases = ["setm"],
+		arguments = ["Modifier", "Value"],
+		use = "Sets the modifier Modifier to Value."
+	},
+	play = {
+		aliases = ["playmap"],
+		arguments = ["Map Name"],
+		use = "Plays the map with the name Map Name"
+	},
+	createlobby = {
+		aliases = ["cl"],
+		arguments = [],
+		use = "Creates a lobby. Can be connected to with the command \"joinlobby\""
+	},
+	joinlobby = {
+		aliases = ["jl"],
+		arguments = ["Steam ID"],
+		use = "Joins the lobby of the player with the steam user id Steam ID."
+	},
+	leavelobby = {
+		aliases = ["ll"],
+		arguments = [],
+		use = "Leaves the current lobby."
+	},
+	message = {
+		aliases = ["msg","chat"],
+		arguments = [],
+		use = "Sends a message to the other users in your lobby."
+	},
+}
+
 func register_command(command:Command) -> void:
 	commands.append(command)
 
@@ -137,3 +190,38 @@ func _ready() -> void:
 		SSCS.lobby.send_chat_message(" ".join(msg))
 		
 	,["message","msg","chat"],1,true))
+	
+	register_command(Command.new(func(msg: Array[String]) -> void:
+		if SSCS.lobby == null: print("lobby doesnt exist"); return
+		
+		SSCS.lobby.queue_free()
+		
+	,["leavelobby","ll"]))
+	
+	register_command(Command.new(func(command: String = "") -> void:
+		print("we playing")
+		if command == "":
+			for name: String in command_help:
+				var command_info: Dictionary = command_help[name]
+				Terminal.print_console("{0}, {1}\n".format([name,", ".join(command_info.aliases)]))
+			Terminal.print_console("Type the name of a command after \"help\" to get more info.\n")
+			return
+		
+		var real_command: String = ""
+		
+		if command_help.has(command):
+			real_command = command
+		else:
+			for name: String in command_help:
+				var command_info: Dictionary = command_help[name]
+				if command in command_info.aliases:
+					real_command=name
+					break
+		
+		if real_command == "":
+			Terminal.print_console("No command with name \"%s\" exists." % command)
+			return
+		
+		var command_info: Dictionary = command_help[real_command]
+		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
+	,["help"],0))
