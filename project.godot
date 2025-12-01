@@ -40,6 +40,7 @@ SteamHandler="*res://scripts/singletons/SteamHandler.gd"
 
 settings/profiler/max_timestamp_query_elements=1024
 gdscript/warnings/untyped_declaration=2
+gdscript/warnings/confusable_local_declaration=0
 
 [display]
 
