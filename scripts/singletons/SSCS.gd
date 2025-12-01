@@ -25,6 +25,8 @@ class Settings:
 	var note_fade_out_end: float = 0
 	
 	var fov: float = 75
+	
+	var absolute_input: bool = false
 
 class Modifiers:
 	var hit_time: float = 45.0

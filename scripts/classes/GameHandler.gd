@@ -11,7 +11,8 @@ const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52
 
 var map: MapLoader.Map
 
-var notes: Array[Note]
+var notes: Array[Note] = []
+var note_scores: Array[int] = []
 var allocated_notes: PackedByteArray = []
 var cursor: Cursor
 var hud: Hud
@@ -23,9 +24,9 @@ var last_top_note_id: int = 0
 var note_added: int = -1
 var note_removed: int = -1
 
-
 var misses: int = 0 
 var hits: int = 0
+var score: int = 0
 
 var last_loaded_note_id: int=0
 
@@ -75,6 +76,9 @@ func _init(map_arg: MapLoader.Map) -> void:
 	allocated_notes.resize(max_loaded_notes)
 	allocated_notes.fill(0)
 	
+	note_scores.resize(len(map.data))
+	for i: int in range(len(map.data)):
+		note_scores[i] = 50
 
 func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
@@ -190,7 +194,9 @@ func unpause() -> void:
 
 func _register_hit() -> void:
 	#print('hit')
+	score += note_scores[hits+misses]
 	hits+=1
+	
 	health=clamp(health+0.5,0,5)
 	#print(health)
 
