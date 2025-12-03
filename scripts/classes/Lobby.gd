@@ -56,7 +56,7 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
 	if !lobby_users.has(connection_data.identity): return
-	Terminal.print_console("Player %s has left the lobby." % lobby_users[connection_data.identity].username)
+	Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[connection_data.identity].username)
 	lobby_users.erase(connection_data.identity)
 	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
@@ -70,7 +70,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has joined the lobby." % data.username)
+			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 			
 			lobby_users[packet.identity]={
 				user_id=packet.identity,
@@ -97,7 +97,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 		CLIENT_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			print(data)
-			Terminal.print_console("Player %s has joined the lobby." % data.username)
+			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 			
 			lobby_users[data.user_id]={
 				user_id=data.user_id,
@@ -106,7 +106,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has left the lobby." % lobby_users[data.user_id].username)
+			Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[data.user_id].username)
 			lobby_users.erase(data.user_id)
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
