@@ -72,16 +72,16 @@ func _packet_received_host(packet: Dictionary) -> void:
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has joined the lobby." % data.name)
+			Terminal.print_console("Player %s has joined the lobby." % data.username)
 			
 			lobby_users[packet.identity]={
 				user_id=packet.identity,
-				name=data.name,
+				username=data.username,
 				settings=data.settings
 			}
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
-				name=data.name,
+				username=data.username,
 				settings=data.settings
 			}),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
@@ -102,16 +102,16 @@ func _packet_received_client(packet: Dictionary) -> void:
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has joined the lobby." % data.name)
+			Terminal.print_console("Player %s has joined the lobby." % data.username)
 			
 			lobby_users[data.user_id]={
 				user_id=data.user_id,
-				name=data.name,
+				username=data.username,
 				settings=data.settings
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has left the lobby." % lobby_users[data.user_id].name)
+			Terminal.print_console("Player %s has left the lobby." % lobby_users[data.user_id].username)
 			lobby_users.erase(data.user_id)
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
@@ -152,6 +152,6 @@ func _init(host_user_id: int = 0) -> void:
 		return
 	
 	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, var_to_bytes({
-		name=Steam.getPersonaName(),
+		username=Steam.getPersonaName(),
 		settings=SSCS.encode_class(SSCS.settings)
 	}))
