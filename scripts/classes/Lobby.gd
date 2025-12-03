@@ -43,14 +43,12 @@ func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] 
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)
 	for client: int in lobby_users:
-		if client == connection_handle: continue
+		if client == connection_data.identity: continue
 		var client_data: Dictionary = lobby_users[client]
-		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
-			user_id=client_data.user_id,
-			settings=client_data.settings
-		}))
+		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes(client_data))
 	SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
 		user_id=SteamHandler.steam_id,
+		username=Steam.getPersonaName(),
 		settings=SSCS.encode_class(SSCS.settings)
 	}))
 	
@@ -79,11 +77,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 				username=data.username,
 				settings=data.settings
 			}
-			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
-				user_id=packet.identity,
-				username=data.username,
-				settings=data.settings
-			}),[packet.identity])
+			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes(lobby_users[packet.identity]),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
 			_send_to_clients(CLIENT_PACKET.CHAT_MESSAGE,raw_data.to_ascii_buffer(),[packet.identity])
@@ -152,6 +146,7 @@ func _init(host_user_id: int = 0) -> void:
 		print("Failed to connect lobby, will cause major issues")
 		return
 	
+	print(Steam.getPersonaName())
 	SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.PLAYER_ADDED, var_to_bytes({
 		username=Steam.getPersonaName(),
 		settings=SSCS.encode_class(SSCS.settings)
