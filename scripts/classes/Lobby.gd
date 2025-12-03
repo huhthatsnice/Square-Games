@@ -120,7 +120,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		print("lobby closed")
-		SteamHandler.leave_lobby()
+		print(SteamHandler.leave_lobby())
 		SteamHandler.accepting_connections = false
 
 func _init(host_user_id: int = 0) -> void:

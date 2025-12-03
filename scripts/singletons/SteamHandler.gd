@@ -41,8 +41,11 @@ func leave_lobby() -> bool:
 		return false
 	if listen_socket != 0:
 		Steam.closeListenSocket(listen_socket)
+		listen_socket=0
+		clients.clear()
 	else:
 		Steam.closeConnection(connection,0,"Left the lobby", true)
+		connection=0
 	return true
 
 func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> Dictionary:
