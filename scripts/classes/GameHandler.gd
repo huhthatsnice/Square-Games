@@ -24,7 +24,7 @@ var last_top_note_id: int = 0
 var note_added: int = -1
 var note_removed: int = -1
 
-var misses: int = 0 
+var misses: int = 0
 var hits: int = 0
 var score: int = 0
 
@@ -49,67 +49,82 @@ var reset_timer: int = -1
 
 var autoplay_handler: AutoplayHandler
 
-signal ended
+var is_replay: bool = false
+var replay_note_hit_data: PackedByteArray
+var replay_cursor_pos_data: PackedVector3Array
 
-func _init(map_arg: MapLoader.Map) -> void:
+var last_replay_cursor_pos_index: int = 0
+
+signal ended
+signal note_hit
+signal note_missed
+
+func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = []) -> void:
 	map = map_arg
-	
+
 	var max_t: int = ceil(((SSCS.settings.spawn_distance+0.1)/SSCS.settings.approach_rate)*1000) + SSCS.modifiers.hit_time
 	var note_counter: PackedInt32Array = []
-	
+
 	for v: MapLoader.NoteDataMinimal in map.data:
 		var ct: int = v.t
 		var to_remove: int = 0
-		
+
 		for t in note_counter:
 			if ct-t>max_t:
 				to_remove += 1
 			else:
 				break
-		
+
 		note_counter = note_counter.slice(to_remove)
 		note_counter.append(ct)
 		if len(note_counter) > max_loaded_notes:
 			max_loaded_notes=len(note_counter)
 	max_loaded_notes+=1
-	
+
 	allocated_notes.resize(max_loaded_notes)
 	allocated_notes.fill(0)
-	
+
 	note_scores.resize(len(map.data))
 	for i: int in range(len(map.data)):
 		note_scores[i] = 50
+
+	if len(replay_cursor_pos_data) > 0:
+		self.is_replay = true
+		self.replay_cursor_pos_data = replay_cursor_pos_data
+		self.replay_note_hit_data = replay_note_hit_data
 
 func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
 	RenderingServer.global_shader_parameter_set("spawn_distance",SSCS.settings.spawn_distance)
 	RenderingServer.global_shader_parameter_set("vanish_distance",-SSCS.settings.vanish_distance)
-	
+
 	RenderingServer.global_shader_parameter_set("note_begin_transparency",SSCS.settings.note_begin_transparency)
 	RenderingServer.global_shader_parameter_set("note_transparency",SSCS.settings.note_transparency)
 	RenderingServer.global_shader_parameter_set("note_end_transparency",SSCS.settings.note_end_transparency)
-	
+
 	RenderingServer.global_shader_parameter_set("note_fade_in_begin",SSCS.settings.note_fade_in_begin)
 	RenderingServer.global_shader_parameter_set("note_fade_in_end",SSCS.settings.note_fade_in_end)
-	
+
 	RenderingServer.global_shader_parameter_set("note_fade_out_begin",SSCS.settings.note_fade_out_begin)
 	RenderingServer.global_shader_parameter_set("note_fade_out_end",SSCS.settings.note_fade_out_end)
-	
+
 	cursor = cursor_base.instantiate()
+	if is_replay:
+		cursor.accepts_input = false
 	self.add_child(cursor)
-	
+
 	hud = hud_base.instantiate()
 	self.add_child(hud)
-	
+
 	if autoplay:
 		autoplay_handler = AutoplayHandler.new(map,cursor)
-	
+
 	self.multimesh = MultiMesh.new()
-	
+
 	update_note_mesh(note_mesh)
 	self.multimesh.transform_format=MultiMesh.TRANSFORM_3D
 	self.multimesh.use_custom_data=true
-	
+
 	self.multimesh.instance_count=max_loaded_notes
 	self.multimesh.visible_instance_count=1
 
@@ -117,32 +132,32 @@ func _ready() -> void:
 #region note creation and deletion
 
 func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
-	
+
 	var new_index: int = allocated_notes.find(0,0)
-	
+
 	if new_index>note_added:
 		note_added = new_index
-		
+
 	allocated_notes[new_index]=1
 	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
-	
+
 	return new_note
 
 func remove_note(note: Note) -> void:
 	var index:int = note.multimesh_index
-	
+
 	if index>note_removed:
 		note_removed = index
-		
+
 	allocated_notes[index]=0
 	multimesh.set_instance_transform(index,nan_transform)
-	
+
 	note.queue_free()
 
 
 func update_note_mesh(mesh: Mesh) -> void:
 	var new_note_mesh: Mesh = mesh.duplicate()
-	
+
 	new_note_mesh.surface_set_material(0,note_material)
 	self.multimesh.mesh=new_note_mesh
 
@@ -152,7 +167,7 @@ func update_note_mesh(mesh: Mesh) -> void:
 func play(from: float) -> void:
 	assert(not ran, "Tried to run game manager more than once")
 	ran = true
-	
+
 	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
 	cursor.pos=Vector2()
 	cursor.update_position()
@@ -160,7 +175,7 @@ func play(from: float) -> void:
 	AudioManager.set_stream(map.audio)
 	AudioManager.set_playback_speed(SSCS.modifiers.speed)
 	AudioManager.play(from - 1*SSCS.modifiers.speed)
-	
+
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
@@ -172,7 +187,7 @@ func play(from: float) -> void:
 func stop() -> void:
 	assert(not stopped, "Tried to stop game manager more than once")
 	stopped = true
-	
+
 	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	ended.emit()
 	playing = false
@@ -196,7 +211,7 @@ func _register_hit() -> void:
 	#print('hit')
 	score += note_scores[hits+misses]
 	hits+=1
-	
+
 	health=clamp(health+0.5,0,5)
 	#print(health)
 
@@ -219,13 +234,13 @@ func _load_notes() -> void:
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
 		if note_data.t <= threshold:
 			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
-	
+
 			notes.append(new_note)
-			
+
 			last_loaded_note_id += 1
 		else:
 			break
-	
+
 	#debug loader, just loads a string of notes at 10 notes per second
 	#if AudioManager.elapsed-0.1>last_load:
 		#last_load = AudioManager.elapsed
@@ -240,31 +255,51 @@ func _check_hitreg() -> void:
 
 	var to_remove: PackedInt32Array = []
 	var i: int = -1
-	
+
 	for note: Note in notes:
 		i+=1
 		if note.t<elapsed:
 			if note.t<elapsed-hit_time:
-				misses+=1
-				health=clamp(health-1,0,5)
-				
-				to_remove.append(i)
+				if !is_replay:
+					misses+=1
+					health=clamp(health-1,0,5)
+					note_missed.emit(note.note_id)
+
+					to_remove.append(i)
+				else:
+					if note.note_id >= len(replay_note_hit_data): return
+
+					if replay_note_hit_data[note.note_id]==0:
+						misses+=1
+						health=clamp(health-1,0,5)
+						note_missed.emit(note.note_id)
+
+						to_remove.append(i)
+					else:
+						hits+=1
+						health=clamp(health+0.5,0,5)
+						note_hit.emit(note.note_id)
+
+						to_remove.append(i)
+
+
 			else:
 				var diff: Vector2 = (note.pos-cursor.pos).abs()
 
 				if max(diff.x,diff.y)<hitbox_size:
 					hits+=1
 					health=clamp(health+0.5,0,5)
-					
+					note_hit.emit(note.note_id)
+
 					to_remove.append(i)
 		else:
 			break
-	
+
 	var shift: int = 0
 	for v in to_remove:
 		var note: Note = notes.pop_at(v-shift)
 		remove_note(note)
-	
+
 		shift+=1
 
 func _process(_dt: float) -> void:
@@ -272,11 +307,20 @@ func _process(_dt: float) -> void:
 	if autoplay:
 		cursor.pos=autoplay_handler.get_cursor_position()
 		cursor.update_position()
-	
+
+	if is_replay:
+		var cursor_pos_data: Vector3 = replay_cursor_pos_data[last_replay_cursor_pos_index]
+		while cursor_pos_data.z < AudioManager.elapsed:
+			last_replay_cursor_pos_index += 1
+			cursor_pos_data = replay_cursor_pos_data[last_replay_cursor_pos_index]
+
+		cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)
+		cursor.update_position()
+
 	_check_hitreg()
 	_load_notes()
 	_check_death()
-	
+
 	if note_removed==last_top_note_id:
 		var top_note_id: int = allocated_notes.rfind(1)
 		last_top_note_id=top_note_id
@@ -286,7 +330,7 @@ func _process(_dt: float) -> void:
 	elif note_added>last_top_note_id:
 		last_top_note_id = note_added
 		self.multimesh.visible_instance_count=note_added+1
-	
+
 	if Input.is_action_pressed(&"reset"):
 		if reset_timer == -1:
 			reset_timer=Time.get_ticks_msec()

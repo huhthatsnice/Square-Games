@@ -15,6 +15,8 @@ var inverted_pixels_per_grid_unit: float = 1/pixels_per_grid_unit
 var parallax: float = SSCS.settings.parallax
 var absolute: bool = SSCS.settings.absolute_input
 
+var accepts_input: bool = true
+
 func update_position() -> void:
 	pos_world.x=pos.x
 	pos_world.y=pos.y
@@ -25,21 +27,22 @@ func _ready() -> void:
 	var texture_size:Vector2 = self.texture.get_size()
 	self.scale=(Vector3(texture_size.x,texture_size.y,1)*self.pixel_size).inverse() * Vector3(0.28,0.28,1.0)
 	#print(self.scale)
-	
+
 	camera = $"/root/Game/Camera"
-	
+
 	pos_world=Vector3(pos.x,pos.y,grid_distance)
 	self.position=pos_world
 	camera.position=Vector3(pos.x*parallax,pos.y*parallax,0)
 
 func _input(event: InputEvent) -> void:
+	if !accepts_input: return
 	if event is InputEventMouseMotion:
 		if absolute:
 			pos = ((screen_center-event.position)*inverted_pixels_per_grid_unit).clampf(-GRID_MAX,GRID_MAX)
 		else:
 			pos -= event.relative*inverted_pixels_per_grid_unit
 			pos = pos.clampf(-GRID_MAX,GRID_MAX)
-		
+
 		pos_world.x=pos.x
 		pos_world.y=pos.y
 		self.position=pos_world

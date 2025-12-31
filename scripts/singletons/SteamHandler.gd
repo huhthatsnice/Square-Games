@@ -55,19 +55,19 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 func _ready() -> void:
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(480)
-	
+
 	if init_success.status!=0:
 		print("Steam failed to initialize. (%s)" % init_success.verbal)
 	else:
 		steam_enabled=true
 		print("Steam initialized successfully")
-	
+
 	if !steam_enabled: return
-	
+
 	steam_id = Steam.getSteamID()
-	
+
 	Steam.initRelayNetworkAccess()
-	
+
 	Steam.network_connection_status_changed.connect(func(connection_handle: int, connection_data: Dictionary, _old_state: int) -> void:
 		print("network connection status changed ",connection_data)
 		match connection_data.connection_state:
@@ -86,7 +86,7 @@ func _ready() -> void:
 
 func _process(_dt: float) -> void:
 	Steam.run_callbacks()
-	
+
 	for client_id: int in clients:
 		var client_connection: int = clients[client_id]
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):

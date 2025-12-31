@@ -1,12 +1,12 @@
 extends Node3D
 class_name Hud
 
-const info_right_base: String = """ 
+const info_right_base: String = """
 HITS
 {0}
- 
- 
- 
+
+
+
 
 MISSES
 {1}"""

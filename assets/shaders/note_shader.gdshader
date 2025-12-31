@@ -26,11 +26,11 @@ float map(float input, float input_start, float input_end, float output_start, f
 
 void vertex() {
 	color = INSTANCE_CUSTOM.rgb;
-	
+
 	float time_til_hit = INSTANCE_CUSTOM.a-elapsed_time;
 	float note_lerp = time_til_hit/approach_time;
 	float new_pos = spawn_distance*note_lerp;
-	
+
 	if (new_pos<vanish_distance) {
 		alpha = 1.0;
 	} else if (note_lerp<note_fade_in_begin && note_lerp>note_fade_in_end) {
@@ -51,14 +51,14 @@ void vertex() {
 		alpha = note_transparency;
 	}
 	//alpha = new_pos<vanish_distance ? 1.0 : 0.0;
-	
+
 	VERTEX.z+=new_pos;
 }
 
 void fragment() {
 	ALBEDO = color;
 	ALPHA = 1.0-alpha;
-	
+
 }
 
 //void light() {

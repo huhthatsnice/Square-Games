@@ -24,7 +24,7 @@ func _ready() -> void:
 		ended.emit()
 	)
 	self.add_child(player)
-	
+
 	compensation = AudioServer.get_time_to_next_mix() + AudioServer.get_output_latency()
 
 func set_stream(new_stream: AudioStream) -> void:

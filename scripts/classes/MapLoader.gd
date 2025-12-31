@@ -38,7 +38,7 @@ static func from_path_native(path: String) -> Map: #path to a folder with a data
 
 	var audio: AudioStreamMP3 = AudioStreamMP3.new()
 	audio.data = FileAccess.get_file_as_bytes("%s/audio.mp3" % path)
-	
+
 	var raw_data: String = FileAccess.get_file_as_string("%s/data.txt" % path)
 	var data: Array =  _parse_data(raw_data)
 
@@ -52,15 +52,14 @@ static func from_path_native(path: String) -> Map: #path to a folder with a data
 
 static func from_path_sspm(path: String) -> Map: #path to a .sspm file
 	var new_map: Map = Map.new()
-	
+
 	var sspm_parsed: SSPMUtil.SSPM = SSPMUtil.load_from_path(path)
 	var data: Array =  sspm_parsed.data_parsed
-	
+
 	new_map.map_type = MapType.SSPM
 	new_map.path = path
 	new_map.audio = sspm_parsed.audio
 	new_map.raw_data = sspm_parsed.data_csv
 	new_map.data = data
-	
+
 	return new_map
-	

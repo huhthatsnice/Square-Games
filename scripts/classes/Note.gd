@@ -17,7 +17,7 @@ var grid_distance:float = SSCS.settings.grid_distance
 
 func change_id(new_note_id: int) -> void:
 	multimesh_index = new_note_id
-	
+
 	multimesh.set_instance_transform(multimesh_index,note_transform)
 	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
 
@@ -27,22 +27,22 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	t=t_arg
 	multimesh=multimesh_arg
 	multimesh_index=multimesh_index_arg
-	
+
 	if not color_assigned:
 		color_assigned = true
 		color = color_set[note_id % len(color_set)]
-	
-	
+
+
 	#var material: StandardMaterial3D = self.get_surface_override_material(0)
 	#material.albedo_color = color
-	
+
 	#guaruntees note's absolute size will be the Vector3 on the right
 	var aabb:AABB = multimesh.mesh.get_aabb()
-	
+
 	var basis: Basis = Basis.from_scale(aabb.size.inverse() * Vector3(1,1,0.2))
 	var origin: Vector3 = Vector3(pos.x,pos.y,grid_distance)
-	
+
 	note_transform=Transform3D(basis,origin)
-	
+
 	multimesh.set_instance_transform(multimesh_index,note_transform)
 	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
