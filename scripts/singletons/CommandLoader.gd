@@ -160,6 +160,10 @@ func _ready() -> void:
 
 		print(len(map.data))
 
+		if SSCS.lobby != null:
+			SSCS.lobby.start_lobby(map)
+			return
+
 		var game_handler: GameHandler = GameHandler.new(map)
 		SSCS.game_handler=game_handler
 
@@ -187,6 +191,9 @@ func _ready() -> void:
 
 		print("attempt create")
 		SSCS.lobby = Lobby.new()
+
+		var game_scene:Node = $"/root/Game"
+		game_scene.add_child(SSCS.lobby)
 	,["createlobby","cl"]))
 
 	register_command(Command.new(func(uid: String) -> void:
@@ -194,13 +201,15 @@ func _ready() -> void:
 
 		print("attempt join")
 		SSCS.lobby = Lobby.new(uid.to_int())
+
+		var game_scene:Node = $"/root/Game"
+		game_scene.add_child(SSCS.lobby)
 	,["joinlobby","jl"]))
 
 	register_command(Command.new(func(msg: Array[String]) -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
 		SSCS.lobby.send_chat_message(" ".join(msg))
-
 	,["message","msg","chat"],1,true))
 
 	register_command(Command.new(func() -> void:

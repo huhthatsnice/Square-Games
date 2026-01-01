@@ -96,7 +96,9 @@ func start_lobby(map: MapLoader.Map) -> bool:
 
 	game_handler.ended.connect(func() -> void:
 		_send_to_clients(CLIENT_PACKET.DIED, var_to_bytes(SteamHandler.steam_id))
-		Terminal.print_console(Steam.getPersonaName() +" has died.")
+		Terminal.print_console(Steam.getPersonaName() +" has died.\n")
+		Terminal.visible = true
+		Terminal.is_accepting_input = true
 	)
 
 	var game_scene:Node = $"/root/Game"
@@ -222,7 +224,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 		HOST_PACKET.PLAY_READY:
 			clients_to_load -= 1
 		HOST_PACKET.DIED:
-			Terminal.print_console(Steam.getFriendPersonaName(packet.identity) +" has died.")
+			Terminal.print_console(Steam.getFriendPersonaName(packet.identity) +" has died.\n")
 			lobby_users[packet.identity].alive = false
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
@@ -300,7 +302,9 @@ func _packet_received_client(packet: Dictionary) -> void:
 
 			game_handler.ended.connect(func() -> void:
 				SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.DIED, [])
-				Terminal.print_console(Steam.getPersonaName() +" has died.")
+				Terminal.print_console(Steam.getPersonaName() +" has died.\n")
+				Terminal.visible = true
+				Terminal.is_accepting_input = true
 			)
 
 			var game_scene:Node = $"/root/Game"
@@ -319,7 +323,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 				user.alive = true
 		CLIENT_PACKET.DIED:
 			var user: int = bytes_to_var(packet.payload)
-			Terminal.print_console(Steam.getFriendPersonaName(user) +" has died.")
+			Terminal.print_console(Steam.getFriendPersonaName(user) +" has died.\n")
 			lobby_users[user].alive = false
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
