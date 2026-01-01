@@ -65,6 +65,11 @@ const command_help:Dictionary = {
 		arguments = [],
 		use = "Sends a message to the other users in your lobby."
 	},
+	spectate = {
+		aliases = ["spec"],
+		arguments = ["Steam ID"],
+		use = "Spectates the user with the given steam id if they are in the game."
+	}
 }
 
 func register_command(command:Command) -> void:
@@ -232,3 +237,9 @@ func _ready() -> void:
 		var command_info: Dictionary = command_help[real_command]
 		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
 	,["help"],0))
+
+	register_command(Command.new(func(uid: String) -> void:
+		if SSCS.lobby == null or !uid.is_valid_int(): print("lobby doesnt exist"); return
+
+		SSCS.lobby.start_spectate(uid.to_int())
+	,["spectate","spec"]))
