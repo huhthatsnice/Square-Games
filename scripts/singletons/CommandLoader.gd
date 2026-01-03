@@ -136,20 +136,7 @@ func _ready() -> void:
 	register_command(Command.new(func(map_name: String, start_from: String = "0") -> void:
 		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
 
-		var map:MapLoader.Map
-		var is_sspm: bool = FileAccess.file_exists("user://maps/%s.sspm" % map_name)
-		if !is_sspm:
-			for file: String in DirAccess.get_files_at("user://maps/%s" % map_name):
-				if file.contains(".sspm"):
-					is_sspm = true
-					break
-			if is_sspm:
-				map = MapLoader.from_path_sspm("user://maps/%s/sspm.sspm" % map_name)
-			else:
-				map = MapLoader.from_path_native("user://maps/%s" % map_name)
-		else:
-			map = MapLoader.from_path_sspm("user://maps/%s.sspm" % map_name)
-
+		var map:MapLoader.Map = SSCS.load_map_from_name(map_name)
 
 		var start_from_time: float = 0
 

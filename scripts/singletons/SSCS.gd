@@ -149,9 +149,20 @@ func encode_class(obj: Variant) -> Dictionary:
 
 	return encoded
 
+func load_map_from_name(name: String) -> MapLoader.Map:
+		var map: MapLoader.Map
+		var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % name)
+		if is_sspm:
+			map = MapLoader.from_path_sspm("user://rhythiamaps/%s.sspm" % name)
+		else:
+			map = MapLoader.from_path_native("user://maps/%s" % name)
+
+		return map
+
 func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
+	DirAccess.make_dir_absolute("user://rhythiamaps")
 
 	var raw_settings_data: PackedByteArray = FileAccess.get_file_as_bytes("user://settings.txt")
 
