@@ -134,15 +134,16 @@ func _ready() -> void:
 	,["setm","setmodifier"]))
 
 	register_command(Command.new(func(map_name: String, start_from: String = "0") -> void:
-		if not DirAccess.dir_exists_absolute("user://maps/%s" % map_name): return
+		if not (DirAccess.dir_exists_absolute("user://maps/%s" % map_name) or FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)): Terminal.print_console('Map "%s" does not exist.\n' % map_name); return
 
+		print("load map %s" % map_name)
 		var map:MapLoader.Map = SSCS.load_map_from_name(map_name)
 
 		var start_from_time: float = 0
 
 		if start_from.is_valid_float():
 			start_from_time = start_from.to_float()
-		elif start_from == "beginning" or start_from == "b":
+		elif ["start", "s", "beggining", "b"].has(start_from):
 			start_from_time = map.data[0].t/1000.0
 
 		print(len(map.data))
