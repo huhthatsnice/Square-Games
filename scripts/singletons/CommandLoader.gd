@@ -146,7 +146,7 @@ func _ready() -> void:
 		elif ["start", "s", "beggining", "b"].has(start_from):
 			start_from_time = map.data[0].t/1000.0
 
-		print(len(map.data))
+		print("num notes: ", str(len(map.data)))
 
 		if SSCS.lobby != null:
 			SSCS.lobby.start_lobby(map)

@@ -67,6 +67,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 	SteamHandler.accepting_connections = false
 
 	clients_to_load = len(lobby_users)+1
+	print("clients to load: ", str(clients_to_load))
 	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN,var_to_bytes_with_objects({
 		data=map.raw_data,
 		audio=map.audio
@@ -104,7 +105,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 	var game_scene:Node = $"/root/Game"
 	game_scene.add_child(game_handler)
 
-	clients_to_load -=1
+	clients_to_load -= 1
 	print("begin wait")
 	while clients_to_load > 0: await get_tree().physics_frame
 	print("wait done")
@@ -150,7 +151,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] = []) -> void:
 	for client: int in lobby_users:
 		if client in except: continue
-		print("send to ", client)
+		print("send ", packet_id, " to ", client)
 		SteamHandler.send_message(SteamHandler.clients[client],packet_id,data)
 
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
