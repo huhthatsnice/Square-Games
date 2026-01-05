@@ -73,6 +73,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		data=map.raw_data,
 		audio=map.audio
 	})
+
 	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
 		data_len = len(sent_data),
 		data = sent_data.compress(FileAccess.CompressionMode.COMPRESSION_ZSTD)

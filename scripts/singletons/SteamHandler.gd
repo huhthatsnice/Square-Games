@@ -4,8 +4,10 @@ var steam_enabled: bool = false
 var steam_id: int = 0
 
 var clients: Dictionary[int,int] = {}
+var client_multipacket_data : Dictionary[int, PackedByteArray] = {}
 var listen_socket: int = 0
 var connection: int = 0
+var connection_multipacket_data: PackedByteArray
 var accepting_connections: bool = false
 
 signal packet_received(packet: Dictionary)
@@ -48,9 +50,24 @@ func leave_lobby() -> bool:
 		connection=0
 	return true
 
-func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> Dictionary:
+func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> void:
 	data.insert(0,packet_id)
-	return Steam.sendMessageToConnection(connection_handle,data,Steam.NETWORKING_SEND_RELIABLE)
+	Steam.NETWORKING_SEND_USE_CURRENT_THREAD
+
+	var cursor: int = 0
+	if len(data) > 500000:
+		while cursor < len(data):
+			var chunk: PackedByteArray = data.slice(cursor, cursor + 500000)
+			cursor += 500000
+			if cursor < len(data):
+				chunk.append(0xff_ff_ff_ff_ff_ff_ff_ff)
+			else:
+				chunk.append(0xff_ff_ff_ff_ff_ff_ff_fe)
+			Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE)
+	else:
+		Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
+
+
 
 func _ready() -> void:
 	print("Attempt to initialize steam...")
@@ -76,12 +93,14 @@ func _ready() -> void:
 					Steam.acceptConnection(connection_handle)
 			Steam.CONNECTION_STATE_CONNECTED:
 				connection_received.emit(connection_handle, connection_data)
-				clients[connection_data.identity]=connection_handle
+				clients[connection_data.identity] = connection_handle
+				client_multipacket_data[connection_data.identity] = PackedByteArray()
 			_:
 				if connection_data.end_reason != 0:
 					print("connection ended")
 					connection_ended.emit(connection_handle, connection_data)
 					clients.erase(connection_data.identity)
+					client_multipacket_data.erase(connection_data.identity)
 	)
 
 func _process(_dt: float) -> void:
@@ -90,7 +109,25 @@ func _process(_dt: float) -> void:
 	for client_id: int in clients:
 		var client_connection: int = clients[client_id]
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):
+			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_ff:
+				packet.payload.resize(len(packet.payload)-8)
+				client_multipacket_data[client_id].append_array(packet.payload)
+				continue
+			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_fe:
+				packet.payload.resize(len(packet.payload)-8)
+				client_multipacket_data[client_id].append_array(packet.payload)
+				packet.payload = PackedByteArray(client_multipacket_data[client_id])
+				client_multipacket_data[client_id].resize(0)
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):
+			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_ff:
+				packet.payload.resize(len(packet.payload)-8)
+				connection_multipacket_data.append_array(packet.payload)
+				continue
+			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_fe:
+				packet.payload.resize(len(packet.payload)-8)
+				connection_multipacket_data.append_array(packet.payload)
+				packet.payload = PackedByteArray(connection_multipacket_data)
+				connection_multipacket_data.resize(0)
 			packet_received.emit(packet)
