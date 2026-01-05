@@ -68,9 +68,14 @@ func start_lobby(map: MapLoader.Map) -> bool:
 
 	clients_to_load = len(lobby_users)+1
 	print("clients to load: ", str(clients_to_load))
-	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN,var_to_bytes_with_objects({
+
+	var sent_data: PackedByteArray = var_to_bytes_with_objects({
 		data=map.raw_data,
 		audio=map.audio
+	})
+	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
+		data_len = len(sent_data),
+		data = sent_data.compress(FileAccess.CompressionMode.COMPRESSION_ZSTD)
 	}))
 
 	Terminal.is_accepting_input = false
@@ -152,7 +157,8 @@ func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] 
 	for client: int in lobby_users:
 		if client in except: continue
 		print("send ", packet_id, " to ", client)
-		SteamHandler.send_message(SteamHandler.clients[client],packet_id,data)
+		print(len(data))
+		print(SteamHandler.send_message(SteamHandler.clients[client],packet_id,data))
 
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)
@@ -275,7 +281,10 @@ func _packet_received_client(packet: Dictionary) -> void:
 			lobby_users[data.user_id].cursor_pos_data.append_array(data.data)
 		CLIENT_PACKET.PLAY_BEGIN:
 			print("got play start message")
-			var data: Dictionary = bytes_to_var_with_objects(packet.payload)
+
+			var pre_data: Dictionary = bytes_to_var(packet.payload)
+			var data: Dictionary = bytes_to_var_with_objects(pre_data.data.decompress(pre_data.data_len, FileAccess.CompressionMode.COMPRESSION_ZSTD))
+
 			print("decoded data")
 			var new_map: MapLoader.Map = MapLoader.Map.new()
 
