@@ -105,9 +105,9 @@ func start_lobby(map: MapLoader.Map) -> bool:
 	game_scene.add_child(game_handler)
 
 	clients_to_load -=1
-
+	print("begin wait")
 	while clients_to_load > 0: await get_tree().physics_frame
-
+	print("wait done")
 	Terminal.visible = false
 
 	_send_to_clients(CLIENT_PACKET.PLAY_START,[])
@@ -273,8 +273,9 @@ func _packet_received_client(packet: Dictionary) -> void:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			lobby_users[data.user_id].cursor_pos_data.append_array(data.data)
 		CLIENT_PACKET.PLAY_BEGIN:
+			print("got play start message")
 			var data: Dictionary = bytes_to_var_with_objects(packet.payload)
-
+			print("decoded data")
 			var new_map: MapLoader.Map = MapLoader.Map.new()
 
 			new_map.data = MapLoader._parse_data(data.data)

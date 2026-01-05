@@ -155,6 +155,7 @@ func _ready() -> void:
 		var game_handler: GameHandler = GameHandler.new(map)
 		SSCS.game_handler=game_handler
 
+
 		var game_scene:Node = $"/root/Game"
 
 		game_scene.add_child(game_handler)
