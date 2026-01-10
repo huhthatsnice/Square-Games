@@ -122,11 +122,11 @@ func _process(_dt: float) -> void:
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):
-			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
+			if packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				continue
-			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
+			elif packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				packet.payload = PackedByteArray(connection_multipacket_data)
