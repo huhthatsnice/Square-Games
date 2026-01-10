@@ -149,15 +149,44 @@ func encode_class(obj: Variant) -> Dictionary:
 
 	return encoded
 
-func load_map_from_name(name: String) -> MapLoader.Map:
-		var map: MapLoader.Map
-		var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % name)
-		if is_sspm:
-			map = MapLoader.from_path_sspm("user://rhythiamaps/%s.sspm" % name)
-		else:
-			map = MapLoader.from_path_native("user://maps/%s" % name)
+func get_map_file_path_from_name(map_name: String) -> String:
+	var map: String
+	var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)
+	if is_sspm:
+		map = "user://rhythiamaps/%s.sspm" % map_name
+	else:
+		map = "user://maps/%s" % map_name
 
-		return map
+	return map
+
+func get_map_hash(map_name: String) -> PackedByteArray:
+	var map_path: String = get_map_file_path_from_name(map_name)
+
+	if len(map_path) == 0 or not FileAccess.file_exists(map_path):
+		return []
+	var hashing_context: HashingContext = HashingContext.new()
+	hashing_context.start(HashingContext.HashType.HASH_SHA256)
+
+	var file: FileAccess = FileAccess.open(map_path,FileAccess.READ)
+
+	while file.get_position() < file.get_length():
+		var chunk_size: int = file.get_length() - file.get_position()
+		hashing_context.update(file.get_buffer(min(chunk_size, 1024)))
+
+	var hash_data: PackedByteArray = hashing_context.finish()
+
+	return hash_data
+
+func load_map_from_name(map_name: String) -> MapLoader.Map:
+	var map: MapLoader.Map
+	var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)
+	if is_sspm:
+		map = MapLoader.from_path_sspm("user://rhythiamaps/%s.sspm" % map_name)
+	else:
+		map = MapLoader.from_path_native("user://maps/%s" % map_name)
+	map.map_name = map_name
+
+	return map
 
 func _ready() -> void:
 	#make sure directories exist

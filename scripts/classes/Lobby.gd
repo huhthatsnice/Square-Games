@@ -12,12 +12,16 @@ var local_cursor_pos_data:PackedVector3Array=[]
 var last_cursor_pos:Vector2
 
 var clients_to_load: int = len(lobby_users)+1
+var clients_to_get_hashes_from: int = len(lobby_users)
+var hashes_valid: bool = true
 
 var current_map: MapLoader.Map
 var map_started_usec: int = 0
 
 var is_spectating: bool = false
 var spectated_user: int = 0
+
+signal map_hash_received(from: int, hash: PackedByteArray)
 
 enum CLIENT_PACKET {
 	PLAYER_ADDED,
@@ -28,7 +32,8 @@ enum CLIENT_PACKET {
 	CURSOR_UPDATE,
 	PLAY_BEGIN, #related to sending over data
 	PLAY_START, #related to actually starting the map
-	DIED
+	DIED,
+	GET_MAP_HASH,
 }
 
 enum HOST_PACKET {
@@ -37,7 +42,8 @@ enum HOST_PACKET {
 	NOTE_HIT,
 	CURSOR_UPDATE,
 	PLAY_READY,
-	DIED
+	DIED,
+	GET_MAP_HASH
 }
 
 func _to_json_buffer(v: Variant) -> PackedByteArray:
@@ -61,6 +67,26 @@ func _flush_replication_data() -> void:
 		_send_to_clients(CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes(local_cursor_pos_data))
 	local_cursor_pos_data.clear()
 
+#unused and currently nonfunctional
+#func _get_map_hash_from_client(client: int) -> PackedByteArray:
+	#SteamHandler.send_message(SteamHandler.clients[client], CLIENT_PACKET.GET_MAP_HASH, [])
+#
+	#var hash_data: PackedByteArray
+	#var hash_received: bool = false
+#
+	#var connection: Callable = func(from_client: int, received_hash_data: PackedByteArray) -> void:
+		#if from_client == client:
+			#hash_data = received_hash_data
+			#hash_received = true
+#
+	#map_hash_received.connect(connection)
+#
+	#while not hash_received: await get_tree().process_frame
+#
+	#map_hash_received.disconnect(connection)
+#
+	#return hash_data
+
 func start_lobby(map: MapLoader.Map) -> bool:
 	if !is_host: return false
 
@@ -69,14 +95,40 @@ func start_lobby(map: MapLoader.Map) -> bool:
 	clients_to_load = len(lobby_users)+1
 	print("clients to load: ", str(clients_to_load))
 
-	var sent_data: PackedByteArray = var_to_bytes_with_objects({
-		data=map.raw_data,
-		audio=map.audio
-	})
+	#var sent_data: PackedByteArray = var_to_bytes_with_objects({
+		#data=map.raw_data,
+		#audio=map.audio
+	#})
+
+	_send_to_clients(CLIENT_PACKET.GET_MAP_HASH, [])
+
+	var local_hash: PackedByteArray = SSCS.get_map_hash(map.map_name)
+
+	clients_to_get_hashes_from = len(lobby_users)
+	hashes_valid = true
+
+	var connection: Callable = func(_from_client: int, hash_data: PackedByteArray) -> void:
+		if local_hash != hash_data:
+			hashes_valid = false
+		clients_to_get_hashes_from -= 1
+		print("got a hash")
+
+	map_hash_received.connect(connection)
+
+	while clients_to_get_hashes_from > 0 and hashes_valid: await get_tree().process_frame
+
+	map_hash_received.disconnect(connection)
+
+	if !hashes_valid:
+		Terminal.print_console("Cannot start lobby because a client does not have the correct map.\n")
+
+	#_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
+		#data_len = len(sent_data),
+		#data = sent_data.compress(FileAccess.CompressionMode.COMPRESSION_ZSTD)
+	#}))
 
 	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
-		data_len = len(sent_data),
-		data = sent_data.compress(FileAccess.CompressionMode.COMPRESSION_ZSTD)
+		map_name = map.map_name
 	}))
 
 	Terminal.is_accepting_input = false
@@ -177,7 +229,6 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 		settings=SSCS.encode_class(SSCS.settings)
 	}))
 
-
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
 	if !lobby_users.has(connection_data.identity): return
@@ -237,6 +288,9 @@ func _packet_received_host(packet: Dictionary) -> void:
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
 			_send_to_clients(CLIENT_PACKET.DIED, var_to_bytes(packet.identity), [packet.identity])
+		HOST_PACKET.GET_MAP_HASH:
+			map_hash_received.emit(packet.identity, packet.payload)
+
 #endregion
 #region client functions
 func _connection_removed_client(_connection_handle: int, _connection_data: Dictionary) -> void:
@@ -283,14 +337,18 @@ func _packet_received_client(packet: Dictionary) -> void:
 		CLIENT_PACKET.PLAY_BEGIN:
 			print("got play start message")
 
-			var pre_data: Dictionary = bytes_to_var(packet.payload)
-			var data: Dictionary = bytes_to_var_with_objects(pre_data.data.decompress(pre_data.data_len, FileAccess.CompressionMode.COMPRESSION_ZSTD))
+			#var pre_data: Dictionary = bytes_to_var(packet.payload)
+			#var data: Dictionary = bytes_to_var_with_objects(pre_data.data.decompress(pre_data.data_len, FileAccess.CompressionMode.COMPRESSION_ZSTD))
+			var data: Dictionary = bytes_to_var(packet.payload)
 
 			print("decoded data")
-			var new_map: MapLoader.Map = MapLoader.Map.new()
 
-			new_map.data = MapLoader._parse_data(data.data)
-			new_map.audio = data.audio
+			var new_map: MapLoader.Map = SSCS.load_map_from_name(data.map_name)
+
+			#var new_map: MapLoader.Map = MapLoader.Map.new()
+#
+			#new_map.data = MapLoader._parse_data(data.data)
+			#new_map.audio = data.audio
 
 			Terminal.is_accepting_input = false
 			Terminal.print_console("Starting lobby...\n")
@@ -322,7 +380,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 			var game_scene:Node = $"/root/Game"
 			game_scene.add_child(game_handler)
 
-			SteamHandler.send_message(SteamHandler.connection,HOST_PACKET.PLAY_READY,[])
+			SteamHandler.send_message(SteamHandler.connection,HOST_PACKET.PLAY_READY,[1])
 		CLIENT_PACKET.PLAY_START:
 			Terminal.visible = false
 			SSCS.game_handler.play(0)
@@ -339,6 +397,12 @@ func _packet_received_client(packet: Dictionary) -> void:
 			lobby_users[user].alive = false
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
+		CLIENT_PACKET.GET_MAP_HASH:
+			var map_name: String = packet.payload.get_string_from_utf8()
+
+			var hash_data: PackedByteArray = SSCS.get_map_hash(map_name)
+
+			SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.GET_MAP_HASH, hash_data)
 
 #endregion
 

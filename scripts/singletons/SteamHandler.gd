@@ -70,9 +70,8 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 				print("send end chunk")
 			print(Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE))
 
-			await get_tree().create_timer(0.1).timeout
+			await get_tree().create_timer(2).timeout
 	else:
-		Steam.RESULT_ACCESS_DENIED
 		Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
 
 
@@ -117,11 +116,11 @@ func _process(_dt: float) -> void:
 	for client_id: int in clients:
 		var client_connection: int = clients[client_id]
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):
-			if packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
+			if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
 				packet.payload.resize(len(packet.payload)-8)
 				client_multipacket_data[client_id].append_array(packet.payload)
 				continue
-			elif packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
+			elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
 				packet.payload.resize(len(packet.payload)-8)
 				client_multipacket_data[client_id].append_array(packet.payload)
 				packet.payload = PackedByteArray(client_multipacket_data[client_id])
@@ -129,11 +128,11 @@ func _process(_dt: float) -> void:
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):
-			if packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
+			if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				continue
-			elif packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
+			elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				packet.payload = PackedByteArray(connection_multipacket_data)

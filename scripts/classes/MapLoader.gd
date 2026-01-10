@@ -12,6 +12,8 @@ class Map:
 	var raw_data: String
 	var data: Array
 	var audio: AudioStream
+	var loaded_successfully: bool
+	var map_name: String
 
 class NoteDataMinimal:
 	var x: float
@@ -47,6 +49,7 @@ static func from_path_native(path: String) -> Map: #path to a folder with a data
 	new_map.audio = audio
 	new_map.raw_data = raw_data
 	new_map.data = data
+	new_map.loaded_successfully = true
 
 	return new_map
 
@@ -61,5 +64,6 @@ static func from_path_sspm(path: String) -> Map: #path to a .sspm file
 	new_map.audio = sspm_parsed.audio
 	new_map.raw_data = sspm_parsed.data_csv
 	new_map.data = data
+	new_map.loaded_successfully = true
 
 	return new_map
