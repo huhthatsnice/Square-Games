@@ -159,7 +159,7 @@ func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] 
 		if client in except: continue
 		print("send ", packet_id, " to ", client)
 		print(len(data))
-		print(SteamHandler.send_message(SteamHandler.clients[client],packet_id,data))
+		SteamHandler.send_message(SteamHandler.clients[client],packet_id,data)
 
 func _client_connected_host(connection_handle: int, connection_data: Dictionary) -> void:
 	print("client connected ",connection_data.identity)

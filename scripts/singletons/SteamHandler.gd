@@ -52,7 +52,6 @@ func leave_lobby() -> bool:
 
 func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> void:
 	data.insert(0,packet_id)
-	Steam.NETWORKING_SEND_USE_CURRENT_THREAD
 
 	var cursor: int = 0
 	if len(data) > 500000:
@@ -60,9 +59,11 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 			var chunk: PackedByteArray = data.slice(cursor, cursor + 500000)
 			cursor += 500000
 			if cursor < len(data):
-				chunk.append(0xff_ff_ff_ff_ff_ff_ff_ff)
+				chunk.resize(len(chunk)+8)
+				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_ff)
 			else:
-				chunk.append(0xff_ff_ff_ff_ff_ff_ff_fe)
+				chunk.resize(len(chunk)+8)
+				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_fe)
 			Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE)
 	else:
 		Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
@@ -109,11 +110,11 @@ func _process(_dt: float) -> void:
 	for client_id: int in clients:
 		var client_connection: int = clients[client_id]
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):
-			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_ff:
+			if packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
 				packet.payload.resize(len(packet.payload)-8)
 				client_multipacket_data[client_id].append_array(packet.payload)
 				continue
-			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_fe:
+			elif packet.payload.decode_s64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
 				packet.payload.resize(len(packet.payload)-8)
 				client_multipacket_data[client_id].append_array(packet.payload)
 				packet.payload = PackedByteArray(client_multipacket_data[client_id])
@@ -121,11 +122,11 @@ func _process(_dt: float) -> void:
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):
-			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_ff:
+			if packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				continue
-			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_ff_ff_fe:
+			elif packet.payload.decode_u64(len(packet.payload)-9) == 0xff_ff_ff_ff_ff_fe:
 				packet.payload.resize(len(packet.payload)-8)
 				connection_multipacket_data.append_array(packet.payload)
 				packet.payload = PackedByteArray(connection_multipacket_data)
