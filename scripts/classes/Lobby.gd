@@ -100,7 +100,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		#audio=map.audio
 	#})
 
-	_send_to_clients(CLIENT_PACKET.GET_MAP_HASH, [])
+	_send_to_clients(CLIENT_PACKET.GET_MAP_HASH, map.map_name.to_utf8_buffer())
 
 	var local_hash: PackedByteArray = SSCS.get_map_hash(map.map_name)
 
@@ -121,6 +121,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 
 	if !hashes_valid:
 		Terminal.print_console("Cannot start lobby because a client does not have the correct map.\n")
+		return false
 
 	#_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
 		#data_len = len(sent_data),
