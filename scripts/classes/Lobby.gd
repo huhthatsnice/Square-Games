@@ -1,6 +1,8 @@
 extends Node
 class_name Lobby
 
+const notification_sound: AudioStreamMP3 = preload("res://assets/audio/nokia.mp3")
+
 var lobby_users: Dictionary[int,Dictionary] = {}
 
 var is_host: bool = false
@@ -20,6 +22,8 @@ var map_started_usec: int = 0
 
 var is_spectating: bool = false
 var spectated_user: int = 0
+
+var notification: AudioStreamPlayer
 
 signal map_hash_received(from: int, hash: PackedByteArray)
 
@@ -246,6 +250,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 	print("host received packet")
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
+			notification.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 
@@ -305,6 +310,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 	print("client received packet %s" % type)
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
+			notification.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			print(data)
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
@@ -457,3 +463,10 @@ func _physics_process(_dt: float) -> void:
 	if last_cursor_pos != cursor_pos:
 		last_cursor_pos = cursor_pos
 		local_cursor_pos_data.append(cursor_pos_time)
+
+func _ready() -> void:
+	notification = AudioStreamPlayer.new()
+	notification.bus=&"Music"
+	notification.stream = notification_sound
+	notification.volume_linear = 0.15
+	self.add_child(notification)
