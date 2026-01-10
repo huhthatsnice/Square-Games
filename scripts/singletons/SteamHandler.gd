@@ -1,5 +1,7 @@
 extends Node
 
+const packet_chunk_size: int = 500000
+
 var steam_enabled: bool = false
 var steam_id: int = 0
 
@@ -54,18 +56,23 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 	data.insert(0,packet_id)
 
 	var cursor: int = 0
-	if len(data) > 500000:
+	if len(data) > packet_chunk_size:
 		while cursor < len(data):
-			var chunk: PackedByteArray = data.slice(cursor, cursor + 500000)
-			cursor += 500000
+			var chunk: PackedByteArray = data.slice(cursor, cursor + packet_chunk_size)
+			cursor += packet_chunk_size
 			if cursor < len(data):
 				chunk.resize(len(chunk)+8)
 				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_ff)
+				print("send middle chunk")
 			else:
 				chunk.resize(len(chunk)+8)
 				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_fe)
-			Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE)
+				print("send end chunk")
+			print(Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE))
+
+			await get_tree().create_timer(0.1).timeout
 	else:
+		Steam.RESULT_ACCESS_DENIED
 		Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
 
 
