@@ -230,7 +230,7 @@ func _check_death() -> void:
 var last_load:float = 0
 func _load_notes() -> void:
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
-	while last_loaded_note_id<len(map.data):
+	while last_loaded_note_id < len(map.data):
 		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
 		if note_data.t <= threshold:
 			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
@@ -286,9 +286,9 @@ func _check_hitreg() -> void:
 			else:
 				var diff: Vector2 = (note.pos-cursor.pos).abs()
 
-				if max(diff.x,diff.y)<hitbox_size:
-					hits+=1
-					health=clamp(health+0.5,0,5)
+				if max(diff.x, diff.y) < hitbox_size:
+					hits += 1
+					health = clamp(health+0.5,0,5)
 					note_hit.emit(note.note_id)
 
 					to_remove.append(i)
@@ -305,7 +305,7 @@ func _check_hitreg() -> void:
 func _process(_dt: float) -> void:
 	if not playing or stopped: return
 	if autoplay:
-		cursor.pos=autoplay_handler.get_cursor_position()
+		cursor.pos = autoplay_handler.get_cursor_position()
 		cursor.update_position()
 
 	if is_replay:
@@ -316,6 +316,9 @@ func _process(_dt: float) -> void:
 
 		if last_replay_cursor_pos_index >= len(replay_cursor_pos_data):
 			print("you a foreteller bro")
+			pause()
+			await get_tree().create_timer((1 / Engine.physics_ticks_per_second) * 30).timeout
+			unpause()
 
 		cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)
 		cursor.update_position()
@@ -326,7 +329,7 @@ func _process(_dt: float) -> void:
 
 	if note_removed==last_top_note_id:
 		var top_note_id: int = allocated_notes.rfind(1)
-		last_top_note_id=top_note_id
+		last_top_note_id = top_note_id
 		self.multimesh.visible_instance_count=top_note_id+1
 		hud.update_info_right(hits,misses)
 		hud.update_info_bottom(health)
