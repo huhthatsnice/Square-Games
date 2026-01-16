@@ -258,26 +258,26 @@ func _check_hitreg() -> void:
 
 	for note: Note in notes:
 		i+=1
-		if note.t<elapsed:
-			if note.t<elapsed-hit_time:
+		if note.t < elapsed:
+			if note.t < elapsed-hit_time:
 				if !is_replay:
-					misses+=1
-					health=clamp(health-1,0,5)
+					misses += 1
+					health = clamp(health-1,0,5)
 					note_missed.emit(note.note_id)
 
 					to_remove.append(i)
 				else:
 					if note.note_id >= len(replay_note_hit_data): return
 
-					if replay_note_hit_data[note.note_id]==0:
-						misses+=1
-						health=clamp(health-1,0,5)
+					if replay_note_hit_data[note.note_id] == 0:
+						misses += 1
+						health = clamp(health-1, 0, 5)
 						note_missed.emit(note.note_id)
 
 						to_remove.append(i)
 					else:
-						hits+=1
-						health=clamp(health+0.5,0,5)
+						hits += 1
+						health = clamp(health+0.5,0,5)
 						note_hit.emit(note.note_id)
 
 						to_remove.append(i)

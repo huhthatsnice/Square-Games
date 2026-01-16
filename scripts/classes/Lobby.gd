@@ -382,6 +382,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 
 			game_handler.ended.connect(func() -> void:
 				SteamHandler.send_message(SteamHandler.connection, HOST_PACKET.DIED, [])
+				print("send died message")
 				Terminal.print_console(Steam.getPersonaName() +" has died.\n")
 				Terminal.visible = true
 				Terminal.is_accepting_input = true
