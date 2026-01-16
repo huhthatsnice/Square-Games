@@ -342,7 +342,7 @@ func _process(_dt: float) -> void:
 #endregion
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"pause"):
+	if event.is_action_pressed(&"pause") and SSCS.lobby == null:
 		if playing:
 			pause()
 		else:
