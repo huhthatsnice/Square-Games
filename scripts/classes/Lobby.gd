@@ -40,6 +40,7 @@ enum CLIENT_PACKET {
 	GET_MAP_HASH,
 }
 
+
 enum HOST_PACKET {
 	PLAYER_ADDED,
 	CHAT_MESSAGE,
@@ -66,7 +67,7 @@ func send_chat_message(msg: String) -> void:
 
 func _flush_replication_data() -> void:
 	if !is_host:
-		SteamHandler.send_message(SteamHandler.connection,CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes(local_cursor_pos_data))
+		SteamHandler.send_message(SteamHandler.connection,HOST_PACKET.CURSOR_UPDATE,var_to_bytes(local_cursor_pos_data))
 	else:
 		_send_to_clients(CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes({
 			user_id = Steam.getSteamID(),
