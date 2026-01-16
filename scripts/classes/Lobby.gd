@@ -212,7 +212,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 	is_spectating = true
 	spectated_user = user_id
 
-	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - 4) #-0.5s cause im too lazy to properly account for ping and also to account for the fact that data is sent in 0.25s increments
+	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1 / Engine.physics_ticks_per_second) * 30 * 4)) #-0.5s cause im too lazy to properly account for ping and also to account for the fact that data is sent in 0.25s increments
 
 #endregion
 #region host functions
