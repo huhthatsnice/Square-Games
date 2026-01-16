@@ -56,23 +56,23 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 	data.insert(0,packet_id)
 
 	var cursor: int = 0
-	if len(data) > packet_chunk_size:
-		while cursor < len(data):
-			var chunk: PackedByteArray = data.slice(cursor, cursor + packet_chunk_size)
-			cursor += packet_chunk_size
-			if cursor < len(data):
-				chunk.resize(len(chunk)+8)
-				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_ff)
-				print("send middle chunk")
-			else:
-				chunk.resize(len(chunk)+8)
-				chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_fe)
-				print("send end chunk")
-			print(Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE))
-
-			await get_tree().create_timer(2).timeout
-	else:
-		Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
+	#if len(data) > packet_chunk_size:
+		#while cursor < len(data):
+			#var chunk: PackedByteArray = data.slice(cursor, cursor + packet_chunk_size)
+			#cursor += packet_chunk_size
+			#if cursor < len(data):
+				#chunk.resize(len(chunk)+8)
+				#chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_ff)
+				#print("send middle chunk")
+			#else:
+				#chunk.resize(len(chunk)+8)
+				#chunk.encode_s64(len(chunk)-9, 0xff_ff_ff_ff_ff_fe)
+				#print("send end chunk")
+			#print(Steam.sendMessageToConnection(connection_handle, chunk, Steam.NETWORKING_SEND_RELIABLE))
+#
+			#await get_tree().create_timer(2).timeout
+	#else:
+	Steam.sendMessageToConnection(connection_handle, data, Steam.NETWORKING_SEND_RELIABLE)
 
 
 
@@ -116,25 +116,25 @@ func _process(_dt: float) -> void:
 	for client_id: int in clients:
 		var client_connection: int = clients[client_id]
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(client_connection,100):
-			if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
-				packet.payload.resize(len(packet.payload)-8)
-				client_multipacket_data[client_id].append_array(packet.payload)
-				continue
-			elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
-				packet.payload.resize(len(packet.payload)-8)
-				client_multipacket_data[client_id].append_array(packet.payload)
-				packet.payload = PackedByteArray(client_multipacket_data[client_id])
-				client_multipacket_data[client_id].resize(0)
+			#if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
+				#packet.payload.resize(len(packet.payload)-8)
+				#client_multipacket_data[client_id].append_array(packet.payload)
+				#continue
+			#elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
+				#packet.payload.resize(len(packet.payload)-8)
+				#client_multipacket_data[client_id].append_array(packet.payload)
+				#packet.payload = PackedByteArray(client_multipacket_data[client_id])
+				#client_multipacket_data[client_id].resize(0)
 			packet_received.emit(packet)
 	if connection!=0:
 		for packet: Dictionary in Steam.receiveMessagesOnConnection(connection,100):
-			if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
-				packet.payload.resize(len(packet.payload)-8)
-				connection_multipacket_data.append_array(packet.payload)
-				continue
-			elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
-				packet.payload.resize(len(packet.payload)-8)
-				connection_multipacket_data.append_array(packet.payload)
-				packet.payload = PackedByteArray(connection_multipacket_data)
-				connection_multipacket_data.resize(0)
+			#if packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_ff:
+				#packet.payload.resize(len(packet.payload)-8)
+				#connection_multipacket_data.append_array(packet.payload)
+				#continue
+			#elif packet.payload.decode_s64(max(0,len(packet.payload)-9)) == 0xff_ff_ff_ff_ff_fe:
+				#packet.payload.resize(len(packet.payload)-8)
+				#connection_multipacket_data.append_array(packet.payload)
+				#packet.payload = PackedByteArray(connection_multipacket_data)
+				#connection_multipacket_data.resize(0)
 			packet_received.emit(packet)

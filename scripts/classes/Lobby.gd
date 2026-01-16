@@ -68,7 +68,10 @@ func _flush_replication_data() -> void:
 	if !is_host:
 		SteamHandler.send_message(SteamHandler.connection,CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes(local_cursor_pos_data))
 	else:
-		_send_to_clients(CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes(local_cursor_pos_data))
+		_send_to_clients(CLIENT_PACKET.CURSOR_UPDATE,var_to_bytes({
+			user_id = Steam.getSteamID(),
+			data = local_cursor_pos_data
+		}))
 	local_cursor_pos_data.clear()
 
 #unused and currently nonfunctional
