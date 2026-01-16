@@ -310,9 +310,12 @@ func _process(_dt: float) -> void:
 
 	if is_replay:
 		var cursor_pos_data: Vector3 = replay_cursor_pos_data[last_replay_cursor_pos_index]
-		while cursor_pos_data.z < AudioManager.elapsed and last_replay_cursor_pos_index < len(replay_cursor_pos_data):
+		while cursor_pos_data.z < AudioManager.elapsed and last_replay_cursor_pos_index + 1 < len(replay_cursor_pos_data):
 			last_replay_cursor_pos_index += 1
 			cursor_pos_data = replay_cursor_pos_data[last_replay_cursor_pos_index]
+
+		if last_replay_cursor_pos_index >= len(replay_cursor_pos_data):
+			print("you a foreteller bro")
 
 		cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)
 		cursor.update_position()
