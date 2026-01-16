@@ -206,6 +206,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 		spectated_user = 0
 		Terminal.is_accepting_input = true
 		Terminal.visible = true
+		game_handler.queue_free()
 	)
 
 	is_spectating = true
@@ -387,6 +388,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 				Terminal.print_console(Steam.getPersonaName() +" has died.\n")
 				Terminal.visible = true
 				Terminal.is_accepting_input = true
+				game_handler.queue_free()
 			)
 
 			var game_scene:Node = $"/root/Game"
