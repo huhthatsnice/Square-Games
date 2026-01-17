@@ -23,7 +23,7 @@ var map_started_usec: int = 0
 var is_spectating: bool = false
 var spectated_user: int = 0
 
-var notification: AudioStreamPlayer
+var notification_player: AudioStreamPlayer
 
 signal map_hash_received(from: int, hash: PackedByteArray)
 
@@ -212,7 +212,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 	is_spectating = true
 	spectated_user = user_id
 
-	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1 / Engine.physics_ticks_per_second) * 30 * 4)) #-0.5s cause im too lazy to properly account for ping and also to account for the fact that data is sent in 0.25s increments
+	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1 / Engine.physics_ticks_per_second) * 30 * 4))
 
 #endregion
 #region host functions
@@ -255,7 +255,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 	print("host received packet")
 	match type:
 		HOST_PACKET.PLAYER_ADDED:
-			notification.play(0)
+			notification_player.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 
@@ -315,7 +315,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 	print("client received packet %s" % type)
 	match type:
 		CLIENT_PACKET.PLAYER_ADDED:
-			notification.play(0)
+			notification_player.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			print(data)
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
@@ -472,8 +472,8 @@ func _physics_process(_dt: float) -> void:
 		local_cursor_pos_data.append(cursor_pos_time)
 
 func _ready() -> void:
-	notification = AudioStreamPlayer.new()
-	notification.bus=&"Music"
-	notification.stream = notification_sound
-	notification.volume_linear = 0.15
-	self.add_child(notification)
+	notification_player = AudioStreamPlayer.new()
+	notification_player.bus=&"Music"
+	notification_player.stream = notification_sound
+	notification_player.volume_linear = 0.15
+	self.add_child(notification_player)
