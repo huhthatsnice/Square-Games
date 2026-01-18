@@ -42,7 +42,7 @@ var settings: Settings = Settings.new()
 var modifiers: Modifiers = Modifiers.new()
 var lobby: Lobby
 var game_handler: GameHandler
-var map_cache: Dictionary[String, MapLoader.Map] = []
+var map_cache: Dictionary[String, MapLoader.Map] = {}
 
 var setting_parse_overrides: Dictionary[String,Callable] = {
 	color_set = func(value: String) -> Array:
