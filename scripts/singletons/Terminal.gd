@@ -24,6 +24,7 @@ func update_console() -> void:
 
 func _ready() -> void:
 	update_console()
+	print_console("Welcome to Square Games. Type \"help\" to see all commands.\n")
 
 func _input(event:InputEvent) -> void:
 	if not is_accepting_input:

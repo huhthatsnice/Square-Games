@@ -109,9 +109,11 @@ func _ready() -> void:
 	,["clr","clear"]))
 
 	register_command(Command.new(func() -> void:
-		for v:String in DirAccess.get_directories_at("user://maps"):
-			Terminal.print_console(v+"\n")
-	,["lsm","listsongs","listmaps"]))
+		for v:String in DirAccess.get_files_at("user://maps"):
+			Terminal.print_console(v.get_basename()+"\n")
+		for v:String in DirAccess.get_files_at("user://rhythiamaps"):
+			Terminal.print_console(v.get_basename()+"\n")
+	,["lsc","listsongs","listmaps","listcharts"]))
 
 	register_command(Command.new(func() -> void:
 		for i:String in SSCS.encode_class(SSCS.settings):
@@ -236,8 +238,24 @@ func _ready() -> void:
 		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
 	,["help"],0))
 
-	register_command(Command.new(func(uid: String) -> void:
-		if SSCS.lobby == null or !uid.is_valid_int(): print("lobby doesnt exist"); return
+	register_command(Command.new(func(name: String) -> void:
+		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
-		SSCS.lobby.start_spectate(uid.to_int())
+		for user_id: int in SSCS.lobby.lobby_users:
+			var data: Dictionary = SSCS.lobby.lobby_users
+			if data.user_name == name:
+				SSCS.lobby.start_spectate(user_id)
+				return
+
+		if name.is_valid_int():
+			SSCS.lobby.start_spectate(name.to_int())
+			return
+
+		Terminal.print_console("Specified user does not exist.\n")
 	,["spectate","spec"]))
+
+	register_command(Command.new(func() -> void:
+		for i:String in SSCS.encode_class(SSCS.modifiers):
+			var v:Variant = SSCS.modifiers[i]
+			Terminal.print_console("{0}:{1}\n".format([i,v]))
+	,["lsm","listmodifiers"]))

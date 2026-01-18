@@ -260,12 +260,12 @@ func _packet_received_host(packet: Dictionary) -> void:
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 
 			lobby_users[packet.identity]={
-				user_id=packet.identity,
-				username=data.username,
-				settings=data.settings,
+				user_id = packet.identity,
+				username = data.username,
+				settings = data.settings,
 
-				note_hit_data=PackedByteArray(),
-				cursor_pos_data=PackedVector3Array()
+				note_hit_data = PackedByteArray(),
+				cursor_pos_data = PackedVector3Array()
 			}
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
@@ -321,13 +321,13 @@ func _packet_received_client(packet: Dictionary) -> void:
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 
 			lobby_users[data.user_id]={
-				user_id=data.user_id,
-				username=data.username,
-				settings=data.settings,
+				user_id = data.user_id,
+				username = data.username,
+				settings = data.settings,
 
-				alive=false,
-				note_hit_data=PackedByteArray(),
-				cursor_pos_data=PackedVector3Array()
+				alive = false,
+				note_hit_data = PackedByteArray(),
+				cursor_pos_data = PackedVector3Array()
 			}
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
