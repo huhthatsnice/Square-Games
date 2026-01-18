@@ -42,6 +42,7 @@ var settings: Settings = Settings.new()
 var modifiers: Modifiers = Modifiers.new()
 var lobby: Lobby
 var game_handler: GameHandler
+var map_cache: Dictionary[String, MapLoader.Map] = []
 
 var setting_parse_overrides: Dictionary[String,Callable] = {
 	color_set = func(value: String) -> Array:
@@ -177,7 +178,10 @@ func get_map_hash(map_name: String) -> PackedByteArray:
 
 	return hash_data
 
-func load_map_from_name(map_name: String) -> MapLoader.Map:
+func load_map_from_name(map_name: String, ignore_cache: bool = false) -> MapLoader.Map:
+	if !ignore_cache and map_cache.has(map_name):
+		return map_cache[map_name]
+
 	var map: MapLoader.Map
 	var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)
 	if is_sspm:
@@ -185,6 +189,8 @@ func load_map_from_name(map_name: String) -> MapLoader.Map:
 	else:
 		map = MapLoader.from_path_native("user://maps/%s" % map_name)
 	map.map_name = map_name
+
+	map_cache[map_name] = map
 
 	return map
 

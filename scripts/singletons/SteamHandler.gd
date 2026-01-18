@@ -55,7 +55,7 @@ func leave_lobby() -> bool:
 func send_message(connection_handle: int, packet_id: int, data: PackedByteArray) -> void:
 	data.insert(0,packet_id)
 
-	var cursor: int = 0
+	#var cursor: int = 0
 	#if len(data) > packet_chunk_size:
 		#while cursor < len(data):
 			#var chunk: PackedByteArray = data.slice(cursor, cursor + packet_chunk_size)
