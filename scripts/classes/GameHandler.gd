@@ -317,7 +317,7 @@ func _process(_dt: float) -> void:
 		if last_replay_cursor_pos_index >= len(replay_cursor_pos_data):
 			print("you a foreteller bro")
 			pause()
-			await get_tree().create_timer((1 / Engine.physics_ticks_per_second) * 30).timeout
+			await get_tree().create_timer((1.0 / Engine.physics_ticks_per_second) * 30).timeout
 			unpause()
 
 		cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)

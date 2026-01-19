@@ -43,6 +43,7 @@ var modifiers: Modifiers = Modifiers.new()
 var lobby: Lobby
 var game_handler: GameHandler
 var map_cache: Dictionary[String, MapLoader.Map] = {}
+var url_cache: Dictionary[String, Dictionary] = {}
 
 var setting_parse_overrides: Dictionary[String,Callable] = {
 	color_set = func(value: String) -> Array:
@@ -159,6 +160,96 @@ func get_map_file_path_from_name(map_name: String) -> String:
 		map = "user://maps/%s" % map_name
 
 	return map
+
+signal temporary_map_received
+func get_temporary_map_download_link(map: MapLoader.Map) -> String:
+	if url_cache.has(map.map_name):
+		if Time.get_unix_time_from_system() - url_cache[map.map_name].time < (60*60) - 30:
+			return url_cache[map.map_name].url
+		else:
+			url_cache.erase(map.map_name)
+
+	var request: HTTPRequest = HTTPRequest.new()
+	self.add_child(request)
+
+	var data: PackedStringArray = []
+
+	var boundary: String = "--GODOT" + Crypto.new().generate_random_bytes(16).hex_encode()
+
+	var upload_data: PackedByteArray = var_to_bytes_with_objects({
+		data=map.raw_data,
+		audio=map.audio
+	})
+
+	data.append("--%s" % boundary)
+	data.append('Content-Disposition: form-data; name="time"')
+	data.append("")
+	data.append("1h")
+
+	data.append("--%s" % boundary)
+	data.append('Content-Disposition: form-data; name="fileNameLength"')
+	data.append("")
+	data.append("16")
+
+	data.append("--%s" % boundary)
+	data.append('Content-Disposition: form-data; name="reqtype"')
+	data.append("")
+	data.append("fileupload")
+
+	data.append("--%s" % boundary)
+	data.append('Content-Disposition: form-data; name="fileToUpload"; filename="map.txt"')
+	data.append('Content-Type: text/plain')
+	data.append("")
+	data.append(upload_data.get_string_from_utf8())
+	data.append("--%s--" % boundary)
+
+	request.request("https://litterbox.catbox.moe/resources/internals/api.php", ["Content-Type: multipart/form-data;boundary=%s" % boundary], HTTPClient.METHOD_POST, "\r\n".join(data))
+
+	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+		var local_url: String = body.get_string_from_utf8()
+		temporary_map_received.emit(local_url)
+	)
+
+
+	var url: String = await temporary_map_received
+	request.queue_free()
+
+	print("get url")
+	print(url)
+
+	if url.begins_with("http"):
+		url_cache[map.map_name] = {
+			time = Time.get_unix_time_from_system(),
+			url = url
+		}
+		return url
+	else:
+		return ""
+
+func get_map_from_url(url: String) -> MapLoader.Map:
+	var request: HTTPRequest = HTTPRequest.new()
+	self.add_child(request)
+
+	request.request(url)
+
+	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+		var local_data: PackedByteArray = body
+		temporary_map_received.emit(local_data)
+	)
+
+	var data: Dictionary = bytes_to_var_with_objects(await temporary_map_received)
+
+
+	var map: MapLoader.Map = MapLoader.Map.new()
+
+	map.audio = data.audio
+	map.raw_data = data.data
+	map.data = MapLoader._parse_data(data.data)
+
+	request.queue_free()
+
+	return map
+
 
 func get_map_hash(map_name: String) -> PackedByteArray:
 	var map_path: String = get_map_file_path_from_name(map_name)

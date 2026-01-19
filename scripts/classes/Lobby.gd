@@ -108,24 +108,24 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		#audio=map.audio
 	#})
 
-	_send_to_clients(CLIENT_PACKET.GET_MAP_HASH, map.map_name.to_utf8_buffer())
+	#_send_to_clients(CLIENT_PACKET.GET_MAP_HASH, map.map_name.to_utf8_buffer())
 
-	var local_hash: PackedByteArray = SSCS.get_map_hash(map.map_name)
-
-	clients_to_get_hashes_from = len(lobby_users)
-	hashes_valid = true
-
-	var connection: Callable = func(_from_client: int, hash_data: PackedByteArray) -> void:
-		if local_hash != hash_data:
-			hashes_valid = false
-		clients_to_get_hashes_from -= 1
-		print("got a hash")
-
-	map_hash_received.connect(connection)
-
-	while clients_to_get_hashes_from > 0 and hashes_valid: await get_tree().process_frame
-
-	map_hash_received.disconnect(connection)
+	#var local_hash: PackedByteArray = SSCS.get_map_hash(map.map_name)
+#
+	#clients_to_get_hashes_from = len(lobby_users)
+	#hashes_valid = true
+#
+	#var connection: Callable = func(_from_client: int, hash_data: PackedByteArray) -> void:
+		#if local_hash != hash_data:
+			#hashes_valid = false
+		#clients_to_get_hashes_from -= 1
+		#print("got a hash")
+#
+	#map_hash_received.connect(connection)
+#
+	#while clients_to_get_hashes_from > 0 and hashes_valid: await get_tree().process_frame
+#
+	#map_hash_received.disconnect(connection)
 
 	if !hashes_valid:
 		Terminal.print_console("Cannot start lobby because a client does not have the correct map.\n")
@@ -137,7 +137,8 @@ func start_lobby(map: MapLoader.Map) -> bool:
 	#}))
 
 	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
-		map_name = map.map_name
+		map_name = map.map_name,
+		map_link = await SSCS.get_temporary_map_download_link(map)
 	}))
 
 	Terminal.is_accepting_input = false
@@ -212,7 +213,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 	is_spectating = true
 	spectated_user = user_id
 
-	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1 / Engine.physics_ticks_per_second) * 30 * 4))
+	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1.0 / Engine.physics_ticks_per_second) * 30 * 4))
 
 #endregion
 #region host functions
@@ -355,7 +356,9 @@ func _packet_received_client(packet: Dictionary) -> void:
 
 			print("decoded data")
 
-			var new_map: MapLoader.Map = SSCS.load_map_from_name(data.map_name)
+			var map: MapLoader.Map = SSCS.load_map_from_name(data.map_name)
+			if !map.loaded_successfully:
+				map = await SSCS.get_map_from_url(data.map_link) #SSCS.load_map_from_name(data.map_name)
 
 			#var new_map: MapLoader.Map = MapLoader.Map.new()
 #
@@ -365,7 +368,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 			Terminal.is_accepting_input = false
 			Terminal.print_console("Starting lobby...\n")
 
-			var game_handler: GameHandler = GameHandler.new(new_map)
+			var game_handler: GameHandler = GameHandler.new(map)
 			SSCS.game_handler=game_handler
 
 			game_handler.note_hit.connect(func(note_id: int) -> void:
@@ -476,4 +479,5 @@ func _ready() -> void:
 	notification_player.bus=&"Music"
 	notification_player.stream = notification_sound
 	notification_player.volume_linear = 0.15
+
 	self.add_child(notification_player)

@@ -59,4 +59,43 @@ func benchmark() -> void:
 func _ready() -> void:
 	pass
 
+	#var request: HTTPRequest = HTTPRequest.new()
+	#self.add_child(request)
+#
+	#var data: PackedStringArray = []
+#
+	#var boundary: String = "--GODOT" + Crypto.new().generate_random_bytes(16).hex_encode()
+#
+	#data.append("--%s" % boundary)
+	#data.append('Content-Disposition: form-data; name="time"')
+	#data.append("")
+	#data.append("1h")
+#
+	#data.append("--%s" % boundary)
+	#data.append('Content-Disposition: form-data; name="fileNameLength"')
+	#data.append("")
+	#data.append("16")
+#
+	#data.append("--%s" % boundary)
+	#data.append('Content-Disposition: form-data; name="reqtype"')
+	#data.append("")
+	#data.append("fileupload")
+#
+	#data.append("--%s" % boundary)
+	#data.append('Content-Disposition: form-data; name="fileToUpload"; filename="test.txt"')
+	#data.append('Content-Type: text/plain')
+	#data.append("")
+	#data.append("Hello, World!")
+	#data.append("--%s--" % boundary)
+#
+	#request.request("https://litterbox.catbox.moe/resources/internals/api.php", ["Content-Type: multipart/form-data;boundary=%s" % boundary], HTTPClient.METHOD_POST, "\r\n".join(data))
+#
+	#request.request_completed.connect(func(result: int, response_code: int, headers: PackedStringArray, body: PackedByteArray) -> void:
+		#print(result)
+		#print(response_code)
+		##for v: String in headers:
+			##print(v)
+		#DisplayServer.clipboard_set(body.get_string_from_utf8())
+		#print(body.get_string_from_utf8())
+	#)
 	#benchmark()
