@@ -242,7 +242,7 @@ func _ready() -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
 		for user_id: int in SSCS.lobby.lobby_users:
-			var data: Dictionary = SSCS.lobby.lobby_users
+			var data: Dictionary = SSCS.lobby.lobby_users[user_id]
 			if data.user_name == name:
 				SSCS.lobby.start_spectate(user_id)
 				return
