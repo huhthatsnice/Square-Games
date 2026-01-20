@@ -235,9 +235,13 @@ func get_map_from_url(url: String) -> MapLoader.Map:
 	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 		var local_data: PackedByteArray = body
 		temporary_map_received.emit(local_data)
+		print("got map data")
+		print(_result)
+		print(_response_code)
 	)
 
-	var data: Dictionary = bytes_to_var_with_objects(await temporary_map_received)
+	var raw_data: PackedByteArray = await temporary_map_received
+	var data: Dictionary = bytes_to_var_with_objects(raw_data)
 
 
 	var map: MapLoader.Map = MapLoader.Map.new()
