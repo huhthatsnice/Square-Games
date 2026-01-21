@@ -127,18 +127,24 @@ func start_lobby(map: MapLoader.Map) -> bool:
 #
 	#map_hash_received.disconnect(connection)
 
-	if !hashes_valid:
-		Terminal.print_console("Cannot start lobby because a client does not have the correct map.\n")
-		return false
+	#if !hashes_valid:
+		#Terminal.print_console("Cannot start lobby because a client does not have the correct map.\n")
+		#return false
 
 	#_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
 		#data_len = len(sent_data),
 		#data = sent_data.compress(FileAccess.CompressionMode.COMPRESSION_ZSTD)
 	#}))
 
+	var map_link: String = await SSCS.get_temporary_map_download_link(map)
+
+	if map_link.is_empty():
+		Terminal.print_console("Cannot start lobby because the map data failed to upload.\n")
+		return false
+
 	_send_to_clients(CLIENT_PACKET.PLAY_BEGIN, var_to_bytes({
 		map_name = map.map_name,
-		map_link = await SSCS.get_temporary_map_download_link(map)
+		map_link = map_link
 	}))
 
 	Terminal.is_accepting_input = false

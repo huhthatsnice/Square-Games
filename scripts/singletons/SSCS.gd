@@ -161,7 +161,7 @@ func get_map_file_path_from_name(map_name: String) -> String:
 
 	return map
 
-signal temporary_map_received
+signal temporary_map_link_received
 func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	if url_cache.has(map.map_name):
 		if Time.get_unix_time_from_system() - url_cache[map.map_name].time < (60*60) - 30:
@@ -179,7 +179,9 @@ func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	var upload_data: PackedByteArray = var_to_bytes_with_objects({
 		data=map.raw_data,
 		audio=map.audio
-	})
+	}).compress(FileAccess.COMPRESSION_GZIP)
+
+	print(len(upload_data))
 
 	data.append("--%s" % boundary)
 	data.append('Content-Disposition: form-data; name="time"')
@@ -200,18 +202,21 @@ func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	data.append('Content-Disposition: form-data; name="fileToUpload"; filename="map.txt"')
 	data.append('Content-Type: text/plain')
 	data.append("")
-	data.append(upload_data.get_string_from_utf8())
+	data.append(Marshalls.raw_to_base64(upload_data))
 	data.append("--%s--" % boundary)
+
 
 	request.request("https://litterbox.catbox.moe/resources/internals/api.php", ["Content-Type: multipart/form-data;boundary=%s" % boundary], HTTPClient.METHOD_POST, "\r\n".join(data))
 
 	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
 		var local_url: String = body.get_string_from_utf8()
-		temporary_map_received.emit(local_url)
+		print("got map link")
+		print("_result")
+		print("_response_code")
+		temporary_map_link_received.emit(local_url)
 	)
 
-
-	var url: String = await temporary_map_received
+	var url: String = await temporary_map_link_received
 	request.queue_free()
 
 	print("get url")
@@ -226,21 +231,27 @@ func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	else:
 		return ""
 
+signal temporary_map_data_received
 func get_map_from_url(url: String) -> MapLoader.Map:
 	var request: HTTPRequest = HTTPRequest.new()
 	self.add_child(request)
 
+	print("requesting url: %s" % url)
 	request.request(url)
 
 	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
-		var local_data: PackedByteArray = body
-		temporary_map_received.emit(local_data)
+		var local_data: PackedByteArray = Marshalls.base64_to_raw(body.get_string_from_ascii()).decompress_dynamic(100_000_000, FileAccess.CompressionMode.COMPRESSION_GZIP)
 		print("got map data")
 		print(_result)
 		print(_response_code)
+		print(len(local_data))
+		temporary_map_data_received.emit(local_data)
 	)
 
-	var raw_data: PackedByteArray = await temporary_map_received
+	var raw_data: PackedByteArray = await temporary_map_data_received
+
+	print(len(raw_data))
+
 	var data: Dictionary = bytes_to_var_with_objects(raw_data)
 
 
