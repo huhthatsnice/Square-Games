@@ -66,4 +66,6 @@ static func from_path_sspm(path: String) -> Map: #path to a .sspm file
 	new_map.data = data
 	new_map.loaded_successfully = len(data) > 0
 
+	print(sspm_parsed.data_csv)
+
 	return new_map

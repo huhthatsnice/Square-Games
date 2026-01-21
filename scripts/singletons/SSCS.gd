@@ -262,6 +262,7 @@ func get_map_from_url(url: String) -> MapLoader.Map:
 	map.data = MapLoader._parse_data(data.data)
 
 	print("map url debug")
+	print(len(data.data))
 	print(len(map.data))
 	print(map.audio.get_length())
 

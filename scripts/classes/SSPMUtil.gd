@@ -147,7 +147,12 @@ static func load_from_path(path: String) -> SSPM:
 			return a.t<b.t
 	)
 
-	newdata.data_csv=""
+	var csv_data: PackedStringArray = []
+
+	for v: MapLoader.NoteDataMinimal in note_data:
+		csv_data.append("{0}|{1}|{2}".format([v.x,v.y,v.t]))
+
+	newdata.data_csv=",".join(csv_data)
 	newdata.data_parsed=note_data
 
 	return newdata

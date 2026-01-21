@@ -147,6 +147,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		map_link = map_link
 	}))
 
+
 	Terminal.is_accepting_input = false
 	Terminal.print_console("Starting lobby...\n")
 
