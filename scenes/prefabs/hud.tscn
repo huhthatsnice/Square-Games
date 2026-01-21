@@ -30,12 +30,12 @@ corner_radius_bottom_left = 5
 [sub_resource type="ViewportTexture" id="ViewportTexture_f20qw"]
 viewport_path = NodePath("InfoTop/InfoTopViewport")
 
-[sub_resource type="ViewportTexture" id="ViewportTexture_jxby8"]
-viewport_path = NodePath("InfoRight/InfoRightViewport")
-
 [sub_resource type="Theme" id="Theme_f20qw"]
 default_font = ExtResource("2_ijk2n")
 default_font_size = 25
+
+[sub_resource type="ViewportTexture" id="ViewportTexture_jxby8"]
+viewport_path = NodePath("InfoRight/InfoRightViewport")
 
 [node name="Hud" type="Node3D"]
 script = ExtResource("1_eo3kg")
@@ -111,9 +111,20 @@ grow_vertical = 2
 
 [node name="SpectatedUser" type="RichTextLabel" parent="InfoTop/InfoTopViewport/Control"]
 unique_name_in_owner = true
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+custom_minimum_size = Vector2(0, 50)
+layout_mode = 1
+anchors_preset = 12
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 0
+theme = SubResource("Theme_f20qw")
+bbcode_enabled = true
+text = "[center]asdas[/center]
+"
+scroll_active = false
+horizontal_alignment = 1
 
 [node name="InfoRight" type="Sprite3D" parent="."]
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, -2.25, 0, 0)
