@@ -243,7 +243,7 @@ func _ready() -> void:
 
 		for user_id: int in SSCS.lobby.lobby_users:
 			var data: Dictionary = SSCS.lobby.lobby_users[user_id]
-			if data.user_name == name:
+			if data.user_name == name or data.fake_name == name:
 				SSCS.lobby.start_spectate(user_id)
 				return
 

@@ -28,6 +28,8 @@ class Settings:
 
 	var absolute_input: bool = false
 
+	var auto_spectate: bool = true
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2

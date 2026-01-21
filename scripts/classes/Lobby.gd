@@ -23,6 +23,8 @@ var map_started_usec: int = 0
 var is_spectating: bool = false
 var spectated_user: int = 0
 
+var fake_username_count: int = 0
+
 var notification_player: AudioStreamPlayer
 
 signal map_hash_received(from: int, hash: PackedByteArray)
@@ -175,6 +177,23 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		Terminal.print_console(Steam.getPersonaName() +" has died.\n")
 		Terminal.visible = true
 		Terminal.is_accepting_input = true
+
+		if SSCS.settings.auto_spectate:
+			var best_value: int = 0
+			var best: int = 0
+
+			for i: int in lobby_users:
+				var user: Dictionary = lobby_users[i]
+				if user.alive:
+					var hit_notes: int = 0
+					for i2: int in user.note_hit_data:
+						hit_notes += i2
+					if hit_notes > best_value:
+						best = i
+						best_value = hit_notes
+
+			if best != 0:
+				start_spectate(best)
 	)
 
 	var game_scene:Node = $"/root/Game"
@@ -219,6 +238,8 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 
 	is_spectating = true
 	spectated_user = user_id
+
+	game_handler.hud.update_info_top(lobby_users[user_id].username)
 
 	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1.0 / Engine.physics_ticks_per_second) * 30 * 4))
 
@@ -267,18 +288,29 @@ func _packet_received_host(packet: Dictionary) -> void:
 			var data: Dictionary = bytes_to_var(packet.payload)
 			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
 
+			var fake_username: String = ""
+			if ("a" + data.username).is_valid_unicode_identifier():
+				fake_username = "user" + str(fake_username_count)
+				fake_username_count += 1
+
+
 			lobby_users[packet.identity]={
 				user_id = packet.identity,
 				username = data.username,
 				settings = data.settings,
 
+				fake_username = fake_username,
+				display_name = data.username + ("" if fake_username == "" else " (%s)" % fake_username),
+
+				alive = false,
 				note_hit_data = PackedByteArray(),
 				cursor_pos_data = PackedVector3Array()
 			}
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
 				username=data.username,
-				settings=data.settings
+				settings=data.settings,
+				fake_username=fake_username
 			}),[packet.identity])
 		HOST_PACKET.CHAT_MESSAGE:
 			Terminal.print_console(raw_data+"\n")
@@ -326,12 +358,15 @@ func _packet_received_client(packet: Dictionary) -> void:
 			notification_player.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			print(data)
-			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
+			Terminal.print_console("Player %s has joined the lobby.\n" % (data.username))
 
 			lobby_users[data.user_id]={
 				user_id = data.user_id,
 				username = data.username,
 				settings = data.settings,
+
+				fake_username = data.fake_username,
+				display_name = data.username + ("" if data.fake_username == "" else " (%s)" % data.fake_username),
 
 				alive = false,
 				note_hit_data = PackedByteArray(),
@@ -399,6 +434,23 @@ func _packet_received_client(packet: Dictionary) -> void:
 				Terminal.visible = true
 				Terminal.is_accepting_input = true
 				game_handler.queue_free()
+
+				if SSCS.settings.auto_spectate:
+					var best_value: int = 0
+					var best: int = 0
+
+					for i: int in lobby_users:
+						var user: Dictionary = lobby_users[i]
+						if user.alive:
+							var hit_notes: int = 0
+							for i2: int in user.note_hit_data:
+								hit_notes += i2
+							if hit_notes > best_value:
+								best = i
+								best_value = hit_notes
+
+					if best != 0:
+						start_spectate(best)
 			)
 
 			var game_scene:Node = $"/root/Game"
