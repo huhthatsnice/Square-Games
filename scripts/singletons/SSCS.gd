@@ -179,7 +179,7 @@ func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	var upload_data: PackedByteArray = var_to_bytes_with_objects({
 		data=map.raw_data,
 		audio=map.audio
-	}).compress(FileAccess.COMPRESSION_GZIP)
+	})
 
 	print(len(upload_data))
 
@@ -240,7 +240,7 @@ func get_map_from_url(url: String) -> MapLoader.Map:
 	request.request(url)
 
 	request.request_completed.connect(func(_result: int, _response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
-		var local_data: PackedByteArray = Marshalls.base64_to_raw(body.get_string_from_ascii()).decompress_dynamic(100_000_000, FileAccess.CompressionMode.COMPRESSION_GZIP)
+		var local_data: PackedByteArray = Marshalls.base64_to_raw(body.get_string_from_ascii())
 		print("got map data")
 		print(_result)
 		print(_response_code)
