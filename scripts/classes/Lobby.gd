@@ -245,6 +245,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 
 #endregion
 #region host functions
+
 func _send_to_clients(packet_id: int, data: PackedByteArray, except: Array[int] = []) -> void:
 	for client: int in lobby_users:
 		if client in except: continue

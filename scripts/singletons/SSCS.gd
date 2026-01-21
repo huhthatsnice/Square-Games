@@ -9,9 +9,9 @@ class Settings:
 		Color.from_string("#ffffff", Color.WHITE),
 		Color.from_string("#66ffff", Color.WHITE),
 	]
-	var grid_distance: float = 4
+	var grid_distance: float = 3.5
 	var vanish_distance: float = 0.2
-	var pixels_per_grid_unit: float = 80.0
+	var pixels_per_grid_unit: float = 100.0
 	var parallax: float = 0.1
 
 	var note_transparency: float = 0.3
@@ -34,7 +34,7 @@ class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
-	var no_fail: bool = true
+	var no_fail: bool = false
 	var autoplay: bool = false
 
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
