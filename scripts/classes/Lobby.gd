@@ -239,7 +239,7 @@ func start_spectate(user_id: int) -> void: #should be called only when there isn
 	is_spectating = true
 	spectated_user = user_id
 
-	game_handler.hud.update_info_top(lobby_users[user_id].username)
+	game_handler.hud.update_info_top(lobby_users[user_id].display_name)
 
 	game_handler.play(((Time.get_ticks_usec()-map_started_usec)/1_000_000.0) - ((1.0 / Engine.physics_ticks_per_second) * 30 * 4))
 
@@ -258,20 +258,24 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 		if client == connection_data.identity: continue
 		var client_data: Dictionary = lobby_users[client]
 		SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
-			user_id=client_data.user_id,
-			username=client_data.username,
-			settings=client_data.settings
+			user_id = client_data.user_id,
+			username = client_data.username,
+			settings = client_data.settings,
+			fake_name = client_data.fake_name
 		}))
+	var self_fake_name: String = ""
+	if ("a" + Steam.getPersonaName()).is_valid_unicode_identifier():
+		self_fake_name = "user0"
 	SteamHandler.send_message(connection_handle, CLIENT_PACKET.PLAYER_ADDED, var_to_bytes({
-		user_id=SteamHandler.steam_id,
-		username=Steam.getPersonaName(),
-		settings=SSCS.encode_class(SSCS.settings)
+		user_id = SteamHandler.steam_id,
+		username = Steam.getPersonaName(),
+		settings = SSCS.encode_class(SSCS.settings),
 	}))
 
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
 	print("client gone ",connection_data.identity)
 	if !lobby_users.has(connection_data.identity): return
-	Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[connection_data.identity].username)
+	Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[connection_data.identity].display_name)
 	lobby_users.erase(connection_data.identity)
 	_send_to_clients(CLIENT_PACKET.PLAYER_REMOVED,var_to_bytes({
 		user_id=connection_data.identity,
@@ -286,7 +290,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 		HOST_PACKET.PLAYER_ADDED:
 			notification_player.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has joined the lobby.\n" % data.username)
+
 
 			var fake_username: String = ""
 			if ("a" + data.username).is_valid_unicode_identifier():
@@ -306,6 +310,9 @@ func _packet_received_host(packet: Dictionary) -> void:
 				note_hit_data = PackedByteArray(),
 				cursor_pos_data = PackedVector3Array()
 			}
+
+			Terminal.print_console("Player %s has joined the lobby.\n" % lobby_users[packet.identity].display_name)
+
 			_send_to_clients(CLIENT_PACKET.PLAYER_ADDED,var_to_bytes({
 				user_id=packet.identity,
 				username=data.username,
@@ -334,7 +341,7 @@ func _packet_received_host(packet: Dictionary) -> void:
 		HOST_PACKET.PLAY_READY:
 			clients_to_load -= 1
 		HOST_PACKET.DIED:
-			Terminal.print_console(Steam.getFriendPersonaName(packet.identity) +" has died.\n")
+			Terminal.print_console(lobby_users[packet.identity].display_name +" has died.\n")
 			lobby_users[packet.identity].alive = false
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
@@ -358,7 +365,6 @@ func _packet_received_client(packet: Dictionary) -> void:
 			notification_player.play(0)
 			var data: Dictionary = bytes_to_var(packet.payload)
 			print(data)
-			Terminal.print_console("Player %s has joined the lobby.\n" % (data.username))
 
 			lobby_users[data.user_id]={
 				user_id = data.user_id,
@@ -372,9 +378,10 @@ func _packet_received_client(packet: Dictionary) -> void:
 				note_hit_data = PackedByteArray(),
 				cursor_pos_data = PackedVector3Array()
 			}
+			Terminal.print_console("Player %s has joined the lobby.\n" % (lobby_users[data.user_id].display_name))
 		CLIENT_PACKET.PLAYER_REMOVED:
 			var data: Dictionary = bytes_to_var(packet.payload)
-			Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[data.user_id].username)
+			Terminal.print_console("Player %s has left the lobby.\n" % lobby_users[data.user_id].display_name)
 			lobby_users.erase(data.user_id)
 		CLIENT_PACKET.PLAYER_CHANGED:
 			var data: Dictionary = bytes_to_var(packet.payload)
@@ -469,7 +476,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 				user.alive = true
 		CLIENT_PACKET.DIED:
 			var user: int = bytes_to_var(packet.payload)
-			Terminal.print_console(Steam.getFriendPersonaName(user) +" has died.\n")
+			Terminal.print_console(lobby_users[user].display_name +" has died.\n")
 			lobby_users[user].alive = false
 			if is_spectating and spectated_user == packet.identity:
 				SSCS.game_handler.stop()
@@ -540,3 +547,6 @@ func _ready() -> void:
 	notification_player.volume_linear = 0.15
 
 	self.add_child(notification_player)
+
+	if ("a" + Steam.getPersonaName()).is_valid_unicode_identifier():
+		fake_username_count += 1
