@@ -14,6 +14,8 @@ MISSES
 @onready var viewport_right: SubViewport = %InfoRightViewport
 @onready var text_right: RichTextLabel = %InfoRightText
 
+@onready var spectated_user: RichTextLabel = %SpectatedUser
+
 @onready var viewport_bottom: SubViewport = %InfoBottomViewport
 @onready var health_bar: ProgressBar = %HealthBar
 
@@ -29,3 +31,6 @@ func update_info_bottom(health: float) -> void:
 	health_bar.value = health
 	#viewport_bottom.render_target_clear_mode = SubViewport.CLEAR_MODE_ONCE
 	#viewport_bottom.render_target_update_mode = SubViewport.UPDATE_ONCE
+
+func update_info_top(spectated: String) -> void:
+	spectated_user.text = "[center]%s[/center]" % spectated
