@@ -238,17 +238,17 @@ func _ready() -> void:
 		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
 	,["help"],0))
 
-	register_command(Command.new(func(name: String) -> void:
+	register_command(Command.new(func(user_name: String) -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
 		for user_id: int in SSCS.lobby.lobby_users:
 			var data: Dictionary = SSCS.lobby.lobby_users[user_id]
-			if data.user_name == name or data.fake_name == name:
+			if data.user_name == user_name or data.fake_name == user_name:
 				SSCS.lobby.start_spectate(user_id)
 				return
 
-		if name.is_valid_int():
-			SSCS.lobby.start_spectate(name.to_int())
+		if user_name.is_valid_int():
+			SSCS.lobby.start_spectate(user_name.to_int())
 			return
 
 		Terminal.print_console("Specified user does not exist.\n")
