@@ -9,6 +9,8 @@ const hud_base: PackedScene = preload("res://scenes/prefabs/hud.tscn")
 
 const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
 
+@onready var camera: Camera3D = $"/root/Game/Camera"
+
 var map: MapLoader.Map
 
 var notes: Array[Note] = []
@@ -59,6 +61,7 @@ signal ended
 signal note_hit
 signal note_missed
 
+@warning_ignore("shadowed_variable")
 func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = []) -> void:
 	map = map_arg
 
@@ -107,6 +110,10 @@ func _ready() -> void:
 
 	RenderingServer.global_shader_parameter_set("note_fade_out_begin",SSCS.settings.note_fade_out_begin)
 	RenderingServer.global_shader_parameter_set("note_fade_out_end",SSCS.settings.note_fade_out_end)
+	
+	camera.environment.glow_enabled = SSCS.settings.glow_enabled
+	camera.environment.glow_strength = SSCS.settings.glow_strength
+	camera.environment.glow_bloom = SSCS.settings.glow_bloom
 
 	cursor = cursor_base.instantiate()
 	if is_replay:

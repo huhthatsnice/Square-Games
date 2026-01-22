@@ -29,6 +29,10 @@ class Settings:
 	var absolute_input: bool = false
 
 	var auto_spectate: bool = true
+	
+	var glow_enabled: bool = false
+	var glow_strength: float = 2
+	var glow_bloom: float = 0.2
 
 class Modifiers:
 	var hit_time: float = 45.0

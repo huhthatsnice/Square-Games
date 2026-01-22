@@ -42,7 +42,7 @@ func print_console(txt:String) -> void:
 	update_console()
 
 func update_console() -> void:
-	self.text=console_text+">"+current_input.insert(cursor,"❘")+"\n\n\n"
+	self.text=console_text+">"+current_input.insert(cursor,"❘")
 
 func _ready() -> void:
 	update_console()

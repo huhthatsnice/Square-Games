@@ -271,6 +271,7 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 		user_id = SteamHandler.steam_id,
 		username = Steam.getPersonaName(),
 		settings = SSCS.encode_class(SSCS.settings),
+		fake_name = self_fake_name
 	}))
 
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
