@@ -37,10 +37,12 @@ var stopped: bool = false
 
 var playing: bool = false
 
-var hit_time: float = (SSCS.modifiers.hit_time/1000) * SSCS.modifiers.speed
+var speed_multiplier: float = SSCS.modifiers.speed
+
+var hit_time: float = (SSCS.modifiers.hit_time/1000) * speed_multiplier
 var hitbox_size: float = SSCS.modifiers.hitbox_size
 
-var approach_time: float = (SSCS.settings.spawn_distance/SSCS.settings.approach_rate) * SSCS.modifiers.speed
+var approach_time: float = (SSCS.settings.spawn_distance/SSCS.settings.approach_rate) * speed_multiplier
 
 var no_fail: bool = SSCS.modifiers.no_fail or SSCS.modifiers.autoplay
 
@@ -69,7 +71,7 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	var note_counter: PackedInt32Array = []
 
 	for v: MapLoader.NoteDataMinimal in map.data:
-		var ct: int = v.t
+		var ct: float = v.t / speed_multiplier
 		var to_remove: int = 0
 
 		for t in note_counter:
@@ -79,10 +81,12 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 				break
 
 		note_counter = note_counter.slice(to_remove)
-		note_counter.append(ct)
+		note_counter.append(floor(ct))
 		if len(note_counter) > max_loaded_notes:
 			max_loaded_notes=len(note_counter)
 	max_loaded_notes+=1
+	
+	print(max_loaded_notes)
 
 	allocated_notes.resize(max_loaded_notes)
 	allocated_notes.fill(0)
@@ -144,6 +148,10 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 
 	if new_index>note_added:
 		note_added = new_index
+	
+	if new_index<0 or new_index>=multimesh.instance_count:
+		print("WOOAAHHH")
+		print(new_index)
 
 	allocated_notes[new_index]=1
 	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
@@ -158,6 +166,7 @@ func remove_note(note: Note) -> void:
 
 	allocated_notes[index]=0
 	multimesh.set_instance_transform(index,nan_transform)
+	
 
 	note.queue_free()
 

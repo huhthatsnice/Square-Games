@@ -105,7 +105,6 @@ common/physics_jitter_fix=0.0
 
 occlusion_culling/bvh_build_quality=0
 rendering_device/vulkan/max_descriptors_per_pool=256
-driver/threads/thread_model=2
 lights_and_shadows/directional_shadow/size=256
 lights_and_shadows/directional_shadow/soft_shadow_filter_quality=0
 lights_and_shadows/positional_shadow/soft_shadow_filter_quality=0
