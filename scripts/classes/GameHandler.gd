@@ -240,7 +240,7 @@ func _register_miss() -> void:
 
 
 func _check_death() -> void:
-	if (health==0 and !no_fail) or (AudioManager.elapsed > map.data[-1].t/1000.0):
+	if (health==0 and !no_fail) or (AudioManager.elapsed > (map.data[-1].t/1000.0) + 1000):
 		stop()
 
 var last_load:float = 0
