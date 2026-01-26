@@ -12,7 +12,6 @@ class SSPM:
 	var data_parsed: Array[MapLoader.NoteDataMinimal]
 
 static func load_from_path(path: String) -> SSPM:
-
 	var newdata:SSPM = SSPM.new()
 
 	var file:FileAccess = FileAccess.open(path,FileAccess.READ)
@@ -121,38 +120,57 @@ static func load_from_path(path: String) -> SSPM:
 	#only reason we go to marker definitions is for ssp_note
 
 	file.seek(markersOffset)
+	
+	var benchmarking_start_1: int = Time.get_ticks_usec()
 
 	var note_data: Array[MapLoader.NoteDataMinimal]
+	note_data.resize(noteCount)
+	
+	#6.371
+	#5.964
+	#5.879
 
 	for i:int in range(noteCount):
 		var ms:int = file.get_32()
 
-		var mtype:int = file.get_8() #skip marker type, only marker type thats ever used is ssp_note
+		#var mtype:int = file.get_8() #skip marker type, only marker type thats ever used is ssp_note
 
-		if mtype!=0: continue
+		var isQuantum: int = file.get_16()
 
-		var isQuantum:bool = file.get_8()
-
-		if !isQuantum:
-			var x:int = -file.get_8()+2
-			var y:int = -file.get_8()+2
-			note_data.append(MapLoader.NoteDataMinimal.new(1-x,y-1,ms))
+		if isQuantum==0:
+			note_data[i] = MapLoader.NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
 		else:
-			var x:float = -file.get_float()+2
-			var y:float = -file.get_float()+2
-			note_data.append(MapLoader.NoteDataMinimal.new(1-x,y-1,ms))
-
+			note_data[i] = MapLoader.NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
+	
+	var benchmarking_end_1: int = Time.get_ticks_usec()
+	var benchmarking_start_2: int = Time.get_ticks_usec()
+	
 	note_data.sort_custom(
-		func(a:MapLoader.NoteDataMinimal,b:MapLoader.NoteDataMinimal) -> bool:
-			return a.t<b.t
+		func(a:MapLoader.NoteDataMinimal, b:MapLoader.NoteDataMinimal) -> bool:
+			return a.t < b.t
 	)
-
+	
+	var benchmarking_end_2: int = Time.get_ticks_usec()
+	var benchmarking_start_3: int = Time.get_ticks_usec()
+	
 	var csv_data: PackedStringArray = []
-
-	for v: MapLoader.NoteDataMinimal in note_data:
-		csv_data.append("{0}|{1}|{2}".format([v.x,v.y,v.t]))
-
+	csv_data.resize(noteCount)
+	
+	for i: int in range(noteCount):
+		var v: MapLoader.NoteDataMinimal = note_data[i]
+		csv_data[i] = "|".join([v.x,v.y,v.t]) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
+	
 	newdata.data_csv=",".join(csv_data)
+	
+	var benchmarking_end_3: int = Time.get_ticks_usec()
+	
 	newdata.data_parsed=note_data
+	
+	print("Took {0} ms to load notes and {1} ms to sort and {2} ms to make csv data with {3} notes".format([
+		(benchmarking_end_1-benchmarking_start_1)/1000.0, 
+		(benchmarking_end_2-benchmarking_start_2)/1000.0, 
+		(benchmarking_end_3-benchmarking_start_3)/1000.0, 
+		len(note_data)])
+	)
 
 	return newdata
