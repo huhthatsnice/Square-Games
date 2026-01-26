@@ -49,6 +49,6 @@ static func _get_position(note_0: MapLoader.NoteDataMinimal, note_1: MapLoader.N
 	var u: float = (time - note_1.t) / segment_duration
 
 	return Vector2(
-		_catmull_rom_2(note_0.x, note_1.x, note_2.x, note_3.x, u, note_0.t,note_1.t,note_2.t,note_3.t),
-		_catmull_rom_2(note_0.y, note_1.y, note_2.y, note_3.y, u, note_0.t,note_1.t,note_2.t,note_3.t)
+		_catmull_rom_2(note_0.x, note_1.x, note_2.x, note_3.x, u, note_0.t, note_1.t, note_2.t, note_3.t),
+		_catmull_rom_2(note_0.y, note_1.y, note_2.y, note_3.y, u, note_0.t, note_1.t, note_2.t, note_3.t)
 	)

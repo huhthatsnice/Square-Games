@@ -311,26 +311,6 @@ func load_map_from_name(map_name: String, ignore_cache: bool = false) -> MapLoad
 
 	return map
 
-func _ready() -> void:
-	#make sure directories exist
-	DirAccess.make_dir_absolute("user://maps")
-	DirAccess.make_dir_absolute("user://rhythiamaps")
-
-	var raw_settings_data: PackedByteArray = FileAccess.get_file_as_bytes("user://settings.txt")
-
-	if len(raw_settings_data)>=4:
-		print("decode")
-		var settings_data: Dictionary = bytes_to_var(raw_settings_data)
-		for setting: String in settings_data:
-			var value: Variant = settings_data[setting]
-			settings[setting]=value
-
-	setting_updated.connect(func(setting: String, _old: Variant, new: Variant) -> void:
-		match setting:
-			"fov":
-				get_viewport().get_camera_3d().fov = new
-	)
-
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		print("close")
