@@ -66,25 +66,33 @@ signal note_missed
 @warning_ignore("shadowed_variable")
 func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = []) -> void:
 	map = map_arg
-
+	
+	var benchmark_start_1: int = Time.get_ticks_usec()
+	
 	var max_t: int = ceil(((SSCS.settings.spawn_distance+0.1)/SSCS.settings.approach_rate)*1000) + SSCS.modifiers.hit_time
-	var note_counter: PackedInt32Array = []
+	var note_counter: int = 0
+	var current_note: int = 0
 
 	for v: MapLoader.NoteDataMinimal in map.data:
 		var ct: float = v.t / speed_multiplier
-		var to_remove: int = 0
 
-		for t in note_counter:
-			if ct-t>max_t:
-				to_remove += 1
+		while true:
+			var closest_note: MapLoader.NoteDataMinimal = map.data[note_counter]
+			
+			if ct - (closest_note.t / speed_multiplier) > max_t:
+				note_counter += 1
 			else:
 				break
-
-		note_counter = note_counter.slice(to_remove)
-		note_counter.append(floor(ct))
-		if len(note_counter) > max_loaded_notes:
-			max_loaded_notes=len(note_counter)
+		
+		current_note += 1
+		
+		if current_note - note_counter > max_loaded_notes:
+			max_loaded_notes = current_note - note_counter
+		
 	max_loaded_notes+=1
+	
+	var benchmark_end_1: int = Time.get_ticks_usec()
+	print((benchmark_end_1 - benchmark_start_1)/1000.0)
 	
 	print(max_loaded_notes)
 

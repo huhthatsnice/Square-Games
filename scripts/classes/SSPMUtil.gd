@@ -11,6 +11,8 @@ class SSPM:
 	var difficulty: String
 	var data_parsed: Array[MapLoader.NoteDataMinimal]
 
+const NoteDataMinimal: GDScript = MapLoader.NoteDataMinimal
+
 static func load_from_path(path: String) -> SSPM:
 	var newdata:SSPM = SSPM.new()
 
@@ -126,11 +128,7 @@ static func load_from_path(path: String) -> SSPM:
 	var note_data: Array[MapLoader.NoteDataMinimal]
 	note_data.resize(noteCount)
 	
-	#6.371
-	#5.964
-	#5.879
-
-	for i:int in range(noteCount):
+	for i: int in range(noteCount):
 		var ms:int = file.get_32()
 
 		#var mtype:int = file.get_8() #skip marker type, only marker type thats ever used is ssp_note
@@ -138,9 +136,9 @@ static func load_from_path(path: String) -> SSPM:
 		var isQuantum: int = file.get_16()
 
 		if isQuantum==0:
-			note_data[i] = MapLoader.NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
+			note_data[i] = NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
 		else:
-			note_data[i] = MapLoader.NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
+			note_data[i] = NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
 	
 	var benchmarking_end_1: int = Time.get_ticks_usec()
 	var benchmarking_start_2: int = Time.get_ticks_usec()
