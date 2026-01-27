@@ -45,8 +45,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		for note: MapLoader.NoteDataMinimal in collected:
 			avg_pos += Vector2(note.x,note.y)
 		avg_pos /= len(collected)
+		
+		var new_note_data: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+		new_note_data.x = avg_pos.x
+		new_note_data.y = avg_pos.y
+		new_note_data.t = v.t
 
-		preprocessed_data.append(MapLoader.NoteDataMinimal.new(avg_pos.x,avg_pos.y,v.t))
+		preprocessed_data.append(new_note_data)
 
 	#shift preprocessing
 	i = 0
@@ -73,7 +78,11 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			shift_vec = shift_vec * clamp(shift_vec.y, -max_range, max_range)/shift_vec.y
 
 
-		var new_note: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new(note_2.x+shift_vec.x, note_2.y+shift_vec.y, note_2.t)
+		var new_note: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+		
+		new_note.x = note_2.x+shift_vec.x
+		new_note.y = note_2.y+shift_vec.y
+		new_note.t = note_2.t
 
 		processed_data.append(new_note)
 		i += 1

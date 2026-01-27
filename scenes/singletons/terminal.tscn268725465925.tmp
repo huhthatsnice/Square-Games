@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://b5vqj61tm047m"]
+[gd_scene load_steps=2 format=3 uid="uid://b5vqj61tm047m"]
 
 [ext_resource type="Script" uid="uid://fpdfqibiw5d7" path="res://scripts/singletons/Terminal.gd" id="1_yjhey"]
-[ext_resource type="Theme" uid="uid://8kihldx6yt13" path="res://assets/themes/lineedit.tres" id="2_3cscc"]
 
 [node name="Terminal" type="Control"]
 layout_mode = 3
@@ -29,18 +28,14 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_top = 32.0
+offset_top = 30.0
 grow_horizontal = 2
 grow_vertical = 2
 scroll_following = true
 
-[node name="LineEdit" type="LineEdit" parent="."]
-z_index = 3
+[node name="TextEdit" type="TextEdit" parent="."]
 layout_mode = 1
 anchors_preset = 10
 anchor_right = 1.0
-offset_bottom = 32.0
+offset_bottom = 30.0
 grow_horizontal = 2
-theme = ExtResource("2_3cscc")
-placeholder_text = "booty"
-keep_editing_on_text_submit = true

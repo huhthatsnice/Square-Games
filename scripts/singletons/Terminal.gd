@@ -1,4 +1,4 @@
-extends Label
+extends Control
 
 const CAPITALIZED: Dictionary[String, String] = {
 	"`" = "~",
@@ -24,13 +24,16 @@ const CAPITALIZED: Dictionary[String, String] = {
 	"'" = "\"",
 }
 
-var is_accepting_input: bool = true
-var console_text:String = ""
-var current_input: String = ""
+@onready var output: RichTextLabel = $"./RichTextLabel"
+@onready var input: LineEdit = $"./LineEdit"
 
-var cursor: int = 0
-var selection_start: int = cursor
-var selection_end: int = cursor
+var is_accepting_input: bool = true:
+	set(x):
+		if x:
+			input.edit()
+		else:
+			input.unedit()
+var console_text:String = ""
 
 var command_history: Array[String] = []
 var command_history_cursor: int = -1
@@ -42,11 +45,19 @@ func print_console(txt:String) -> void:
 	update_console()
 
 func update_console() -> void:
-	self.text=console_text+">"+current_input.insert(cursor,"❘")
+	output.text = console_text
 
 func _ready() -> void:
 	update_console()
 	print_console("Welcome to Square Games. Type \"help\" to see all commands.\n")
+	input.edit()
+	
+	input.text_submitted.connect(func(text: String) -> void:
+		input.text = ""
+		command_history.insert(0, text)
+		line_entered.emit(text)
+		command_history_cursor=-1
+	)
 
 func _input(event:InputEvent) -> void:
 	if not is_accepting_input:
@@ -55,53 +66,17 @@ func _input(event:InputEvent) -> void:
 		if event is InputEventKey and not event.echo:
 			var keylabel: int = event.key_label
 			#print(keylabel)
-
 			match keylabel:
-				KEY_BACKSPACE:
-					if cursor==0: return
-					if event.is_command_or_control_pressed():
-						var space: int = max(current_input.rfind(" ",cursor),0)
-						current_input = current_input.erase(space, 0xffff)
-						cursor = clamp(space, 0, len(current_input))
-					else:
-						current_input = current_input.erase(cursor - 1, 1)
-						cursor = clamp(cursor - 1, 0, len(current_input))
-				KEY_ENTER:
-					console_text += ">" + current_input + "\n"
-					command_history.insert(0,current_input)
-					line_entered.emit(current_input)
-					current_input = ""
-					command_history_cursor=-1
-					cursor = 0
-				KEY_LEFT:
-					cursor = clamp(cursor - 1, 0, len(current_input))
-				KEY_RIGHT:
-					cursor = clamp(cursor + 1, 0, len(current_input))
 				KEY_UP:
 					if len(command_history)==0: return
 					command_history_cursor = clamp(command_history_cursor + 1, -1, len(command_history)-1)
-					current_input = command_history[command_history_cursor]
-					cursor = len(current_input)
+					input.text = command_history[command_history_cursor]
 				KEY_DOWN:
 					if len(command_history)==0: return
 					command_history_cursor = clamp(command_history_cursor - 1, -1, len(command_history)-1)
 					if command_history_cursor==-1:
-						current_input = ""
+						input.text = ""
 					else:
-						current_input = command_history[command_history_cursor]
-					cursor = len(current_input)
+						input.text = command_history[command_history_cursor]
 				_:
-					if OS.is_keycode_unicode(keylabel):
-						var key: String = char(keylabel)
-						if key == "V" and event.ctrl_pressed:
-							key = DisplayServer.clipboard_get()
-						elif not event.shift_pressed:
-							key = key.to_lower()
-
-						elif CAPITALIZED.has(key):
-							key = CAPITALIZED[key]
-
-						current_input = current_input.insert(cursor, key)
-						cursor = clamp(cursor + len(key), 0, len(current_input))
-
-			update_console()
+					return

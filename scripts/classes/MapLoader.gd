@@ -20,10 +20,10 @@ class NoteDataMinimal:
 	var y: float
 	var t: int
 
-	func _init(x_arg: float, y_arg: float, t_arg: int) -> void:
-		x = x_arg
-		y = y_arg
-		t = t_arg
+	#func _init(x_arg: float, y_arg: float, t_arg: int) -> void:
+		#x = x_arg
+		#y = y_arg
+		#t = t_arg
 
 static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 	var output_data: Array[NoteDataMinimal] = []
@@ -31,7 +31,12 @@ static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 	for v: String in data.split(","):
 		var split: PackedStringArray = v.split("|")
 		if len(split)==3:
-			output_data.append(NoteDataMinimal.new(1-split[0].to_float(), split[1].to_float()-1, split[2].to_int()))
+			var new_note_data: NoteDataMinimal = NoteDataMinimal.new()
+			new_note_data.x = 1.0-split[0].to_float()
+			new_note_data.y = split[0].to_float()-1.0
+			new_note_data.t = split[2].to_int()
+			
+			output_data.append(new_note_data)
 
 	return output_data
 

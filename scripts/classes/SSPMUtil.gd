@@ -134,11 +134,20 @@ static func load_from_path(path: String) -> SSPM:
 		#var mtype:int = file.get_8() #skip marker type, only marker type thats ever used is ssp_note
 
 		var isQuantum: int = file.get_16()
+		
+		var new_note_data: MapLoader.NoteDataMinimal = NoteDataMinimal.new()
+		new_note_data.t = ms
 
 		if isQuantum==0:
-			note_data[i] = NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
+			new_note_data.x = file.get_8()-1
+			new_note_data.y = 1-file.get_8()
+
+			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
 		else:
-			note_data[i] = NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
+			new_note_data.x = file.get_float()-1.0
+			new_note_data.y = 1.0-file.get_float()
+
+			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
 	
 	var benchmarking_end_1: int = Time.get_ticks_usec()
 	var benchmarking_start_2: int = Time.get_ticks_usec()
