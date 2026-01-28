@@ -1,9 +1,14 @@
-immediate chores;
+chores;
 get a real user interface
+add hit/miss effects
+add cursor trail
+add replays
 
 future chores;
 replace NoteDataMinimal with arrays since they're faster
 add spin
+get a better hud
+
 
 decisions;
 allow custom note mesh?
