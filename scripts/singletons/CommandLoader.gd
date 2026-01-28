@@ -5,12 +5,14 @@ class Command:
 	var names:Array[String]
 	var argument_count:int
 	var variadic:bool
+	var echoes: bool
 
-	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, variadic_arg: bool = false) -> void:
+	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, variadic_arg: bool = false, echoes_arg: bool = true) -> void:
 		function=function_arg
 		names=names_arg
 		argument_count = function.get_argument_count() if argument_count_arg == -1 else argument_count_arg
 		variadic = variadic_arg
+		echoes = echoes_arg
 
 var commands:Array[Command]=[]
 
@@ -88,6 +90,9 @@ func _ready() -> void:
 
 		for command:Command in commands:
 			if command.names.has(cmd):
+				if command.echoes:
+					Terminal.print_console("> %s\n" % line)
+
 				if argc>=command.argument_count:
 					ran=true
 					if command.variadic:
@@ -201,7 +206,7 @@ func _ready() -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
 		SSCS.lobby.send_chat_message(" ".join(msg))
-	,["message","msg","chat"],1,true))
+	,["message","msg","chat"],1,true, false))
 
 	register_command(Command.new(func() -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
