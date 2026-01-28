@@ -50,6 +50,8 @@ class Settings:
 
 	var hit_sound_volume: float = 0.2
 
+	var disable_pausing: bool = false
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2

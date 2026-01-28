@@ -247,13 +247,11 @@ func stop() -> void:
 	AudioManager.full_stop()
 
 func pause() -> void:
-	Input.mouse_mode=Input.MOUSE_MODE_VISIBLE
 	playing = false
 	AudioManager.stop()
 	#Input.warp_mouse(get_viewport().get_camera_3d().unproject_position(cursor.position))
 
 func unpause() -> void:
-	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
 	playing = true
 	AudioManager.resume()
 
@@ -403,7 +401,7 @@ func _process(_dt: float) -> void:
 #endregion
 
 func _input(event: InputEvent) -> void:
-	if event.is_action_pressed(&"pause") and SSCS.lobby == null:
+	if event.is_action_pressed(&"pause") and SSCS.lobby == null and !SSCS.settings.disable_pausing:
 		if playing:
 			pause()
 		else:
