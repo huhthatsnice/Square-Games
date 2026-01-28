@@ -42,6 +42,11 @@ class Settings:
 			fullscreen = x
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
+	var map_volume: float = 0.2:
+		set(x):
+			map_volume = x
+			AudioManager.player.volume_linear = map_volume
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
