@@ -29,7 +29,8 @@ const CAPITALIZED: Dictionary[String, String] = {
 
 var is_accepting_input: bool = true:
 	set(x):
-		if x:
+		is_accepting_input = x
+		if is_accepting_input:
 			input.edit()
 		else:
 			input.unedit()

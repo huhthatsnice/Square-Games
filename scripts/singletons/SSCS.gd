@@ -37,6 +37,11 @@ class Settings:
 	var semi_spin: bool = false
 	#var true_spin: bool = false
 
+	var fullscreen: bool = true:
+		set(x):
+			fullscreen = x
+			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
@@ -323,3 +328,7 @@ func _notification(what: int) -> void:
 		settings_file.close()
 		await get_tree().process_frame
 		get_tree().quit()
+
+func _input(event: InputEvent) -> void:
+	if event.is_action_pressed("fullscreen"):
+		settings.fullscreen = !settings.fullscreen
