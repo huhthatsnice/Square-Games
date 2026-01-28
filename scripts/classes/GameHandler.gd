@@ -6,6 +6,7 @@ const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
 const note_material: ShaderMaterial = preload("res://assets/materials/note_shader_material.tres")
 const hud_base: PackedScene = preload("res://scenes/prefabs/hud.tscn")
 const default_hit_sound: AudioStreamWAV = preload("res://assets/audio/hitsound.wav")
+const default_miss_sound: AudioStreamMP3 = preload("res://assets/audio/misssound.mp3")
 
 const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
 
@@ -57,9 +58,13 @@ var is_replay: bool = false
 var replay_note_hit_data: PackedByteArray
 var replay_cursor_pos_data: PackedVector3Array
 
+var use_hit_sound: bool = SSCS.settings.hit_sound_volume > 0
+var use_miss_sound: bool = SSCS.settings.miss_sound_volume > 0
+
 var last_replay_cursor_pos_index: int = 0
 
 var hit_sound_player: AudioStreamPlayer
+var miss_sound_player: AudioStreamPlayer
 
 signal ended
 signal note_hit
@@ -172,8 +177,22 @@ func _ready() -> void:
 	else:
 		hit_sound_player.stream = default_hit_sound
 
-
 	self.add_child(hit_sound_player)
+
+
+	miss_sound_player = AudioStreamPlayer.new()
+	miss_sound_player.max_polyphony = 50
+	miss_sound_player.volume_linear = SSCS.settings.miss_sound_volume
+	miss_sound_player.bus = &"Sounds"
+
+	var custom_miss_sound_resource: String = SSCS.get_arbitrary_exension("user://misssound", ["mp3","wav"])
+	if !custom_miss_sound_resource.is_empty():
+		miss_sound_player.stream = SSCS.load_audio(custom_miss_sound_resource)
+	else:
+		miss_sound_player.stream = default_miss_sound
+
+	self.add_child(miss_sound_player)
+
 
 
 
@@ -314,6 +333,7 @@ func _check_hitreg() -> void:
 				if !is_replay:
 					misses += 1
 					health = clamp(health-1,0,5)
+					if use_miss_sound: miss_sound_player.play(0)
 					note_missed.emit(note.note_id)
 
 					to_remove.append(i)
@@ -323,13 +343,15 @@ func _check_hitreg() -> void:
 					if replay_note_hit_data[note.note_id] == 0:
 						misses += 1
 						health = clamp(health-1, 0, 5)
+						if use_miss_sound: miss_sound_player.play(0)
 						note_missed.emit(note.note_id)
+
 
 						to_remove.append(i)
 					else:
 						hits += 1
 						health = clamp(health+0.5,0,5)
-						hit_sound_player.play(0)
+						if use_hit_sound: hit_sound_player.play(0)
 						note_hit.emit(note.note_id)
 
 						to_remove.append(i)
@@ -341,7 +363,7 @@ func _check_hitreg() -> void:
 				if max(diff.x, diff.y) < hitbox_size:
 					hits += 1
 					health = clamp(health+0.5,0,5)
-					hit_sound_player.play(0)
+					if use_hit_sound: hit_sound_player.play(0)
 					note_hit.emit(note.note_id)
 
 					to_remove.append(i)

@@ -49,6 +49,7 @@ class Settings:
 				AudioManager.player.volume_linear = map_volume
 
 	var hit_sound_volume: float = 0.2
+	var miss_sound_volume: float = 0.2
 
 	var disable_pausing: bool = false
 
