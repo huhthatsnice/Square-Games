@@ -295,6 +295,32 @@ func get_map_from_url(url: String) -> MapLoader.Map:
 
 	return map
 
+func get_arbitrary_exension(path: String, whitelist: PackedStringArray) -> String:
+	var base_dir: String = path.get_base_dir()
+	print(base_dir)
+	for file: String in DirAccess.get_files_at(base_dir):
+		print(path.get_file().get_basename())
+		print(file.get_basename())
+		if path.get_file().get_basename() == file.get_basename() and file.get_extension() in whitelist:
+			print(base_dir + file)
+			return base_dir + file
+	return ""
+
+func load_image(path: String) -> Image:
+	var new_image: Image = Image.new()
+	new_image.load(ProjectSettings.globalize_path(path))
+	return new_image
+
+func load_audio(path: String) -> AudioStream:
+	var new_audio_stream: AudioStream
+	match path.get_extension():
+		"wav":
+			new_audio_stream = AudioStreamWAV.load_from_file(path)
+		"mp3":
+			new_audio_stream = AudioStreamMP3.load_from_file(path)
+		"ogg":
+			new_audio_stream = AudioStreamOggVorbis.load_from_file(path)
+	return new_audio_stream
 
 func get_map_hash(map_name: String) -> PackedByteArray:
 	var map_path: String = get_map_file_path_from_name(map_name)

@@ -1,11 +1,11 @@
 immediate chores;
 get a real user interface
-allow custom hit sounds / cursor / note mesh
 
 future chores;
 replace NoteDataMinimal with arrays since they're faster
 add spin
 
 decisions;
+allow custom note mesh?
 add vr support?
 add ingame map editor?

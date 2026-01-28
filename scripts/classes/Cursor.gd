@@ -26,6 +26,10 @@ func update_position() -> void:
 	camera.position=Vector3(pos.x*parallax,pos.y*parallax,0)
 
 func _ready() -> void:
+	var custom_cursor_resource: String = SSCS.get_arbitrary_exension("user://cursor", ["png","jpg"])
+	if !custom_cursor_resource.is_empty():
+		self.texture = ImageTexture.create_from_image(SSCS.load_image(custom_cursor_resource))
+		print("yeah i found an image")
 	var texture_size: Vector2 = self.texture.get_size()
 	scale = (Vector3(texture_size.x,texture_size.y,1)*self.pixel_size).inverse() * Vector3(0.28,0.28,1.0)
 	#print(self.scale)

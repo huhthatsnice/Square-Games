@@ -165,7 +165,13 @@ func _ready() -> void:
 	hit_sound_player.max_polyphony = 50
 	hit_sound_player.volume_linear = SSCS.settings.hit_sound_volume
 	hit_sound_player.bus = &"Sounds"
-	hit_sound_player.stream = default_hit_sound
+
+	var custom_hit_sound_resource: String = SSCS.get_arbitrary_exension("user://hitsound", ["mp3","wav"])
+	if !custom_hit_sound_resource.is_empty():
+		hit_sound_player.stream = SSCS.load_audio(custom_hit_sound_resource)
+	else:
+		hit_sound_player.stream = default_hit_sound
+
 
 	self.add_child(hit_sound_player)
 
