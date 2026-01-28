@@ -16,7 +16,7 @@ func _ready() -> void:
 	player = AudioStreamPlayer.new()
 	player.bus=&"Music"
 	player.pitch_scale=playback_speed
-	player.volume_linear=0.2
+	player.volume_linear = SSCS.settings.map_volume
 	player.finished.connect(func() -> void:
 		print("audio ended")
 		playing=false

@@ -5,7 +5,7 @@ const cursor_base: PackedScene = preload("res://scenes/prefabs/cursor.tscn")
 const note_mesh: ArrayMesh = preload("res://assets/meshes/Rounded.obj")
 const note_material: ShaderMaterial = preload("res://assets/materials/note_shader_material.tres")
 const hud_base: PackedScene = preload("res://scenes/prefabs/hud.tscn")
-
+const default_hit_sound: AudioStreamWAV = preload("res://assets/audio/hitsound.wav")
 
 const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
 
@@ -58,6 +58,8 @@ var replay_note_hit_data: PackedByteArray
 var replay_cursor_pos_data: PackedVector3Array
 
 var last_replay_cursor_pos_index: int = 0
+
+var hit_sound_player: AudioStreamPlayer
 
 signal ended
 signal note_hit
@@ -158,6 +160,15 @@ func _ready() -> void:
 
 	self.multimesh.instance_count=max_loaded_notes
 	self.multimesh.visible_instance_count=1
+
+	hit_sound_player = AudioStreamPlayer.new()
+	hit_sound_player.max_polyphony = 50
+	hit_sound_player.volume_linear = SSCS.settings.hit_sound_volume
+	hit_sound_player.bus = &"Sounds"
+	hit_sound_player.stream = default_hit_sound
+
+	self.add_child(hit_sound_player)
+
 
 
 #region note creation and deletion
@@ -314,6 +325,7 @@ func _check_hitreg() -> void:
 					else:
 						hits += 1
 						health = clamp(health+0.5,0,5)
+						hit_sound_player.play(0)
 						note_hit.emit(note.note_id)
 
 						to_remove.append(i)
@@ -325,6 +337,7 @@ func _check_hitreg() -> void:
 				if max(diff.x, diff.y) < hitbox_size:
 					hits += 1
 					health = clamp(health+0.5,0,5)
+					hit_sound_player.play(0)
 					note_hit.emit(note.note_id)
 
 					to_remove.append(i)

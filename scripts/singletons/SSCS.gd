@@ -45,7 +45,10 @@ class Settings:
 	var map_volume: float = 0.2:
 		set(x):
 			map_volume = x
-			AudioManager.player.volume_linear = map_volume
+			if AudioManager.player != null:
+				AudioManager.player.volume_linear = map_volume
+
+	var hit_sound_volume: float = 0.2
 
 class Modifiers:
 	var hit_time: float = 45.0
