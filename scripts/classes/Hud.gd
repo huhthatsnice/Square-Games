@@ -21,6 +21,7 @@ MISSES
 
 func _ready() -> void:
 	self.position=Vector3(0,0,SSCS.settings.grid_distance)
+	self.scale = Vector3(1, 1, 1) * SSCS.settings.hud_scale
 
 func update_info_right(hits: int, misses: int) -> void:
 	text_right.text = info_right_base.format([hits,misses])
