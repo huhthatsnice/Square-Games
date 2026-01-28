@@ -139,12 +139,12 @@ static func load_from_path(path: String) -> SSPM:
 		new_note_data.t = ms
 
 		if isQuantum==0:
-			new_note_data.x = file.get_8()-1
+			new_note_data.x = 1-file.get_8()
 			new_note_data.y = 1-file.get_8()
 
 			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
 		else:
-			new_note_data.x = file.get_float()-1.0
+			new_note_data.x = 1.0-file.get_float()
 			new_note_data.y = 1.0-file.get_float()
 
 			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
