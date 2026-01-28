@@ -94,6 +94,11 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	var benchmark_end_1: int = Time.get_ticks_usec()
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
 
+	if SSCS.modifiers.horizontal_flip or SSCS.modifiers.vertical_flip:
+		for note_data: MapLoader.NoteDataMinimal in map.data:
+			note_data.x = (-1 if SSCS.modifiers.horizontal_flip else 1) * note_data.x
+			note_data.y = (-1 if SSCS.modifiers.vertical_flip else 1) * note_data.y
+
 	print(max_loaded_notes)
 
 	allocated_notes.resize(max_loaded_notes)
@@ -107,6 +112,13 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 		self.is_replay = true
 		self.replay_cursor_pos_data = replay_cursor_pos_data
 		self.replay_note_hit_data = replay_note_hit_data
+
+func _notification(what: int) -> void: #have to have this since horizontal/vertical flip mutates map data and we have to undo it
+	if what == NOTIFICATION_PREDELETE:
+		if SSCS.modifiers.horizontal_flip or SSCS.modifiers.vertical_flip:
+			for note_data: MapLoader.NoteDataMinimal in map.data:
+				note_data.x = (-1 if SSCS.modifiers.horizontal_flip else 1) * note_data.x
+				note_data.y = (-1 if SSCS.modifiers.vertical_flip else 1) * note_data.y
 
 func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)

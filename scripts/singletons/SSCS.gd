@@ -49,6 +49,9 @@ class Modifiers:
 	var no_fail: bool = false
 	var autoplay: bool = false
 
+	var horizontal_flip: bool = false
+	var vertical_flip: bool = false
+
 signal setting_updated(setting: String, old_value: Variant, new_value: Variant)
 signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant)
 
