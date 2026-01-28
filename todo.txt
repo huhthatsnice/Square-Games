@@ -1,6 +1,10 @@
-chores;
+immediate chores;
 get a real user interface
+
+future chores;
 replace NoteDataMinimal with arrays since they're faster
-add real spin
+add spin
 
 decisions;
+add vr support?
+add ingame map editor?
