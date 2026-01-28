@@ -4,4 +4,5 @@
 bg_color = Color(0.15, 0.15, 0.15, 1)
 
 [resource]
+LineEdit/styles/focus = SubResource("StyleBoxFlat_pivox")
 LineEdit/styles/normal = SubResource("StyleBoxFlat_pivox")
