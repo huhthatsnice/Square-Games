@@ -55,6 +55,8 @@ class Settings:
 
 	var hud_scale: float = 1
 
+	var smooth_replays: bool = true
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2

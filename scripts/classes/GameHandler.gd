@@ -61,6 +61,8 @@ var replay_cursor_pos_data: PackedVector3Array
 var use_hit_sound: bool = SSCS.settings.hit_sound_volume > 0
 var use_miss_sound: bool = SSCS.settings.miss_sound_volume > 0
 
+var smooth_replays: bool = SSCS.settings.smooth_replays
+
 var last_replay_cursor_pos_index: int = 0
 
 var hit_sound_player: AudioStreamPlayer
@@ -395,7 +397,15 @@ func _process(_dt: float) -> void:
 			await get_tree().create_timer((1.0 / Engine.physics_ticks_per_second) * 30).timeout
 			unpause()
 
-		cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)
+		if smooth_replays:
+			var previous_cursor_pos_data: Vector3 = replay_cursor_pos_data[max(last_replay_cursor_pos_index-1, 0)]
+
+			var progress: float = AudioManager.elapsed - previous_cursor_pos_data.z
+			var time_distance: float = cursor_pos_data.z - previous_cursor_pos_data.z
+
+			cursor.pos = Vector2(previous_cursor_pos_data.x, previous_cursor_pos_data.y).lerp(Vector2(cursor_pos_data.x, cursor_pos_data.y), progress/time_distance)
+		else:
+			cursor.pos = Vector2(cursor_pos_data.x, cursor_pos_data.y)
 		cursor.update_position()
 
 	_check_hitreg()
