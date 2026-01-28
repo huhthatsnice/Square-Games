@@ -20,5 +20,5 @@ func _ready() -> void:
 			"fov":
 				get_viewport().get_camera_3d().fov = new
 	)
-	
+
 	get_tree().change_scene_to_file("res://scenes/game.tscn")

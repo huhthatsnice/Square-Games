@@ -66,9 +66,9 @@ signal note_missed
 @warning_ignore("shadowed_variable")
 func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = []) -> void:
 	map = map_arg
-	
+
 	var benchmark_start_1: int = Time.get_ticks_usec()
-	
+
 	var max_t: int = ceil(((SSCS.settings.spawn_distance+0.1)/SSCS.settings.approach_rate)*1000) + SSCS.modifiers.hit_time
 	var note_counter: int = 0
 	var current_note: int = 0
@@ -78,22 +78,22 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 
 		while true:
 			var closest_note: MapLoader.NoteDataMinimal = map.data[note_counter]
-			
+
 			if ct - (closest_note.t / speed_multiplier) > max_t:
 				note_counter += 1
 			else:
 				break
-		
+
 		current_note += 1
-		
+
 		if current_note - note_counter > max_loaded_notes:
 			max_loaded_notes = current_note - note_counter
-		
+
 	max_loaded_notes+=1
-	
+
 	var benchmark_end_1: int = Time.get_ticks_usec()
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
-	
+
 	print(max_loaded_notes)
 
 	allocated_notes.resize(max_loaded_notes)
@@ -122,7 +122,7 @@ func _ready() -> void:
 
 	RenderingServer.global_shader_parameter_set("note_fade_out_begin",SSCS.settings.note_fade_out_begin)
 	RenderingServer.global_shader_parameter_set("note_fade_out_end",SSCS.settings.note_fade_out_end)
-	
+
 	camera.environment.glow_enabled = SSCS.settings.glow_enabled
 	camera.environment.glow_strength = SSCS.settings.glow_strength
 	camera.environment.glow_bloom = SSCS.settings.glow_bloom
@@ -156,7 +156,7 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 
 	if new_index>note_added:
 		note_added = new_index
-	
+
 	if new_index<0 or new_index>=multimesh.instance_count:
 		print("WOOAAHHH")
 		print(new_index)
@@ -174,7 +174,7 @@ func remove_note(note: Note) -> void:
 
 	allocated_notes[index]=0
 	multimesh.set_instance_transform(index,nan_transform)
-	
+
 
 	note.queue_free()
 

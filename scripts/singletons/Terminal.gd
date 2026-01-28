@@ -51,7 +51,7 @@ func _ready() -> void:
 	update_console()
 	print_console("Welcome to Square Games. Type \"help\" to see all commands.\n")
 	input.edit()
-	
+
 	input.text_submitted.connect(func(text: String) -> void:
 		input.text = ""
 		command_history.insert(0, text)

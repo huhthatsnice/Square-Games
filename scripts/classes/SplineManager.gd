@@ -31,7 +31,7 @@ static func _catmull_rom_2(pos_0: float, pos_1: float, pos_2: float, pos_3: floa
 
 	var m0: float = ((pos_1 - pos_0) / (dt0**tension) * (dt1_tension)) if dt0>0.0 else 0.0
 	var m1: float = ((pos_3 - pos_2) / (dt2**tension) * (dt1_tension)) if dt2>0.0 else 0.0
-	
+
 	m0 = sign(m0)*abs(m0)**tension
 	m1 = sign(m1)*abs(m1)**tension
 

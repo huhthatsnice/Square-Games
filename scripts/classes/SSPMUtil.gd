@@ -122,19 +122,19 @@ static func load_from_path(path: String) -> SSPM:
 	#only reason we go to marker definitions is for ssp_note
 
 	file.seek(markersOffset)
-	
+
 	var benchmarking_start_1: int = Time.get_ticks_usec()
 
 	var note_data: Array[MapLoader.NoteDataMinimal]
 	note_data.resize(noteCount)
-	
+
 	for i: int in range(noteCount):
 		var ms:int = file.get_32()
 
 		#var mtype:int = file.get_8() #skip marker type, only marker type thats ever used is ssp_note
 
 		var isQuantum: int = file.get_16()
-		
+
 		var new_note_data: MapLoader.NoteDataMinimal = NoteDataMinimal.new()
 		new_note_data.t = ms
 
@@ -148,35 +148,35 @@ static func load_from_path(path: String) -> SSPM:
 			new_note_data.y = 1.0-file.get_float()
 
 			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
-	
+
 	var benchmarking_end_1: int = Time.get_ticks_usec()
 	var benchmarking_start_2: int = Time.get_ticks_usec()
-	
+
 	note_data.sort_custom(
 		func(a:MapLoader.NoteDataMinimal, b:MapLoader.NoteDataMinimal) -> bool:
 			return a.t < b.t
 	)
-	
+
 	var benchmarking_end_2: int = Time.get_ticks_usec()
 	var benchmarking_start_3: int = Time.get_ticks_usec()
-	
+
 	var csv_data: PackedStringArray = []
 	csv_data.resize(noteCount)
-	
+
 	for i: int in range(noteCount):
 		var v: MapLoader.NoteDataMinimal = note_data[i]
 		csv_data[i] = "|".join([v.x,v.y,v.t]) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
-	
+
 	newdata.data_csv=",".join(csv_data)
-	
+
 	var benchmarking_end_3: int = Time.get_ticks_usec()
-	
+
 	newdata.data_parsed=note_data
-	
+
 	print("Took {0} ms to load notes and {1} ms to sort and {2} ms to make csv data with {3} notes".format([
-		(benchmarking_end_1-benchmarking_start_1)/1000.0, 
-		(benchmarking_end_2-benchmarking_start_2)/1000.0, 
-		(benchmarking_end_3-benchmarking_start_3)/1000.0, 
+		(benchmarking_end_1-benchmarking_start_1)/1000.0,
+		(benchmarking_end_2-benchmarking_start_2)/1000.0,
+		(benchmarking_end_3-benchmarking_start_3)/1000.0,
 		len(note_data)])
 	)
 

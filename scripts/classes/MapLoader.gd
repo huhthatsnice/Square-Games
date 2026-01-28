@@ -35,7 +35,7 @@ static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 			new_note_data.x = 1.0-split[0].to_float()
 			new_note_data.y = split[0].to_float()-1.0
 			new_note_data.t = split[2].to_int()
-			
+
 			output_data.append(new_note_data)
 
 	return output_data

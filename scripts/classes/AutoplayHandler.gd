@@ -45,7 +45,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		for note: MapLoader.NoteDataMinimal in collected:
 			avg_pos += Vector2(note.x,note.y)
 		avg_pos /= len(collected)
-		
+
 		var new_note_data: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
 		new_note_data.x = avg_pos.x
 		new_note_data.y = avg_pos.y
@@ -79,7 +79,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 
 		var new_note: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
-		
+
 		new_note.x = note_2.x+shift_vec.x
 		new_note.y = note_2.y+shift_vec.y
 		new_note.t = note_2.t
