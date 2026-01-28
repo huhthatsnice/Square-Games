@@ -1,0 +1,6 @@
+chores;
+get a real user interface
+replace NoteDataMinimal with arrays since they're faster
+add real spin
+
+decisions;
