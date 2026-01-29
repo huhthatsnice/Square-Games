@@ -264,3 +264,32 @@ func _ready() -> void:
 			var v:Variant = SSCS.modifiers[i]
 			Terminal.print_console("{0}:{1}\n".format([i,v]))
 	,["lsm","listmodifiers"]))
+
+	register_command(Command.new(func(replay_id: String) -> void:
+		for replay:String in DirAccess.get_files_at("user://replays"):
+			if replay.begins_with(replay_id):
+				var replay_data: Dictionary = ReplayParser.get_data_from_replay(FileAccess.get_file_as_bytes("user://replays/%s" % replay))
+
+				if SSCS.settings.use_replay_settings:
+					SSCS.settings = replay_data.settings
+				SSCS.modifiers = replay_data.modifiers
+
+				var game_handler: GameHandler = GameHandler.new(replay_data.map, replay_data.replay_note_hit_data, replay_data.replay_cursor_pos_data, true)
+
+				SSCS.game_handler = game_handler
+				$"/root/Game".add_child(game_handler)
+
+				Terminal.is_accepting_input = false
+				Terminal.visible = false
+				game_handler.play(replay_data.start_from)
+
+				await game_handler.ended
+
+				Terminal.visible = true
+				Terminal.is_accepting_input = true
+
+				game_handler.queue_free()
+				SSCS.settings = SSCS.true_settings
+				SSCS.modifiers = SSCS.true_modifiers
+
+	,["rp","replay"]))

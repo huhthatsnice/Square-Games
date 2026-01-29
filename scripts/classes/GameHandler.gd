@@ -61,19 +61,28 @@ var replay_cursor_pos_data: PackedVector3Array
 var use_hit_sound: bool = SSCS.settings.hit_sound_volume > 0
 var use_miss_sound: bool = SSCS.settings.miss_sound_volume > 0
 
+var record_replays: bool = SSCS.settings.record_replays
 var smooth_replays: bool = SSCS.settings.smooth_replays
+
+var recorded_replay_note_hit_data: PackedByteArray
+var recorded_replay_cursor_pos_data: PackedVector3Array
 
 var last_replay_cursor_pos_index: int = 0
 
 var hit_sound_player: AudioStreamPlayer
 var miss_sound_player: AudioStreamPlayer
 
+var horizontal_flip: bool = SSCS.modifiers.horizontal_flip
+var vertical_flip: bool = SSCS.modifiers.vertical_flip
+
+var end_replay_on_end_of_data: bool = false
+
 signal ended
 signal note_hit
 signal note_missed
 
 @warning_ignore("shadowed_variable")
-func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = []) -> void:
+func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = [], end_replay_on_end_of_data: bool = false) -> void:
 	map = map_arg
 
 	var benchmark_start_1: int = Time.get_ticks_usec()
@@ -103,10 +112,10 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	var benchmark_end_1: int = Time.get_ticks_usec()
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
 
-	if SSCS.modifiers.horizontal_flip or SSCS.modifiers.vertical_flip:
+	if horizontal_flip or vertical_flip:
 		for note_data: MapLoader.NoteDataMinimal in map.data:
-			note_data.x = (-1 if SSCS.modifiers.horizontal_flip else 1) * note_data.x
-			note_data.y = (-1 if SSCS.modifiers.vertical_flip else 1) * note_data.y
+			note_data.x = (-1 if horizontal_flip else 1) * note_data.x
+			note_data.y = (-1 if vertical_flip else 1) * note_data.y
 
 	print(max_loaded_notes)
 
@@ -121,13 +130,14 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 		self.is_replay = true
 		self.replay_cursor_pos_data = replay_cursor_pos_data
 		self.replay_note_hit_data = replay_note_hit_data
+		self.end_replay_on_end_of_data = end_replay_on_end_of_data
 
 func _notification(what: int) -> void: #have to have this since horizontal/vertical flip mutates map data and we have to undo it
 	if what == NOTIFICATION_PREDELETE:
-		if SSCS.modifiers.horizontal_flip or SSCS.modifiers.vertical_flip:
+		if horizontal_flip or vertical_flip:
 			for note_data: MapLoader.NoteDataMinimal in map.data:
-				note_data.x = (-1 if SSCS.modifiers.horizontal_flip else 1) * note_data.x
-				note_data.y = (-1 if SSCS.modifiers.vertical_flip else 1) * note_data.y
+				note_data.x = (-1 if horizontal_flip else 1) * note_data.x
+				note_data.y = (-1 if vertical_flip else 1) * note_data.y
 
 func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
@@ -247,8 +257,25 @@ func play(from: float) -> void:
 	cursor.update_position()
 	playing = true
 	AudioManager.set_stream(map.audio)
-	AudioManager.set_playback_speed(SSCS.modifiers.speed)
-	AudioManager.play(from - 1*SSCS.modifiers.speed)
+	AudioManager.set_playback_speed(speed_multiplier)
+	AudioManager.play(from - 1 * speed_multiplier)
+
+	if record_replays and !is_replay and SSCS.lobby == null:
+		note_hit.connect(func(note_id: int) -> void:
+			recorded_replay_note_hit_data.resize(max(len(recorded_replay_note_hit_data), note_id + 1))
+			recorded_replay_note_hit_data[note_id] = 1
+		)
+
+		note_hit.connect(func(note_id: int) -> void:
+			recorded_replay_note_hit_data.resize(max(len(recorded_replay_note_hit_data), note_id + 1))
+			recorded_replay_note_hit_data[note_id] = 0
+		)
+
+		ended.connect(func() -> void:
+			var new_replay: FileAccess = FileAccess.open("user://replays/" + "{0} {1} {2}.sscr".format([len(DirAccess.get_files_at("user://replays")), map.map_name, Time.get_datetime_string_from_system(false, true)]).replace(" ","_").replace(":","_"), FileAccess.WRITE)
+			print(new_replay)
+			new_replay.store_buffer(ReplayParser.create_replay_without_map(map, recorded_replay_note_hit_data, recorded_replay_cursor_pos_data, SSCS.settings, SSCS.modifiers, from))
+		)
 
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):
@@ -391,11 +418,14 @@ func _process(_dt: float) -> void:
 			last_replay_cursor_pos_index += 1
 			cursor_pos_data = replay_cursor_pos_data[last_replay_cursor_pos_index]
 
-		if last_replay_cursor_pos_index >= len(replay_cursor_pos_data):
-			print("you a foreteller bro")
-			pause()
-			await get_tree().create_timer((1.0 / Engine.physics_ticks_per_second) * 30).timeout
-			unpause()
+		if last_replay_cursor_pos_index + 1 >= len(replay_cursor_pos_data):
+			if end_replay_on_end_of_data:
+				stop()
+			else:
+				print("you a foreteller bro")
+				pause()
+				await get_tree().create_timer((1.0 / Engine.physics_ticks_per_second) * 30).timeout
+				unpause()
 
 		if smooth_replays:
 			var previous_cursor_pos_data: Vector3 = replay_cursor_pos_data[max(last_replay_cursor_pos_index-1, 0)]
@@ -438,3 +468,10 @@ func _input(event: InputEvent) -> void:
 			pause()
 		else:
 			unpause()
+
+func _physics_process(_delta: float) -> void:
+	if record_replays and playing and !is_replay and SSCS.lobby == null:
+		var cursor_pos: Vector2 = cursor.pos
+		var cursor_pos_time: Vector3 = Vector3(cursor_pos.x,cursor_pos.y,AudioManager.elapsed)
+
+		recorded_replay_cursor_pos_data.append(cursor_pos_time)

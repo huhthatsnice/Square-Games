@@ -55,7 +55,13 @@ class Settings:
 
 	var hud_scale: float = 1
 
+	var record_replays: bool = true
 	var smooth_replays: bool = true
+	var replay_cursor_fps: int = 240:
+		set(x):
+			replay_cursor_fps = x
+			Engine.physics_ticks_per_second = replay_cursor_fps
+	var use_replay_settings: bool = true
 
 class Modifiers:
 	var hit_time: float = 45.0
@@ -72,6 +78,10 @@ signal modifier_updated(modifier: String, old_value: Variant, new_value: Variant
 
 var settings: Settings = Settings.new()
 var modifiers: Modifiers = Modifiers.new()
+
+var true_settings: Settings = settings
+var true_modifiers: Modifiers = modifiers
+
 var lobby: Lobby
 var game_handler: GameHandler
 var map_cache: Dictionary[String, MapLoader.Map] = {}
@@ -367,6 +377,7 @@ func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
 	DirAccess.make_dir_absolute("user://rhythiamaps")
+	DirAccess.make_dir_absolute("user://replays")
 
 	var raw_settings_data: PackedByteArray = FileAccess.get_file_as_bytes("user://settings.txt")
 
