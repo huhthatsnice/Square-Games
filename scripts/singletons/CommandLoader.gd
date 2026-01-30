@@ -71,6 +71,11 @@ const command_help:Dictionary = {
 		aliases = ["spec"],
 		arguments = ["Steam ID"],
 		use = "Spectates the user with the given steam id if they are in the game."
+	},
+	replay = {
+		aliases = ["rp"],
+		arguments = ["Replay file id"],
+		use = "Plays the given replay. Replay file id must be the start of a replay file in your replays folder."
 	}
 }
 
