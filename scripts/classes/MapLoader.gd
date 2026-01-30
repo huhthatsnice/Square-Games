@@ -43,6 +43,8 @@ static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 static func from_path_native(path: String) -> Map: #path to a folder with a data.txt file and audio.mp3 file
 	var new_map: Map = Map.new()
 
+	if !FileAccess.file_exists(path): print("no map file"); return new_map
+
 	var audio: AudioStreamMP3 = AudioStreamMP3.new()
 	audio.data = FileAccess.get_file_as_bytes("%s/audio.mp3" % path)
 

@@ -205,6 +205,18 @@ func get_map_file_path_from_name(map_name: String) -> String:
 
 	return map
 
+func get_full_map_name_from_partial_name(partial_map_name: String) -> String:
+
+	for v: String in DirAccess.get_files_at("user://maps"):
+		if v.get_basename().contains(partial_map_name):
+			return v.get_basename()
+
+	for v: String in DirAccess.get_files_at("user://rhythiamaps"):
+		if v.get_basename().contains(partial_map_name):
+			return v.get_basename()
+
+	return ""
+
 signal temporary_map_link_received
 func get_temporary_map_download_link(map: MapLoader.Map) -> String:
 	if url_cache.has(map.map_name):
