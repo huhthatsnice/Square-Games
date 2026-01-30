@@ -159,7 +159,7 @@ func _ready() -> void:
 	camera.environment.glow_bloom = SSCS.settings.glow_bloom
 
 	cursor = cursor_base.instantiate()
-	if is_replay:
+	if is_replay or autoplay:
 		cursor.accepts_input = false
 	self.add_child(cursor)
 
@@ -260,7 +260,7 @@ func play(from: float) -> void:
 	AudioManager.set_playback_speed(speed_multiplier)
 	AudioManager.play(from - 1 * speed_multiplier)
 
-	if record_replays and !is_replay and SSCS.lobby == null:
+	if record_replays and !is_replay and SSCS.lobby == null and !autoplay:
 		note_hit.connect(func(note_id: int) -> void:
 			recorded_replay_note_hit_data.resize(max(len(recorded_replay_note_hit_data), note_id + 1))
 			recorded_replay_note_hit_data[note_id] = 1
@@ -470,7 +470,7 @@ func _input(event: InputEvent) -> void:
 			unpause()
 
 func _physics_process(_delta: float) -> void:
-	if record_replays and playing and !is_replay and SSCS.lobby == null:
+	if record_replays and playing and !is_replay and SSCS.lobby == null and !autoplay:
 		var cursor_pos: Vector2 = cursor.pos
 		var cursor_pos_time: Vector3 = Vector3(cursor_pos.x,cursor_pos.y,AudioManager.elapsed)
 
