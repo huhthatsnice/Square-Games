@@ -243,8 +243,9 @@ func _ready() -> void:
 		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
 	,["help"],0))
 
-	register_command(Command.new(func(user_name: String) -> void:
+	register_command(Command.new(func(user_name_array: Array[String]) -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
+		var user_name: String = " ".join(user_name_array)
 
 		for user_id: int in SSCS.lobby.lobby_users:
 			var data: Dictionary = SSCS.lobby.lobby_users[user_id]
@@ -257,7 +258,7 @@ func _ready() -> void:
 			return
 
 		Terminal.print_console("Specified user does not exist.\n")
-	,["spectate","spec"]))
+	,["spectate","spec"], 1, true))
 
 	register_command(Command.new(func() -> void:
 		for i:String in SSCS.encode_class(SSCS.modifiers):
