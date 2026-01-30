@@ -33,7 +33,7 @@ static func _parse_data(data: String) -> Array[NoteDataMinimal]:
 		if len(split)==3:
 			var new_note_data: NoteDataMinimal = NoteDataMinimal.new()
 			new_note_data.x = 1.0-split[0].to_float()
-			new_note_data.y = split[0].to_float()-1.0
+			new_note_data.y = 1.0-split[1].to_float()
 			new_note_data.t = split[2].to_int()
 
 			output_data.append(new_note_data)
