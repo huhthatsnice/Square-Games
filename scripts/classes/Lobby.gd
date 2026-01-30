@@ -262,7 +262,7 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 			user_id = client_data.user_id,
 			username = client_data.username,
 			settings = client_data.settings,
-			fake_name = client_data.fake_name
+			fake_username = client_data.fake_username
 		}))
 	var self_fake_name: String = ""
 	if ("a" + Steam.getPersonaName()).is_valid_unicode_identifier():
@@ -271,7 +271,7 @@ func _client_connected_host(connection_handle: int, connection_data: Dictionary)
 		user_id = SteamHandler.steam_id,
 		username = Steam.getPersonaName(),
 		settings = SSCS.encode_class(SSCS.settings),
-		fake_name = self_fake_name
+		fake_username = self_fake_name
 	}))
 
 func _client_removed_host(_connection_handle: int, connection_data: Dictionary) -> void:
@@ -373,7 +373,7 @@ func _packet_received_client(packet: Dictionary) -> void:
 				username = data.username,
 				settings = data.settings,
 
-				fake_username = data.fake_username,
+				fake_username = data.fake_username if data.has("fake_username") else "",
 				display_name = data.username + ("" if data.fake_username == "" else " (%s)" % data.fake_username),
 
 				alive = false,
@@ -496,6 +496,7 @@ func _notification(what: int) -> void:
 		print("lobby closed")
 		print(SteamHandler.leave_lobby())
 		SteamHandler.accepting_connections = false
+		Terminal.print_console("You have left the lobby.\n")
 
 func _init(host_user_id: int = 0) -> void:
 	print("lobby created with host id '%s'" % host_user_id)

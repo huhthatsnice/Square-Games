@@ -63,6 +63,8 @@ class Settings:
 			Engine.physics_ticks_per_second = replay_cursor_fps
 	var use_replay_settings: bool = true
 
+
+
 class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
