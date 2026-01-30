@@ -42,7 +42,6 @@ enum CLIENT_PACKET {
 	GET_MAP_HASH,
 }
 
-
 enum HOST_PACKET {
 	PLAYER_ADDED,
 	CHAT_MESSAGE,
@@ -177,6 +176,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 		Terminal.print_console(Steam.getPersonaName() +" has died.\n")
 		Terminal.visible = true
 		Terminal.is_accepting_input = true
+		game_handler.queue_free()
 
 		if SSCS.settings.auto_spectate:
 			var best_value: int = 0
@@ -194,6 +194,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 
 			if best != 0:
 				start_spectate(best)
+
 	)
 
 	var game_scene:Node = $"/root/Game"
