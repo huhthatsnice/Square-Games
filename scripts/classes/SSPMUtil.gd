@@ -165,7 +165,7 @@ static func load_from_path(path: String) -> SSPM:
 
 	for i: int in range(noteCount):
 		var v: MapLoader.NoteDataMinimal = note_data[i]
-		csv_data[i] = "|".join([v.x,v.y,v.t]) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
+		csv_data[i] = "|".join([1-v.x,1-v.y,v.t]) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
 
 	newdata.data_csv=",".join(csv_data)
 
