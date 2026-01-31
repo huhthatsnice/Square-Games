@@ -19,6 +19,10 @@ var semi_spin: bool = SSCS.settings.semi_spin
 
 var accepts_input: bool = true
 
+var true_spin: bool = SSCS.settings.true_spin
+
+var hit_plane: Plane = Plane(Vector3(0, 0, 1), Vector3(0, 0, SSCS.settings.grid_distance))
+
 func update_position() -> void:
 	pos_world.x=pos.x
 	pos_world.y=pos.y
@@ -40,22 +44,39 @@ func _ready() -> void:
 	position = pos_world
 	camera.position = Vector3(pos.x*parallax,pos.y*parallax,0)
 
+	camera.look_at(Vector3(0, 0, 1))
 	if semi_spin:
 		camera.look_at(position)
 
 func _input(event: InputEvent) -> void:
 	if !accepts_input: return
 	if event is InputEventMouseMotion:
-		if absolute:
-			pos = ((screen_center - event.position) * inverted_pixels_per_grid_unit).clampf(-GRID_MAX, GRID_MAX)
+		if true_spin:
+			var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * inverted_pixels_per_grid_unit
+			camera.rotation += mouse_rotation
+			var intersection: Vector3 = hit_plane.intersects_ray(camera.position, -camera.basis.z)
+
+			if intersection != null:
+				pos_world = intersection.clamp(Vector3(-GRID_MAX, -GRID_MAX, -INF), Vector3(GRID_MAX, GRID_MAX, INF))
+
+				pos.x = pos_world.x
+				pos.y = pos_world.y
+
+				position = pos_world
+
+				camera.look_at_from_position(Vector3(pos.x*parallax, pos.y*parallax, 0), pos_world)
+
 		else:
-			pos -= event.relative * inverted_pixels_per_grid_unit
-			pos = pos.clampf(-GRID_MAX, GRID_MAX)
+			if absolute:
+				pos = ((screen_center - event.position) * inverted_pixels_per_grid_unit).clampf(-GRID_MAX, GRID_MAX)
+			else:
+				pos -= event.relative * inverted_pixels_per_grid_unit
+				pos = pos.clampf(-GRID_MAX, GRID_MAX)
 
-		pos_world.x = pos.x
-		pos_world.y = pos.y
-		position = pos_world
-		camera.position = Vector3(pos.x*parallax, pos.y*parallax, 0)
+			pos_world.x = pos.x
+			pos_world.y = pos.y
+			position = pos_world
+			camera.position = Vector3(pos.x*parallax, pos.y*parallax, 0)
 
-		if semi_spin:
-			camera.look_at(position)
+			if semi_spin:
+				camera.look_at(position)

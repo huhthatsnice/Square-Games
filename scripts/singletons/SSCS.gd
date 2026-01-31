@@ -11,7 +11,9 @@ class Settings:
 	]
 	var grid_distance: float = 3.5
 	var vanish_distance: float = 0.2
+
 	var pixels_per_grid_unit: float = 100.0
+
 	var parallax: float = 0.1
 
 	var note_transparency: float = 0.3
@@ -35,7 +37,7 @@ class Settings:
 	var glow_bloom: float = 0.2
 
 	var semi_spin: bool = false
-	#var true_spin: bool = false
+	var true_spin: bool = false
 
 	var fullscreen: bool = true:
 		set(x):
