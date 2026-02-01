@@ -23,6 +23,8 @@ var true_spin: bool = SSCS.settings.true_spin
 
 var hit_plane: Plane = Plane(Vector3(0, 0, 1), Vector3(0, 0, SSCS.settings.grid_distance))
 
+var cursor_scale: float = SSCS.settings.cursor_scale
+
 func update_position() -> void:
 	pos_world.x=pos.x
 	pos_world.y=pos.y
@@ -35,7 +37,7 @@ func _ready() -> void:
 		self.texture = ImageTexture.create_from_image(SSCS.load_image(custom_cursor_resource))
 		print("yeah i found an image")
 	var texture_size: Vector2 = self.texture.get_size()
-	scale = (Vector3(texture_size.x,texture_size.y,1)*self.pixel_size).inverse() * Vector3(0.28,0.28,1.0)
+	scale = (Vector3(texture_size.x,texture_size.y,1)*self.pixel_size).inverse() * Vector3(0.28,0.28,1.0) * cursor_scale
 	#print(self.scale)
 
 	camera = $"/root/Game/Camera"

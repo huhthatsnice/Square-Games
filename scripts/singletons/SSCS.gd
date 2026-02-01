@@ -65,6 +65,9 @@ class Settings:
 			Engine.physics_ticks_per_second = replay_cursor_fps
 	var use_replay_settings: bool = true
 
+	var cursor_scale: float = 1
+	var note_scale: float = 1
+
 
 
 class Modifiers:

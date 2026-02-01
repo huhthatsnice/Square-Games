@@ -15,6 +15,8 @@ var note_transform: Transform3D
 var color_set:Array[Color]=SSCS.settings.color_set
 var grid_distance:float = SSCS.settings.grid_distance
 
+var note_scale: float = SSCS.settings.note_scale
+
 func change_id(new_note_id: int) -> void:
 	multimesh_index = new_note_id
 
@@ -39,7 +41,7 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	#guaruntees note's absolute size will be the Vector3 on the right
 	var aabb:AABB = multimesh.mesh.get_aabb()
 
-	var basis: Basis = Basis.from_scale(aabb.size.inverse() * Vector3(1,1,0.2))
+	var basis: Basis = Basis.from_scale(aabb.size.inverse() * Vector3(1,1,0.2) * note_scale)
 	var origin: Vector3 = Vector3(pos.x,pos.y,grid_distance)
 
 	note_transform=Transform3D(basis,origin)
