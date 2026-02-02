@@ -1,0 +1,29 @@
+[gd_scene load_steps=4 format=3 uid="uid://bt6ffaggxdng6"]
+
+[ext_resource type="Shader" uid="uid://c46ldkdwghaj" path="res://assets/shaders/terminal.gdshader" id="1_3msla"]
+[ext_resource type="Script" uid="uid://dchkkmdbcvv7c" path="res://scripts/singletons/NewTerminal.gd" id="1_d1vgd"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_d1vgd"]
+shader = ExtResource("1_3msla")
+shader_parameter/color_1 = Vector4(1, 0, 1, 1)
+shader_parameter/color_2 = Vector4(0, 1, 1, 1)
+
+[node name="NewTerminal" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_d1vgd")
+
+[node name="Background" type="ColorRect" parent="."]
+material = SubResource("ShaderMaterial_d1vgd")
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+rotation = -0.002558097
+color = Color(0.144, 0.16, 0.15866667, 1)
