@@ -75,7 +75,7 @@ class Modifiers:
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
 	var no_fail: bool = false
-	var autoplay: bool = false
+	var autoplay: bool = true
 
 	var horizontal_flip: bool = false
 	var vertical_flip: bool = false

@@ -9,6 +9,7 @@ shader_parameter/color_1 = Vector4(1, 0, 1, 1)
 shader_parameter/color_2 = Vector4(0, 1, 1, 1)
 
 [node name="NewTerminal" type="Control"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
