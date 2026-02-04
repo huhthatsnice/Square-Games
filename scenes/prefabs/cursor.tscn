@@ -7,7 +7,6 @@
 transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
 cast_shadow = 0
 gi_mode = 0
-transparent = false
 double_sided = false
 texture = ExtResource("1_mnqj6")
 script = ExtResource("2_j4t12")
