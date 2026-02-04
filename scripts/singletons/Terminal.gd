@@ -44,6 +44,7 @@ signal line_entered
 func print_console(txt:String) -> void:
 	console_text += txt
 	update_console()
+	print(int(INF))
 
 func update_console() -> void:
 	output.text = console_text
@@ -72,6 +73,8 @@ func _input(event:InputEvent) -> void:
 					if len(command_history)==0: return
 					command_history_cursor = clamp(command_history_cursor + 1, -1, len(command_history)-1)
 					input.text = command_history[command_history_cursor]
+					await get_tree().process_frame
+					input.caret_column = input.text.length()
 				KEY_DOWN:
 					if len(command_history)==0: return
 					command_history_cursor = clamp(command_history_cursor - 1, -1, len(command_history)-1)
@@ -79,5 +82,7 @@ func _input(event:InputEvent) -> void:
 						input.text = ""
 					else:
 						input.text = command_history[command_history_cursor]
+						await get_tree().process_frame
+						input.caret_blink = input.text.length()
 				_:
 					return

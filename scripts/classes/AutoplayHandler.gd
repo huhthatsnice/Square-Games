@@ -48,8 +48,21 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		if i > 1:
 			var prev_data: MapLoader.NoteDataMinimal = preprocessed_data[-1]
-			var speed: float = (Vector2(prev_data.x, prev_data.y) - avg_pos).length() / (abs(prev_data.t - v.t) / 10.0)
-			avg_pos *= 0.8 + (sigmoid(speed * 5) - 0.5) * 2 * 0.4
+			var prev_data_pos: Vector2 = Vector2(prev_data.x, prev_data.y)
+
+			var time_elapsed: float = abs(prev_data.t - v.t) / 1000.0
+
+			var speed: float = (prev_data_pos - avg_pos).length() / (time_elapsed * 100)
+			avg_pos *= 0.8 + (sigmoid(speed * 5) - 0.5) * 2 * 0.2
+
+			if i > 2:
+				var prev_prev_data: MapLoader.NoteDataMinimal = preprocessed_data[-2]
+				var prev_prev_data_pos: Vector2 = Vector2(prev_prev_data.x, prev_prev_data.y)
+
+				var dir_1: Vector2 = (prev_data_pos - prev_prev_data_pos).normalized()
+				var dir_2: Vector2 = (avg_pos - prev_data_pos).normalized()
+
+				avg_pos *= 1 + (max(-dir_1.dot(dir_2) - 0.5, 0) * (1 / (time_elapsed * 20 + 1)))
 
 		var new_note_data: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
 		new_note_data.x = avg_pos.x
