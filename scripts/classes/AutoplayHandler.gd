@@ -13,6 +13,16 @@ var max_range: float = SSCS.modifiers.hitbox_size*max_shift_multi
 
 var last_loaded_note: int = 0
 
+static func _check_hit(note_pos: Variant, cursor_pos: Variant, size: float) -> bool:
+	if typeof(note_pos) != TYPE_VECTOR2:
+		note_pos = Vector2(note_pos.x, note_pos.y)
+	if typeof(cursor_pos) != TYPE_VECTOR2:
+		cursor_pos = Vector2(cursor_pos.x, cursor_pos.y)
+
+	var diff: Vector2 = (note_pos - cursor_pos).abs()
+
+	return max(diff.x, diff.y) < size
+
 func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 	self.map = map_arg
 	self.cursor = cursor_arg
@@ -71,19 +81,113 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		preprocessed_data.append(new_note_data)
 
+	print("begin aggressive stack compressing")
+	i = 2
+
+	var preprocessed_data_len: int = len(preprocessed_data)
+
+	var secondary_preprocessed_data: Array[MapLoader.NoteDataMinimal] = []
+
+	if preprocessed_data_len > 5:
+
+		secondary_preprocessed_data.append(preprocessed_data[0])
+		secondary_preprocessed_data.append(preprocessed_data[1])
+
+		while i + 3 < preprocessed_data_len:
+
+			var stack_length: int = 1
+
+			var top_note: MapLoader.NoteDataMinimal = preprocessed_data[i]
+			var top_note_i: int = i
+			i += 1
+			#secondary_preprocessed_data.append(top_note)
+
+			while i + 2 < preprocessed_data_len:
+				var next_note: MapLoader.NoteDataMinimal = preprocessed_data[i]
+				i += 1
+				if _check_hit(next_note, top_note, 0.1):
+					stack_length += 1
+				else:
+					break
+			i -= 1
+
+			if stack_length > 1:
+				print("stack found ", top_note.t)
+				print(stack_length)
+
+				var prev_note_2: MapLoader.NoteDataMinimal = preprocessed_data[top_note_i - 2]
+				var prev_note_1: MapLoader.NoteDataMinimal = preprocessed_data[top_note_i - 1]
+
+				var end_note: MapLoader.NoteDataMinimal = preprocessed_data[i-1]
+
+				var past_note_1: MapLoader.NoteDataMinimal = preprocessed_data[i]
+				var past_note_2: MapLoader.NoteDataMinimal = preprocessed_data[i + 1]
+
+				var tests: Array[MapLoader.NoteDataMinimal] = []
+
+				var new_note_1: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+				new_note_1.x = top_note.x
+				new_note_1.y = top_note.y
+				new_note_1.t = floor((top_note.t + end_note.t) / 2.0)
+				tests.append(new_note_1)
+
+				var new_note_2: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+				new_note_2.x = top_note.x
+				new_note_2.y = top_note.y
+				new_note_2.t = top_note.t
+				tests.append(new_note_2)
+
+				var new_note_3: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+				new_note_3.x = top_note.x
+				new_note_3.y = top_note.y
+				new_note_3.t = end_note.t
+				tests.append(new_note_3)
+
+				var valid: bool = false
+
+				#for new_note: MapLoader.NoteDataMinimal in tests:
+					#if _check_hit(top_note, SplineManager._get_position(prev_note_2, prev_note_1, new_note, past_note_1, top_note.t), SSCS.modifiers.hitbox_size) and _check_hit(end_note, SplineManager._get_position(prev_note_1, new_note, past_note_1, past_note_2, end_note.t), SSCS.modifiers.hitbox_size):
+						#secondary_preprocessed_data.append(new_note)
+						#print("merge")
+						#valid = true
+						#break
+
+				if !valid:
+					print("stackify")
+					secondary_preprocessed_data.append(top_note)
+					secondary_preprocessed_data.append(top_note)
+
+					secondary_preprocessed_data.append(end_note)
+					secondary_preprocessed_data.append(end_note)
+
+					#for i2: int in range(top_note_i, i):
+						#print("add")
+						#secondary_preprocessed_data.append(preprocessed_data[i2])
+						#secondary_preprocessed_data.append(preprocessed_data[i2])
+			else:
+				secondary_preprocessed_data.append(top_note)
+
+		secondary_preprocessed_data.append(preprocessed_data[-1])
+		secondary_preprocessed_data.append(preprocessed_data[-2])
+	else:
+		secondary_preprocessed_data = preprocessed_data
+
 	#shift preprocessing
 	i = 0
-	var preprocessed_data_len: int = len(preprocessed_data)
+	var secondary_preprocessed_data_len: int = len(secondary_preprocessed_data)
+	print(secondary_preprocessed_data_len)
 
 	print("begin shift preprocessing")
 
-	while i+1<preprocessed_data_len:
 
-		var note_0: MapLoader.NoteDataMinimal = preprocessed_data[max(i-2,0)]
-		var note_1: MapLoader.NoteDataMinimal = preprocessed_data[max(i-1,0)]
-		var note_2: MapLoader.NoteDataMinimal = preprocessed_data[i]
-		var note_3: MapLoader.NoteDataMinimal = preprocessed_data[i+1]
-		var note_4: MapLoader.NoteDataMinimal = preprocessed_data[min(i+2,preprocessed_data_len-1)]
+
+	while i+1<secondary_preprocessed_data_len:
+
+		var note_0: MapLoader.NoteDataMinimal = secondary_preprocessed_data[max(i-2,0)]
+		var note_1: MapLoader.NoteDataMinimal = secondary_preprocessed_data[max(i-1,0)]
+		var note_2: MapLoader.NoteDataMinimal = secondary_preprocessed_data[i]
+		var note_3: MapLoader.NoteDataMinimal = secondary_preprocessed_data[i+1]
+		var note_4: MapLoader.NoteDataMinimal = secondary_preprocessed_data[min(i+2,secondary_preprocessed_data_len-1)]
 
 		var pos: Vector2 = SplineManager._get_position(note_0,note_1,note_3,note_4,note_2.t)
 
@@ -95,15 +199,22 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			shift_vec = shift_vec * clamp(shift_vec.x, -max_range, max_range)/shift_vec.x
 			shift_vec = shift_vec * clamp(shift_vec.y, -max_range, max_range)/shift_vec.y
 
-
 		var new_note: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
 
 		new_note.x = note_2.x+shift_vec.x
 		new_note.y = note_2.y+shift_vec.y
 		new_note.t = note_2.t
 
-		processed_data.append(new_note)
+		if _check_hit(SplineManager._get_position(note_1, new_note, note_3, note_4, new_note.t), note_2, SSCS.modifiers.hitbox_size):
+			processed_data.append(new_note)
+		else:
+			processed_data.append(note_2)
 		i += 1
+
+	processed_data.append(preprocessed_data[-1])
+
+	#processed_data = secondary_preprocessed_data
+
 
 func get_cursor_position() -> Vector2:
 	var elapsed: int = int(AudioManager.elapsed*1000.0)

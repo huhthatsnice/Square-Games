@@ -59,8 +59,6 @@ func benchmark() -> void:
 func _ready() -> void:
 	pass
 
-	print(SSCS.load_map_from_name("asdhgyaiygfd"))
-
 	#var request: HTTPRequest = HTTPRequest.new()
 	#self.add_child(request)
 #
