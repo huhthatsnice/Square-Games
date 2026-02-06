@@ -158,7 +158,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 					secondary_preprocessed_data.append(top_note)
 
 					secondary_preprocessed_data.append(end_note)
-					secondary_preprocessed_data.append(end_note)
+					#secondary_preprocessed_data.append(end_note)
 
 					#for i2: int in range(top_note_i, i):
 						#print("add")

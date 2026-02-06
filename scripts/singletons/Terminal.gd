@@ -44,7 +44,6 @@ signal line_entered
 func print_console(txt:String) -> void:
 	console_text += txt
 	update_console()
-	print(int(INF))
 
 func update_console() -> void:
 	output.text = console_text
