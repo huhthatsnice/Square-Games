@@ -107,7 +107,9 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 		if current_note - note_counter > max_loaded_notes:
 			max_loaded_notes = current_note - note_counter
 
-	max_loaded_notes+=1
+	max_loaded_notes += 1
+	if max_loaded_notes > 10000: #holy shit visual map
+		max_loaded_notes *= 2
 
 	var benchmark_end_1: int = Time.get_ticks_usec()
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
