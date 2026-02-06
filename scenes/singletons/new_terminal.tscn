@@ -11,7 +11,7 @@ shader_parameter/color_2 = Vector4(0, 1, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jdn8h"]
 shader = ExtResource("3_31kv5")
-shader_parameter/blur_scale = 5.0
+shader_parameter/blur_scale = 8.0
 
 [node name="NewTerminal" type="Control"]
 layout_mode = 3
@@ -36,8 +36,16 @@ color = Color(0.144, 0.16, 0.15866667, 1)
 [node name="blur" type="ColorRect" parent="."]
 material = SubResource("ShaderMaterial_jdn8h")
 layout_mode = 0
-offset_left = 264.0
-offset_top = 73.0
-offset_right = 592.0
-offset_bottom = 327.0
+offset_left = 173.0
+offset_top = 53.0
+offset_right = 501.0
+offset_bottom = 307.0
 color = Color(1, 1, 1, 0)
+
+[node name="Label" type="Label" parent="blur"]
+layout_mode = 0
+offset_left = 92.0
+offset_top = 98.0
+offset_right = 181.0
+offset_bottom = 121.0
+text = "Hello Nigga"
