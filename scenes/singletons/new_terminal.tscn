@@ -1,8 +1,10 @@
-[gd_scene load_steps=6 format=3 uid="uid://bt6ffaggxdng6"]
+[gd_scene load_steps=9 format=3 uid="uid://bt6ffaggxdng6"]
 
 [ext_resource type="Shader" uid="uid://c46ldkdwghaj" path="res://assets/shaders/terminal.gdshader" id="1_3msla"]
 [ext_resource type="Script" uid="uid://dchkkmdbcvv7c" path="res://scripts/singletons/NewTerminal.gd" id="1_d1vgd"]
-[ext_resource type="Shader" uid="uid://cbxktt0naliy6" path="res://scenes/singletons/blur.gdshader" id="3_31kv5"]
+[ext_resource type="Shader" uid="uid://diqgvkyp0v8rm" path="res://assets/shaders/blur_horizontal.gdshader" id="3_31kv5"]
+[ext_resource type="Shader" uid="uid://cbxktt0naliy6" path="res://assets/shaders/blur_vertical.gdshader" id="4_jdn8h"]
+[ext_resource type="Script" uid="uid://bpbaqt3f4n3k6" path="res://scripts/fps.gd" id="5_x802j"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d1vgd"]
 shader = ExtResource("1_3msla")
@@ -11,7 +13,16 @@ shader_parameter/color_2 = Vector4(0, 1, 1, 1)
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_jdn8h"]
 shader = ExtResource("3_31kv5")
-shader_parameter/blur_scale = 8.0
+shader_parameter/blur_scale = 32.0
+shader_parameter/variance = 0.05
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_x802j"]
+shader = ExtResource("4_jdn8h")
+shader_parameter/blur_scale = 32.0
+shader_parameter/variance = 0.05
+shader_parameter/brightness = 0.66
+shader_parameter/contrast = 3.0
+shader_parameter/contrast_from = 0.1
 
 [node name="NewTerminal" type="Control"]
 layout_mode = 3
@@ -33,19 +44,50 @@ grow_vertical = 2
 rotation = -0.002558097
 color = Color(0.144, 0.16, 0.15866667, 1)
 
-[node name="blur" type="ColorRect" parent="."]
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="blur_horizontal" type="ColorRect" parent="CanvasLayer"]
 material = SubResource("ShaderMaterial_jdn8h")
-layout_mode = 0
-offset_left = 173.0
-offset_top = 53.0
-offset_right = 501.0
-offset_bottom = 307.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -780.0
+offset_bottom = -220.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0)
+
+[node name="CanvasLayer2" type="CanvasLayer" parent="CanvasLayer"]
+
+[node name="blur_vertical" type="ColorRect" parent="CanvasLayer/CanvasLayer2"]
+material = SubResource("ShaderMaterial_x802j")
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -780.0
+offset_bottom = -220.0
+grow_horizontal = 2
+grow_vertical = 2
 color = Color(1, 1, 1, 0)
 
-[node name="Label" type="Label" parent="blur"]
+[node name="Label" type="Label" parent="CanvasLayer/CanvasLayer2/blur_vertical"]
+z_index = 5
 layout_mode = 0
 offset_left = 92.0
 offset_top = 98.0
 offset_right = 181.0
 offset_bottom = 121.0
 text = "Hello Nigga"
+
+[node name="FPS" type="RichTextLabel" parent="CanvasLayer/CanvasLayer2/blur_vertical"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -200.0
+offset_bottom = 50.0
+grow_horizontal = 0
+theme_override_colors/default_color = Color(0.842094, 0.000559857, 0.842088, 1)
+text = "tuff"
+scroll_active = false
+script = ExtResource("5_x802j")
