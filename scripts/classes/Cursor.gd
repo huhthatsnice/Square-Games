@@ -15,6 +15,8 @@ var inverted_pixels_per_grid_unit: float = 1/pixels_per_grid_unit
 var parallax: float = SSCS.settings.parallax
 var absolute: bool = SSCS.settings.absolute_input
 
+var degrees_per_pixel: float = Vector2(grid_distance, inverted_pixels_per_grid_unit).angle()
+
 var semi_spin: bool = SSCS.settings.semi_spin
 
 var accepts_input: bool = true
@@ -54,7 +56,7 @@ func _input(event: InputEvent) -> void:
 	if !accepts_input: return
 	if event is InputEventMouseMotion:
 		if true_spin:
-			var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * inverted_pixels_per_grid_unit
+			var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * degrees_per_pixel
 			camera.rotation += mouse_rotation
 			var intersection: Vector3 = hit_plane.intersects_ray(camera.position, -camera.basis.z)
 
