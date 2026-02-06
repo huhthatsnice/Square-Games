@@ -75,7 +75,7 @@ class Modifiers:
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
 	var no_fail: bool = false
-	var autoplay: bool = true
+	var autoplay: bool = false
 
 	var horizontal_flip: bool = false
 	var vertical_flip: bool = false
@@ -333,12 +333,8 @@ func get_map_from_url(url: String) -> MapLoader.Map:
 
 func get_arbitrary_exension(path: String, whitelist: PackedStringArray) -> String:
 	var base_dir: String = path.get_base_dir()
-	print(base_dir)
 	for file: String in DirAccess.get_files_at(base_dir):
-		print(path.get_file().get_basename())
-		print(file.get_basename())
 		if path.get_file().get_basename() == file.get_basename() and file.get_extension() in whitelist:
-			print(base_dir + file)
 			return base_dir + file
 	return ""
 
