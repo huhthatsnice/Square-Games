@@ -14,3 +14,6 @@ decisions;
 allow custom note mesh?
 add vr support?
 add ingame map editor?
+
+ideas;
+new terminal autocomplete will cycle with tab and confirm with space
