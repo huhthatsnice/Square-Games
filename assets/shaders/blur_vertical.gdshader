@@ -6,13 +6,13 @@ uniform float brightness;
 uniform float contrast;
 uniform float contrast_from;
 
-uniform sampler2D screen_texture : hint_screen_texture, filter_linear;
+uniform sampler2D screen_texture : hint_screen_texture, filter_linear, repeat_disable;
 
 void fragment() {
 	vec4 color_sum = vec4(0.0);
 	float sum_count = 0.0;
 	vec2 blur_distance = SCREEN_PIXEL_SIZE * blur_scale;
-	for (float y = SCREEN_UV.y - blur_distance.y; y < SCREEN_UV.y + blur_distance.y; y += SCREEN_PIXEL_SIZE.y * 1.0) {
+	for (float y = max(SCREEN_UV.y - blur_distance.y, 0.0); y < min(SCREEN_UV.y + blur_distance.y, 1.0); y += SCREEN_PIXEL_SIZE.y * 1.0) {
 		float weight = y - SCREEN_UV.y;
 		float variance_2 = 2.0 * variance * variance;
 		weight = inversesqrt(PI * variance_2) * exp(-((weight * weight) / variance_2));
