@@ -25,6 +25,7 @@ shader_parameter/contrast = 3.0
 shader_parameter/contrast_from = 0.1
 
 [node name="NewTerminal" type="Control"]
+visible = false
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -45,6 +46,7 @@ rotation = -0.002558097
 color = Color(0.144, 0.16, 0.15866667, 1)
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
+visible = false
 
 [node name="blur_horizontal" type="ColorRect" parent="CanvasLayer"]
 material = SubResource("ShaderMaterial_jdn8h")
@@ -56,6 +58,7 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0)
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="CanvasLayer"]
+visible = false
 
 [node name="blur_vertical" type="ColorRect" parent="CanvasLayer/CanvasLayer2"]
 material = SubResource("ShaderMaterial_x802j")

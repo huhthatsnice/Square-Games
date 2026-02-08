@@ -65,13 +65,13 @@ static func _catmull_rom_raw(pos_0: float, pos_1: float, pos_2: float, pos_3: fl
 
 	return (2 * (pos_1 - pos_2) + m1 + m2)*u*u*u + (-3 * (pos_1 - pos_2) - m1 - m1 - m2)*u*u + (m1)*u + (pos_1)
 
-static func _get_position(note_0: MapLoader.NoteDataMinimal, note_1: MapLoader.NoteDataMinimal, note_2: MapLoader.NoteDataMinimal, note_3: MapLoader.NoteDataMinimal, time: float) -> Vector2:
-	var segment_duration: float = note_2.t - note_1.t
-	if segment_duration <= 0: return Vector2(note_1.x,note_1.y)
+static func _get_position(note_0: Array, note_1: Array, note_2: Array, note_3: Array, time: float) -> Vector2:
+	var segment_duration: float = note_2[2] - note_1[2]
+	if segment_duration <= 0: return Vector2(note_1[0],note_1[1])
 
-	var u: float = (time - note_1.t) / segment_duration
+	var u: float = (time - note_1[2]) / segment_duration
 
 	return Vector2(
-		_catmull_rom_raw(note_0.x, note_1.x, note_2.x, note_3.x, u, note_0.t, note_1.t, note_2.t, note_3.t),
-		_catmull_rom_raw(note_0.y, note_1.y, note_2.y, note_3.y, u, note_0.t, note_1.t, note_2.t, note_3.t)
+		_catmull_rom_raw(note_0[0], note_1[0], note_2[0], note_3[0], u, note_0[2], note_1[2], note_2[2], note_3[2]),
+		_catmull_rom_raw(note_0[1], note_1[1], note_2[1], note_3[1], u, note_0[2], note_1[2], note_2[2], note_3[2])
 	)

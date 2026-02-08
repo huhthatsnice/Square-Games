@@ -9,9 +9,7 @@ class SSPM:
 	var name: String
 	var mapper: String
 	var difficulty: String
-	var data_parsed: Array[MapLoader.NoteDataMinimal]
-
-const NoteDataMinimal: GDScript = MapLoader.NoteDataMinimal
+	var data_parsed: Array[Array]
 
 static func load_from_path(path: String) -> SSPM:
 	var newdata:SSPM = SSPM.new()
@@ -125,7 +123,7 @@ static func load_from_path(path: String) -> SSPM:
 
 	var benchmarking_start_1: int = Time.get_ticks_usec()
 
-	var note_data: Array[MapLoader.NoteDataMinimal]
+	var note_data: Array[Array]
 	note_data.resize(noteCount)
 
 	for i: int in range(noteCount):
@@ -135,26 +133,29 @@ static func load_from_path(path: String) -> SSPM:
 
 		var isQuantum: int = file.get_16()
 
-		var new_note_data: MapLoader.NoteDataMinimal = NoteDataMinimal.new()
-		new_note_data.t = ms
-
 		if isQuantum==0:
-			new_note_data.x = 1-file.get_8()
-			new_note_data.y = 1-file.get_8()
+			var new_note_data: Array = [
+				1.0 - file.get_8(),
+				1.0 - file.get_8(),
+				ms
+			]
 
-			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_8()-1, 1-file.get_8(), ms)
+			note_data[i] = new_note_data
 		else:
-			new_note_data.x = 1.0-file.get_float()
-			new_note_data.y = 1.0-file.get_float()
+			var new_note_data: Array = [
+				1.0 - file.get_float(),
+				1.0 - file.get_float(),
+				ms
+			]
 
-			note_data[i] = new_note_data #NoteDataMinimal.new(file.get_float()-1.0, 1.0-file.get_float(), ms)
+			note_data[i] = new_note_data
 
 	var benchmarking_end_1: int = Time.get_ticks_usec()
 	var benchmarking_start_2: int = Time.get_ticks_usec()
 
 	note_data.sort_custom(
-		func(a:MapLoader.NoteDataMinimal, b:MapLoader.NoteDataMinimal) -> bool:
-			return a.t < b.t
+		func(a: Array, b: Array) -> bool:
+			return a[2] < b[2]
 	)
 
 	var benchmarking_end_2: int = Time.get_ticks_usec()
@@ -164,8 +165,8 @@ static func load_from_path(path: String) -> SSPM:
 	csv_data.resize(noteCount)
 
 	for i: int in range(noteCount):
-		var v: MapLoader.NoteDataMinimal = note_data[i]
-		csv_data[i] = "|".join([1-v.x,1-v.y,v.t]) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
+		var v: Array = note_data[i]
+		csv_data[i] = "|".join(v) #("{0}|{1}|{2}".format([v.x,v.y,v.t]))
 
 	newdata.data_csv=",".join(csv_data)
 

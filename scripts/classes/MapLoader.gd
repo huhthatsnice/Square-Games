@@ -10,11 +10,12 @@ class Map:
 	var map_type: MapType
 	var path: String
 	var raw_data: String
-	var data: Array
+	var data: Array[Array]
 	var audio: AudioStream
 	var loaded_successfully: bool
 	var map_name: String
 
+#DEPRECATED because arrays are better in basically every way
 class NoteDataMinimal:
 	var x: float
 	var y: float
@@ -25,16 +26,17 @@ class NoteDataMinimal:
 		#y = y_arg
 		#t = t_arg
 
-static func _parse_data(data: String) -> Array[NoteDataMinimal]:
-	var output_data: Array[NoteDataMinimal] = []
+static func _parse_data(data: String) -> Array[Array]:
+	var output_data: Array[Array] = []
 
 	for v: String in data.split(","):
 		var split: PackedStringArray = v.split("|")
 		if len(split)==3:
-			var new_note_data: NoteDataMinimal = NoteDataMinimal.new()
-			new_note_data.x = 1.0-split[0].to_float()
-			new_note_data.y = 1.0-split[1].to_float()
-			new_note_data.t = split[2].to_int()
+			var new_note_data: Array = [
+				1.0-split[0].to_float(),
+				1.0-split[1].to_float(),
+				split[2].to_int()
+			]
 
 			output_data.append(new_note_data)
 

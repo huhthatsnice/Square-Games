@@ -163,7 +163,7 @@ func _ready() -> void:
 		if start_from.is_valid_float():
 			start_from_time = start_from.to_float()
 		elif ["start", "s", "beggining", "b"].has(start_from):
-			start_from_time = map.data[0].t/1000.0
+			start_from_time = map.data[0][2]/1000.0
 
 		print("num notes: ", str(len(map.data)))
 

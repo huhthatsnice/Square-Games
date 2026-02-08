@@ -59,6 +59,8 @@ func benchmark() -> void:
 func _ready() -> void:
 	pass
 
+	#var sspm: SSPMUtil.SSPM = SSPMUtil.load_from_path("user://rhythiamaps/stress.sspm")
+
 	#var request: HTTPRequest = HTTPRequest.new()
 	#self.add_child(request)
 #

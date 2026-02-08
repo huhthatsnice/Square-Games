@@ -3,7 +3,7 @@ class_name AutoplayHandler
 
 var map: MapLoader.Map
 
-var processed_data: Array[MapLoader.NoteDataMinimal] = []
+var processed_data: Array[Array] = []
 
 const max_shift_multi: float = 0.25
 
@@ -15,9 +15,9 @@ var last_loaded_note: int = 0
 
 static func _check_hit(note_pos: Variant, cursor_pos: Variant, size: float) -> bool:
 	if typeof(note_pos) != TYPE_VECTOR2:
-		note_pos = Vector2(note_pos.x, note_pos.y)
+		note_pos = Vector2(note_pos[0], note_pos[1])
 	if typeof(cursor_pos) != TYPE_VECTOR2:
-		cursor_pos = Vector2(cursor_pos.x, cursor_pos.y)
+		cursor_pos = Vector2(cursor_pos[0], cursor_pos[1])
 
 	var diff: Vector2 = (note_pos - cursor_pos).abs()
 
@@ -29,22 +29,22 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var i: int = 0
 
-	var notes: Array[MapLoader.NoteDataMinimal] = map.data
+	var notes: Array[Array] = map.data
 	var notes_len: int = len(notes)
 
-	var preprocessed_data: Array[MapLoader.NoteDataMinimal] = []
+	var preprocessed_data: Array[Array] = []
 
 	print("begin initial preprocessing")
 	#initial preprocessing
 	while i < notes_len:
-		var v: MapLoader.NoteDataMinimal = notes[i]
+		var v: Array = notes[i]
 		i += 1
 
-		var collected: Array[MapLoader.NoteDataMinimal] = [v]
+		var collected: Array[Array] = [v]
 
 		while i < notes_len:
-			var v2: MapLoader.NoteDataMinimal = notes[i]
-			if v2 and abs(v2.t-v.t) <= 3 and max(abs(v2.x-v.x),abs(v2.y-v.y)) < 1*1:
+			var v2: Array = notes[i]
+			if v2 and abs(v2[2]-v[2]) <= 3 and max(abs(v2[0] - v[0]),abs(v2[1] - v[1])) < 1*1:
 				collected.append(v2)
 				i += 1
 			else:
@@ -52,32 +52,33 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		var avg_pos: Vector2 = Vector2()
 
-		for note: MapLoader.NoteDataMinimal in collected:
-			avg_pos += Vector2(note.x,note.y)
+		for note: Array in collected:
+			avg_pos += Vector2(note[0], note[1])
 		avg_pos /= len(collected)
 
 		if i > 1:
-			var prev_data: MapLoader.NoteDataMinimal = preprocessed_data[-1]
-			var prev_data_pos: Vector2 = Vector2(prev_data.x, prev_data.y)
+			var prev_data: Array = preprocessed_data[-1]
+			var prev_data_pos: Vector2 = Vector2(prev_data[0], prev_data[1])
 
-			var time_elapsed: float = abs(prev_data.t - v.t) / 1000.0
+			var time_elapsed: float = abs(prev_data[2] - v[2]) / 1000.0
 
 			var speed: float = (prev_data_pos - avg_pos).length() / (time_elapsed * 100)
 			avg_pos *= 0.8 + (sigmoid(speed * 5) - 0.5) * 2 * 0.2
 
 			if i > 2:
-				var prev_prev_data: MapLoader.NoteDataMinimal = preprocessed_data[-2]
-				var prev_prev_data_pos: Vector2 = Vector2(prev_prev_data.x, prev_prev_data.y)
+				var prev_prev_data: Array = preprocessed_data[-2]
+				var prev_prev_data_pos: Vector2 = Vector2(prev_prev_data[0], prev_prev_data[1])
 
 				var dir_1: Vector2 = (prev_data_pos - prev_prev_data_pos).normalized()
 				var dir_2: Vector2 = (avg_pos - prev_data_pos).normalized()
 
 				avg_pos *= 1 + (max(-dir_1.dot(dir_2) - 0.5, 0) * (1 / (time_elapsed * 20 + 1)))
 
-		var new_note_data: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
-		new_note_data.x = avg_pos.x
-		new_note_data.y = avg_pos.y
-		new_note_data.t = v.t
+		var new_note_data: Array = [
+			avg_pos.x,
+			avg_pos.y,
+			v[2]
+		]
 
 		preprocessed_data.append(new_note_data)
 
@@ -86,7 +87,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var preprocessed_data_len: int = len(preprocessed_data)
 
-	var secondary_preprocessed_data: Array[MapLoader.NoteDataMinimal] = []
+	var secondary_preprocessed_data: Array[Array] = []
 
 	if preprocessed_data_len > 5:
 
@@ -97,13 +98,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 			var stack_length: int = 1
 
-			var top_note: MapLoader.NoteDataMinimal = preprocessed_data[i]
+			var top_note: Array = preprocessed_data[i]
 			var top_note_i: int = i
 			i += 1
 			#secondary_preprocessed_data.append(top_note)
 
 			while i + 2 < preprocessed_data_len:
-				var next_note: MapLoader.NoteDataMinimal = preprocessed_data[i]
+				var next_note: Array = preprocessed_data[i]
 				i += 1
 				if _check_hit(next_note, top_note, 0.1):
 					stack_length += 1
@@ -112,35 +113,40 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			i -= 1
 
 			if stack_length > 1:
-				print("stack found ", top_note.t)
+				print("stack found ", top_note[2])
 				print(stack_length)
 
-				var prev_note_2: MapLoader.NoteDataMinimal = preprocessed_data[top_note_i - 2]
-				var prev_note_1: MapLoader.NoteDataMinimal = preprocessed_data[top_note_i - 1]
+				var prev_note_2: Array = preprocessed_data[top_note_i - 2]
+				var prev_note_1: Array = preprocessed_data[top_note_i - 1]
 
-				var end_note: MapLoader.NoteDataMinimal = preprocessed_data[i-1]
+				var end_note: Array = preprocessed_data[i-1]
 
-				var past_note_1: MapLoader.NoteDataMinimal = preprocessed_data[i]
-				var past_note_2: MapLoader.NoteDataMinimal = preprocessed_data[i + 1]
+				var past_note_1: Array = preprocessed_data[i]
+				var past_note_2: Array = preprocessed_data[i + 1]
 
-				var tests: Array[MapLoader.NoteDataMinimal] = []
+				var tests: Array[Array] = []
 
-				var new_note_1: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
-				new_note_1.x = top_note.x
-				new_note_1.y = top_note.y
-				new_note_1.t = floor((top_note.t + end_note.t) / 2.0)
+				var new_note_1: Array = [
+					top_note[0],
+					top_note[1],
+					floor((top_note[2] + end_note[2]) / 2.0)
+				]
 				tests.append(new_note_1)
 
-				var new_note_2: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
-				new_note_2.x = top_note.x
-				new_note_2.y = top_note.y
-				new_note_2.t = top_note.t
+				var new_note_2: Array = [
+					top_note[0],
+					top_note[1],
+					top_note[2]
+				]
+
 				tests.append(new_note_2)
 
-				var new_note_3: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
-				new_note_3.x = top_note.x
-				new_note_3.y = top_note.y
-				new_note_3.t = end_note.t
+				var new_note_3: Array = [
+					top_note[0],
+					top_note[1],
+					end_note[2]
+				]
+
 				tests.append(new_note_3)
 
 				var valid: bool = false
@@ -183,15 +189,15 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	while i+1<secondary_preprocessed_data_len:
 
-		var note_0: MapLoader.NoteDataMinimal = secondary_preprocessed_data[max(i-2,0)]
-		var note_1: MapLoader.NoteDataMinimal = secondary_preprocessed_data[max(i-1,0)]
-		var note_2: MapLoader.NoteDataMinimal = secondary_preprocessed_data[i]
-		var note_3: MapLoader.NoteDataMinimal = secondary_preprocessed_data[i+1]
-		var note_4: MapLoader.NoteDataMinimal = secondary_preprocessed_data[min(i+2,secondary_preprocessed_data_len-1)]
+		var note_0: Array = secondary_preprocessed_data[max(i-2,0)]
+		var note_1: Array = secondary_preprocessed_data[max(i-1,0)]
+		var note_2: Array = secondary_preprocessed_data[i]
+		var note_3: Array = secondary_preprocessed_data[i+1]
+		var note_4: Array = secondary_preprocessed_data[min(i+2,secondary_preprocessed_data_len-1)]
 
-		var pos: Vector2 = SplineManager._get_position(note_0,note_1,note_3,note_4,note_2.t)
+		var pos: Vector2 = SplineManager._get_position(note_0, note_1, note_3, note_4, note_2[2])
 
-		var shift_vec: Vector2 = pos - Vector2(note_2.x,note_2.y)
+		var shift_vec: Vector2 = pos - Vector2(note_2[0], note_2[1])
 
 		if shift_vec.x==0 or shift_vec.y==0:
 			shift_vec = shift_vec.clampf(-max_range,max_range)
@@ -199,13 +205,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			shift_vec = shift_vec * clamp(shift_vec.x, -max_range, max_range)/shift_vec.x
 			shift_vec = shift_vec * clamp(shift_vec.y, -max_range, max_range)/shift_vec.y
 
-		var new_note: MapLoader.NoteDataMinimal = MapLoader.NoteDataMinimal.new()
+		var new_note: Array = [
+			note_2[0] + shift_vec.x,
+			note_2[1] + shift_vec.y,
+			note_2[2]
+		]
 
-		new_note.x = note_2.x+shift_vec.x
-		new_note.y = note_2.y+shift_vec.y
-		new_note.t = note_2.t
-
-		if _check_hit(SplineManager._get_position(note_1, new_note, note_3, note_4, new_note.t), note_2, SSCS.modifiers.hitbox_size):
+		if _check_hit(SplineManager._get_position(note_1, new_note, note_3, note_4, new_note[2]), note_2, SSCS.modifiers.hitbox_size):
 			processed_data.append(new_note)
 		else:
 			processed_data.append(note_2)
@@ -219,16 +225,16 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 func get_cursor_position() -> Vector2:
 	var elapsed: int = int(AudioManager.elapsed*1000.0)
 	while last_loaded_note+1<len(processed_data):
-		var note: MapLoader.NoteDataMinimal = processed_data[last_loaded_note+1]
-		if note.t>elapsed:
+		var note: Array = processed_data[last_loaded_note+1]
+		if note[2] > elapsed:
 			break
 		else:
 			last_loaded_note+=1
 
-	var note_0: MapLoader.NoteDataMinimal = processed_data[max(last_loaded_note-1,0)]
-	var note_1: MapLoader.NoteDataMinimal = processed_data[last_loaded_note]
-	var note_2: MapLoader.NoteDataMinimal = processed_data[min(last_loaded_note+1,len(processed_data)-1)]
-	var note_3: MapLoader.NoteDataMinimal = processed_data[min(last_loaded_note+2,len(processed_data)-1)]
+	var note_0: Array = processed_data[max(last_loaded_note-1,0)]
+	var note_1: Array = processed_data[last_loaded_note]
+	var note_2: Array = processed_data[min(last_loaded_note+1,len(processed_data)-1)]
+	var note_3: Array = processed_data[min(last_loaded_note+2,len(processed_data)-1)]
 
 	var return_pos: Vector2 = SplineManager._get_position(note_0, note_1, note_2, note_3, elapsed).clampf(-cursor.GRID_MAX,cursor.GRID_MAX)
 

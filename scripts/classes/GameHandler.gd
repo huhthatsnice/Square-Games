@@ -91,13 +91,13 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	var note_counter: int = 0
 	var current_note: int = 0
 
-	for v: MapLoader.NoteDataMinimal in map.data:
-		var ct: float = v.t / speed_multiplier
+	for note: Array in map.data:
+		var ct: float = note[2] / speed_multiplier
 
 		while true:
-			var closest_note: MapLoader.NoteDataMinimal = map.data[note_counter]
+			var closest_note: Array = map.data[note_counter]
 
-			if ct - (closest_note.t / speed_multiplier) > max_t:
+			if ct - (closest_note[2] / speed_multiplier) > max_t:
 				note_counter += 1
 			else:
 				break
@@ -115,9 +115,9 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
 
 	if horizontal_flip or vertical_flip:
-		for note_data: MapLoader.NoteDataMinimal in map.data:
-			note_data.x = (-1 if horizontal_flip else 1) * note_data.x
-			note_data.y = (-1 if vertical_flip else 1) * note_data.y
+		for note_data: Array in map.data:
+			note_data[0] = (-1 if horizontal_flip else 1) * note_data[0]
+			note_data[1] = (-1 if vertical_flip else 1) * note_data[1]
 
 	print(max_loaded_notes)
 
@@ -137,9 +137,9 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 func _notification(what: int) -> void: #have to have this since horizontal/vertical flip mutates map data and we have to undo it
 	if what == NOTIFICATION_PREDELETE:
 		if horizontal_flip or vertical_flip:
-			for note_data: MapLoader.NoteDataMinimal in map.data:
-				note_data.x = (-1 if horizontal_flip else 1) * note_data.x
-				note_data.y = (-1 if vertical_flip else 1) * note_data.y
+			for note_data: Array in map.data:
+				note_data[0] = (-1 if horizontal_flip else 1) * note_data[0]
+				note_data[1] = (-1 if vertical_flip else 1) * note_data[1]
 
 func _ready() -> void:
 	RenderingServer.global_shader_parameter_set("approach_time",approach_time)
@@ -281,8 +281,8 @@ func play(from: float) -> void:
 
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id<len(map.data):
-		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
-		if note_data.t <= threshold:
+		var note_data: Array = map.data[last_loaded_note_id]
+		if note_data[2] <= threshold:
 			last_loaded_note_id += 1
 		else:
 			break
@@ -325,16 +325,16 @@ func _register_miss() -> void:
 
 
 func _check_death() -> void:
-	if (health==0 and !no_fail) or (AudioManager.elapsed > (map.data[-1].t/1000.0) + 1000):
+	if (health==0 and !no_fail) or (AudioManager.elapsed > (map.data[-1][2]/1000.0) + 1000):
 		stop()
 
 var last_load:float = 0
 func _load_notes() -> void:
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
 	while last_loaded_note_id < len(map.data):
-		var note_data: MapLoader.NoteDataMinimal = map.data[last_loaded_note_id]
-		if note_data.t <= threshold:
-			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data.x,note_data.y), float(note_data.t)/1000)
+		var note_data: Array = map.data[last_loaded_note_id]
+		if note_data[2] <= threshold:
+			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data[0], note_data[1]), float(note_data[2]) / 1000)
 
 			notes.append(new_note)
 
