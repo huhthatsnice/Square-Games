@@ -1,7 +1,7 @@
 extends RefCounted
 class_name Commands
 
-var registered_commands: Array[Command]
+var registered_commands: Array[Command2]
 
 func register_command(command: Command2) -> void:
 	registered_commands.append(command)
