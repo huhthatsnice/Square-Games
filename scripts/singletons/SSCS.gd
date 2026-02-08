@@ -74,7 +74,7 @@ class Modifiers:
 	var hit_time: float = 45.0
 	var hitbox_size: float = 1.28/2
 	var speed: float = 1
-	var no_fail: bool = false
+	var no_fail: bool = true
 	var autoplay: bool = false
 
 	var horizontal_flip: bool = false

@@ -5,7 +5,6 @@ const note_material: ShaderMaterial = preload("res://assets/materials/note_shade
 
 var note_id: int = 0
 var color: Color
-var color_assigned:bool = false
 var pos: Vector2
 var t: float
 var multimesh: MultiMesh
@@ -17,12 +16,6 @@ var grid_distance:float = SSCS.settings.grid_distance
 
 var note_scale: float = SSCS.settings.note_scale
 
-func change_id(new_note_id: int) -> void:
-	multimesh_index = new_note_id
-
-	multimesh.set_instance_transform(multimesh_index,note_transform)
-	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
-
 func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:MultiMesh, multimesh_index_arg: int) -> void:
 	note_id=note_id_arg
 	pos=pos_arg
@@ -30,9 +23,7 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	multimesh=multimesh_arg
 	multimesh_index=multimesh_index_arg
 
-	if not color_assigned:
-		color_assigned = true
-		color = color_set[note_id % len(color_set)]
+	color = color_set[note_id % len(color_set)]
 
 
 	#var material: StandardMaterial3D = self.get_surface_override_material(0)
@@ -45,6 +36,19 @@ func _init(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_arg:Multi
 	var origin: Vector3 = Vector3(pos.x,pos.y,grid_distance)
 
 	note_transform=Transform3D(basis,origin)
+
+	multimesh.set_instance_transform(multimesh_index,note_transform)
+	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))
+
+func reinitialize(note_id_arg: int, pos_arg: Vector2, t_arg: float, multimesh_index_arg: int) -> void:
+	note_id=note_id_arg
+	pos=pos_arg
+	t=t_arg
+	multimesh_index=multimesh_index_arg
+
+	color = color_set[note_id % len(color_set)]
+
+	note_transform.origin = Vector3(pos.x,pos.y,grid_distance)
 
 	multimesh.set_instance_transform(multimesh_index,note_transform)
 	multimesh.set_instance_custom_data(multimesh_index,Color(color,t))

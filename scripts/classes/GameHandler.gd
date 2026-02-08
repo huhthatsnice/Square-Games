@@ -20,6 +20,8 @@ var allocated_notes: PackedByteArray = []
 var cursor: Cursor
 var hud: Hud
 
+var note_stockpile: Array[Note] = []
+
 var max_loaded_notes: int = 0
 
 var last_top_note_id: int = 0
@@ -177,8 +179,14 @@ func _ready() -> void:
 	self.multimesh.transform_format=MultiMesh.TRANSFORM_3D
 	self.multimesh.use_custom_data=true
 
-	self.multimesh.instance_count=max_loaded_notes
-	self.multimesh.visible_instance_count=1
+	self.multimesh.instance_count = max_loaded_notes
+	self.multimesh.visible_instance_count = 1
+
+	note_stockpile.resize(max_loaded_notes)
+	var i: int = 0
+	while i < max_loaded_notes:
+		note_stockpile[i] = Note.new(0, Vector2(), 0.0, multimesh, 1)
+		i += 1
 
 	hit_sound_player = AudioStreamPlayer.new()
 	hit_sound_player.max_polyphony = 50
@@ -212,19 +220,24 @@ func _ready() -> void:
 
 #region note creation and deletion
 
+var lowest_hole: int = 0 #not actually guarunteed to be lowest hole, instead guarunteed to be lower than lowest hole
+
 func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 
-	var new_index: int = allocated_notes.find(0,0)
+	var new_index: int = allocated_notes.find(0, lowest_hole)
+
+	lowest_hole = new_index
 
 	if new_index>note_added:
 		note_added = new_index
 
-	if new_index<0 or new_index>=multimesh.instance_count:
-		print("WOOAAHHH")
-		print(new_index)
+	#if new_index<0 or new_index>=multimesh.instance_count:
+		#print("WOOAAHHH")
+		#print(new_index)
 
 	allocated_notes[new_index]=1
-	var new_note:Note = Note.new(note_id, pos, t, multimesh, new_index)
+	var new_note:Note = note_stockpile.pop_back() #Note.new(note_id, pos, t, multimesh, new_index)
+	new_note.reinitialize(note_id, pos, t, new_index)
 
 	return new_note
 
@@ -234,11 +247,13 @@ func remove_note(note: Note) -> void:
 	if index>note_removed:
 		note_removed = index
 
+	if index < lowest_hole:
+		lowest_hole = index
+
 	allocated_notes[index]=0
 	multimesh.set_instance_transform(index,nan_transform)
 
-
-	note.queue_free()
+	note_stockpile.append(note)
 
 
 func update_note_mesh(mesh: Mesh) -> void:
@@ -350,63 +365,111 @@ func _load_notes() -> void:
 		#self.add_child(note)
 		#last_loaded_note_id += 1
 
+var new_notes: Array[Note] #held externally for the sake of memory allocation efficiency(?) no clue if it works
+
+func remove_notes(to_remove: PackedInt32Array) -> void:
+	var notes_len: int = len(notes)
+	var to_remove_len: int = len(to_remove)
+
+	new_notes.resize(notes_len - to_remove_len)
+
+	#1
+	#0,1,2,3,4,5,6,7,8,9
+	#0,2,3,4,5,6,7,8,9
+	var shift: int = 0
+	var i: int = 0
+	var next_check: int = to_remove[0]
+
+	for note: Note in notes:
+		if i == next_check:
+			remove_note(note)
+			shift += 1
+			if shift < to_remove_len:
+				next_check = to_remove[shift]
+			else:
+				break
+		else:
+			new_notes[i - shift] = note
+		i += 1
+
+	new_notes.resize(i - shift + 1)
+	new_notes.append_array(notes.slice(to_remove[-1]+1))
+
+	#while i < notes_len:
+		#new_notes[i - shift] = notes[i]
+		#i += 1
+
+	var notes_temp: Array[Note] = notes
+
+	notes = new_notes
+	new_notes = notes_temp
+
 
 func _check_hitreg() -> void:
 	var elapsed: float = AudioManager.elapsed
 
+	var boundary: float = elapsed-hit_time
+
 	var to_remove: PackedInt32Array = []
 	var i: int = -1
 
-	for note: Note in notes:
-		i+=1
-		if note.t < elapsed:
-			if note.t < elapsed-hit_time:
-				if !is_replay:
+	if is_replay:
+		for note: Note in notes:
+			i+=1
+			var note_t: float = note.t
+			if note_t < elapsed:
+				if note_t < boundary:
+					if note.note_id >= len(replay_note_hit_data): return
+
+					if replay_note_hit_data[note.note_id] == 0:
+						misses += 1
+						health = clamp(health - 1, 0, 5)
+						if use_miss_sound: miss_sound_player.play(0)
+						note_missed.emit(note.note_id)
+
+						to_remove.append(i)
+					else:
+						hits += 1
+						health = clamp(health + 0.5, 0, 5)
+						if use_hit_sound: hit_sound_player.play(0)
+						note_hit.emit(note.note_id)
+
+						to_remove.append(i)
+			else:
+				break
+	else:
+		for note: Note in notes:
+			i += 1
+			var note_t: float = note.t
+			if note_t < elapsed:
+				if note_t < boundary:
 					misses += 1
-					health = clamp(health-1,0,5)
+					health = max(health - 1, 0)
 					if use_miss_sound: miss_sound_player.play(0)
 					note_missed.emit(note.note_id)
 
 					to_remove.append(i)
 				else:
-					if note.note_id >= len(replay_note_hit_data): return
+					var diff: Vector2 = (note.pos - cursor.pos).abs()
 
-					if replay_note_hit_data[note.note_id] == 0:
-						misses += 1
-						health = clamp(health-1, 0, 5)
-						if use_miss_sound: miss_sound_player.play(0)
-						note_missed.emit(note.note_id)
-
-
-						to_remove.append(i)
-					else:
+					if max(diff.x, diff.y) < hitbox_size:
 						hits += 1
-						health = clamp(health+0.5,0,5)
+						health = min(health + 0.5, 5)
 						if use_hit_sound: hit_sound_player.play(0)
 						note_hit.emit(note.note_id)
 
 						to_remove.append(i)
-
-
 			else:
-				var diff: Vector2 = (note.pos-cursor.pos).abs()
+				break
 
-				if max(diff.x, diff.y) < hitbox_size:
-					hits += 1
-					health = clamp(health+0.5,0,5)
-					if use_hit_sound: hit_sound_player.play(0)
-					note_hit.emit(note.note_id)
-
-					to_remove.append(i)
-		else:
-			break
-
-	var shift: int = 0
-	for v in to_remove:
-		var note: Note = notes.pop_at(v-shift)
-		remove_note(note)
-
-		shift+=1
+	if len(to_remove) > 0:
+		remove_notes(to_remove)
+	#var shift: int = 0
+	#for v: int in to_remove:
+		#var note: Note = notes.pop_at(v-shift)
+		#remove_note(note)
+#
+		#shift+=1
 
 func _process(_dt: float) -> void:
 	if not playing or stopped: return
