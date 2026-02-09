@@ -203,8 +203,11 @@ func encode_class(obj: Variant) -> Dictionary:
 func get_map_file_path_from_name(map_name: String) -> String:
 	var map: String
 	var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)
+	var is_phxm: bool = FileAccess.file_exists("user://phoenyxmaps/%s.phxm" % map_name)
 	if is_sspm:
 		map = "user://rhythiamaps/%s.sspm" % map_name
+	elif is_phxm:
+		map = "user://phoenyxmaps/%s.phxm" % map_name
 	else:
 		map = "user://maps/%s" % map_name
 
@@ -217,6 +220,10 @@ func get_full_map_name_from_partial_name(partial_map_name: String) -> String:
 			return v.get_basename()
 
 	for v: String in DirAccess.get_files_at("user://rhythiamaps"):
+		if v.get_basename().contains(partial_map_name):
+			return v.get_basename()
+
+	for v: String in DirAccess.get_files_at("user://phoenyxmaps"):
 		if v.get_basename().contains(partial_map_name):
 			return v.get_basename()
 
@@ -378,8 +385,11 @@ func load_map_from_name(map_name: String, ignore_cache: bool = false) -> MapLoad
 
 	var map: MapLoader.Map
 	var is_sspm: bool = FileAccess.file_exists("user://rhythiamaps/%s.sspm" % map_name)
+	var is_phxm: bool = FileAccess.file_exists("user://phoenyxmaps/%s.phxm" % map_name)
 	if is_sspm:
 		map = MapLoader.from_path_sspm("user://rhythiamaps/%s.sspm" % map_name)
+	elif is_phxm:
+		map = MapLoader.from_path_phxm("user://phoenyxmaps/%s.phxm" % map_name)
 	else:
 		map = MapLoader.from_path_native("user://maps/%s" % map_name)
 	map.map_name = map_name
@@ -392,6 +402,7 @@ func _ready() -> void:
 	#make sure directories exist
 	DirAccess.make_dir_absolute("user://maps")
 	DirAccess.make_dir_absolute("user://rhythiamaps")
+	DirAccess.make_dir_absolute("user://phoenyxmaps")
 	DirAccess.make_dir_absolute("user://replays")
 
 	var raw_settings_data: PackedByteArray = FileAccess.get_file_as_bytes("user://settings.txt")

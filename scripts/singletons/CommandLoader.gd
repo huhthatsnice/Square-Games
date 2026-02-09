@@ -123,6 +123,8 @@ func _ready() -> void:
 			Terminal.print_console(v.get_basename()+"\n")
 		for v:String in DirAccess.get_files_at("user://rhythiamaps"):
 			Terminal.print_console(v.get_basename()+"\n")
+		for v:String in DirAccess.get_files_at("user://phoneyxmaps"):
+			Terminal.print_console(v.get_basename()+"\n")
 	,["lsc","listsongs","listmaps","listcharts"]))
 
 	register_command(Command.new(func() -> void:

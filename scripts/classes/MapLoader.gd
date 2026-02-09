@@ -3,7 +3,8 @@ class_name MapLoader
 
 enum MapType {
 	Native,
-	SSPM
+	SSPM,
+	PHXM
 }
 
 class Map:
@@ -31,10 +32,10 @@ static func _parse_data(data: String) -> Array[Array]:
 
 	for v: String in data.split(","):
 		var split: PackedStringArray = v.split("|")
-		if len(split)==3:
+		if len(split) == 3:
 			var new_note_data: Array = [
-				1.0-split[0].to_float(),
-				1.0-split[1].to_float(),
+				1.0 - split[0].to_float(),
+				1.0 - split[1].to_float(),
 				split[2].to_int()
 			]
 
@@ -75,6 +76,19 @@ static func from_path_sspm(path: String) -> Map: #path to a .sspm file
 	new_map.data = data
 	new_map.loaded_successfully = len(data) > 0
 
-	#print(sspm_parsed.data_csv)
+	return new_map
+
+static func from_path_phxm(path: String) -> Map: #path to a .phxm file
+	var new_map: Map = Map.new()
+
+	var phxm_parsed: PHXMParser.PHXM = PHXMParser.load_from_path(path)
+	var data: Array =  phxm_parsed.data_parsed
+
+	new_map.map_type = MapType.PHXM
+	new_map.path = path
+	new_map.audio = phxm_parsed.audio
+	new_map.raw_data = phxm_parsed.data_csv
+	new_map.data = data
+	new_map.loaded_successfully = len(data) > 0
 
 	return new_map
