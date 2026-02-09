@@ -116,6 +116,7 @@ func _ready() -> void:
 
 	register_command(Command.new(func() -> void:
 		Terminal.console_text=""
+		Terminal.update_console()
 	,["clr","clear"]))
 
 	register_command(Command.new(func() -> void:
@@ -123,7 +124,7 @@ func _ready() -> void:
 			Terminal.print_console(v.get_basename()+"\n")
 		for v:String in DirAccess.get_files_at("user://rhythiamaps"):
 			Terminal.print_console(v.get_basename()+"\n")
-		for v:String in DirAccess.get_files_at("user://phoneyxmaps"):
+		for v:String in DirAccess.get_files_at("user://phoenyxmaps"):
 			Terminal.print_console(v.get_basename()+"\n")
 	,["lsc","listsongs","listmaps","listcharts"]))
 
