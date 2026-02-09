@@ -16,10 +16,10 @@ class Map:
 	var map_name: String
 
 #DEPRECATED because arrays are better in basically every way
-class NoteDataMinimal:
-	var x: float
-	var y: float
-	var t: int
+#class NoteDataMinimal:
+	#var x: float
+	#var y: float
+	#var t: int
 
 	#func _init(x_arg: float, y_arg: float, t_arg: int) -> void:
 		#x = x_arg

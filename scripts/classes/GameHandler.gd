@@ -228,7 +228,7 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 
 	lowest_hole = new_index
 
-	if new_index>note_added:
+	if new_index > note_added:
 		note_added = new_index
 
 	#if new_index<0 or new_index>=multimesh.instance_count:
@@ -259,7 +259,7 @@ func remove_note(note: Note) -> void:
 func update_note_mesh(mesh: Mesh) -> void:
 	var new_note_mesh: Mesh = mesh.duplicate()
 
-	new_note_mesh.surface_set_material(0,note_material)
+	new_note_mesh.surface_set_material(0, note_material)
 	self.multimesh.mesh=new_note_mesh
 
 #endregion
@@ -269,8 +269,8 @@ func play(from: float) -> void:
 	assert(not ran, "Tried to run game manager more than once")
 	ran = true
 
-	Input.mouse_mode=Input.MOUSE_MODE_CONFINED_HIDDEN
-	cursor.pos=Vector2()
+	Input.mouse_mode = Input.MOUSE_MODE_CONFINED_HIDDEN
+	cursor.pos = Vector2()
 	cursor.update_position()
 	playing = true
 	AudioManager.set_stream(map.audio)
@@ -323,24 +323,8 @@ func unpause() -> void:
 #endregion
 #region note functionality
 
-func _register_hit() -> void:
-	#print('hit')
-	score += note_scores[hits+misses]
-	hits+=1
-
-	health=clamp(health+0.5,0,5)
-	#print(health)
-
-
-func _register_miss() -> void:
-	#print('miss')
-	misses+=1
-	health=clamp(health-1,0,5)
-	#print(health)
-
-
 func _check_death() -> void:
-	if (health==0 and !no_fail) or (AudioManager.elapsed > (map.data[-1][2]/1000.0) + 1000):
+	if (health == 0 and !no_fail) or (AudioManager.elapsed > (map.data[-1][2] / 1000.0) + 1000):
 		stop()
 
 var last_load:float = 0
@@ -393,7 +377,7 @@ func remove_notes(to_remove: PackedInt32Array) -> void:
 		i += 1
 
 	new_notes.resize(i - shift + 1)
-	new_notes.append_array(notes.slice(to_remove[-1]+1))
+	new_notes.append_array(notes.slice(to_remove[-1] + 1))
 
 	#while i < notes_len:
 		#new_notes[i - shift] = notes[i]
@@ -408,7 +392,7 @@ func remove_notes(to_remove: PackedInt32Array) -> void:
 func _check_hitreg() -> void:
 	var elapsed: float = AudioManager.elapsed
 
-	var boundary: float = elapsed-hit_time
+	var boundary: float = elapsed - hit_time
 
 	var to_remove: PackedInt32Array = []
 	var i: int = -1
