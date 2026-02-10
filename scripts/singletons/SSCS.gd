@@ -5,7 +5,7 @@ extends Node
 class Settings:
 	var approach_rate: float = 50.0
 	var spawn_distance: float = 25.0
-	var color_set: Array[Color] = [
+	var color_set: Array = [
 		Color.from_string("#ffffff", Color.WHITE),
 		Color.from_string("#66ffff", Color.WHITE),
 	]
@@ -112,42 +112,24 @@ var modifier_parse_overrides: Dictionary[String,Callable] = {
 
 func set_setting(setting: String, value: Variant, generic: bool = false) -> bool:
 	var cur_value: Variant = settings.get(setting)
-	if cur_value==null: return false
+	if cur_value == null: return false
 
 	if generic and value is String:
-		var new_value: Variant
-		var valid: bool = true
-		if setting_parse_overrides.has(setting):
-			var data:Array = setting_parse_overrides.get(setting).call(value)
-			new_value = data[0]
-			valid = data[1]
-		else:
-			match typeof(cur_value):
-				TYPE_STRING:
-					new_value = value
-				TYPE_FLOAT:
-					if !value.is_valid_float(): valid = false
-					new_value = value.to_float()
-				TYPE_INT:
-					if !value.is_valid_int(): valid = false
-					new_value = value.to_int()
-				TYPE_BOOL:
-					var value_lower: String = value.to_lower()
-					if value_lower=="true" or value_lower=="false":
-						new_value = value_lower=="true"
-					else:
-						valid = false
+		var new_value: Variant = str_to_var(value)
 
-		if !valid:
+		if typeof(new_value) != typeof(cur_value):
 			return false
 
-		settings.set(setting,new_value)
+		if cur_value is Array and cur_value.is_typed():
+			new_value = Array(new_value, cur_value.get_typed_builtin(), cur_value.get_typed_class_name(), cur_value.get_typed_script())
+
+		settings.set(setting, new_value)
 	else:
-		if typeof(cur_value)!=typeof(value):
+		if typeof(cur_value) != typeof(value):
 			return false
-		settings.set(setting,value)
+		settings.set(setting, value)
 
-	setting_updated.emit(setting,cur_value,value)
+	setting_updated.emit(setting, cur_value, value)
 	return true
 
 func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bool:
@@ -155,33 +137,15 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 	if cur_value==null: return false
 
 	if generic and value is String:
-		var new_value: Variant
-		var valid: bool = true
-		if modifier_parse_overrides.has(modifier):
-			var data:Array = modifier_parse_overrides.get(modifier).call(value)
-			new_value = data[0]
-			valid = data[1]
-		else:
-			match typeof(cur_value):
-				TYPE_STRING:
-					new_value = value
-				TYPE_FLOAT:
-					if !value.is_valid_float(): valid = false
-					new_value = value.to_float()
-				TYPE_INT:
-					if !value.is_valid_int(): valid = false
-					new_value = value.to_int()
-				TYPE_BOOL:
-					var value_lower: String = value.to_lower()
-					if value_lower=="true" or value_lower=="false":
-						new_value = value_lower=="true"
-					else:
-						valid = false
+		var new_value: Variant = str_to_var(value)
 
-		if !valid:
+		if typeof(new_value) != typeof(cur_value):
 			return false
 
-		modifiers.set(modifier,new_value)
+		if cur_value is Array and cur_value.is_typed():
+			new_value = Array(new_value, cur_value.get_typed_builtin(), cur_value.get_typed_class_name(), cur_value.get_typed_script())
+
+		modifiers.set(modifier, new_value)
 	else:
 		if typeof(cur_value)!=typeof(value):
 			return false
