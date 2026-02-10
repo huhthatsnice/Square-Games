@@ -4,14 +4,12 @@ class Command:
 	var function:Callable
 	var names:Array[String]
 	var argument_count:int
-	var variadic:bool
 	var echoes: bool
 
 	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, variadic_arg: bool = false, echoes_arg: bool = true) -> void:
 		function=function_arg
 		names=names_arg
 		argument_count = function.get_argument_count() if argument_count_arg == -1 else argument_count_arg
-		variadic = variadic_arg
 		echoes = echoes_arg
 
 var commands:Array[Command]=[]
@@ -100,10 +98,7 @@ func _ready() -> void:
 
 				if argc>=command.argument_count:
 					ran=true
-					if command.variadic:
-						command.function.call(args)
-					else:
-						command.function.callv(args)
+					command.function.callv(args)
 				else:
 					Terminal.print_console("Too few arguments (Expected at least {0} arguments, got {1}).\n".format([command.function.get_argument_count(),argc]))
 				break
@@ -131,18 +126,18 @@ func _ready() -> void:
 	register_command(Command.new(func() -> void:
 		for i:String in SSCS.encode_class(SSCS.settings):
 			var v:Variant = SSCS.settings[i]
-			Terminal.print_console("{0}:{1}\n".format([i,v]))
+			Terminal.print_console("{0}: {1}\n".format([i,var_to_str(v)]))
 	,["lss","listsettings"]))
 
-	register_command(Command.new(func(setting_name: String, setting_value: String) -> void:
-		if SSCS.set_setting(setting_name, setting_value, true):
+	register_command(Command.new(func(setting_name: String, ...setting_value: Array) -> void:
+		if SSCS.set_setting(setting_name, " ".join(setting_value), true):
 			Terminal.print_console("Successfully set setting.\n")
 		else:
 			Terminal.print_console("Failed to set setting.\n")
 	,["set","sets","setsetting"]))
 
-	register_command(Command.new(func(modifier_name: String, modifier_value: String) -> void:
-		if SSCS.set_modifier(modifier_name, modifier_value, true):
+	register_command(Command.new(func(modifier_name: String, ...modifier_value: Array) -> void:
+		if SSCS.set_modifier(modifier_name, " ".join(modifier_value), true):
 			Terminal.print_console("Successfully set modifier.\n")
 		else:
 			Terminal.print_console("Failed to set modifier.\n")
@@ -217,7 +212,7 @@ func _ready() -> void:
 		game_scene.add_child(SSCS.lobby)
 	,["joinlobby","jl"]))
 
-	register_command(Command.new(func(msg: Array[String]) -> void:
+	register_command(Command.new(func(...msg: Array) -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 
 		SSCS.lobby.send_chat_message(" ".join(msg))
@@ -258,7 +253,7 @@ func _ready() -> void:
 		Terminal.print_console("Command Name: {0}\nAliases: {1}\nArguments: {2}\n\n{3}\n".format([real_command,", ".join(command_info.aliases),", ".join(command_info.arguments),command_info.use]))
 	,["help"],0))
 
-	register_command(Command.new(func(user_name_array: Array[String]) -> void:
+	register_command(Command.new(func(...user_name_array: Array) -> void:
 		if SSCS.lobby == null: print("lobby doesnt exist"); return
 		var user_name: String = " ".join(user_name_array)
 
@@ -278,7 +273,7 @@ func _ready() -> void:
 	register_command(Command.new(func() -> void:
 		for i:String in SSCS.encode_class(SSCS.modifiers):
 			var v:Variant = SSCS.modifiers[i]
-			Terminal.print_console("{0}:{1}\n".format([i,v]))
+			Terminal.print_console("{0}: {1}\n".format([i,var_to_str(v)]))
 	,["lsm","listmodifiers"]))
 
 	register_command(Command.new(func(replay_id: String) -> void:
