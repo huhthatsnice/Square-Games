@@ -412,9 +412,9 @@ func _ready() -> void:
 		var settings_data: Dictionary = bytes_to_var(raw_settings_data)
 		for setting: String in settings_data:
 			var value: Variant = settings_data[setting]
-			SSCS.settings[setting]=value
+			settings.set(setting, value)
 
-	SSCS.setting_updated.connect(func(setting: String, _old: Variant, new: Variant) -> void:
+	setting_updated.connect(func(setting: String, _old: Variant, new: Variant) -> void:
 		match setting:
 			"fov":
 				get_viewport().get_camera_3d().fov = new #idk why but you cant do this in a setter
@@ -427,6 +427,7 @@ func _notification(what: int) -> void:
 		print(settings_file.store_buffer(var_to_bytes(encode_class(settings))))
 		settings_file.flush()
 		settings_file.close()
+
 		await get_tree().process_frame
 		get_tree().quit()
 
