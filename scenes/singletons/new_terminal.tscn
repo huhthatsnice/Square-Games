@@ -1,10 +1,9 @@
-[gd_scene load_steps=9 format=3 uid="uid://bt6ffaggxdng6"]
+[gd_scene load_steps=8 format=3 uid="uid://bt6ffaggxdng6"]
 
 [ext_resource type="Shader" uid="uid://c46ldkdwghaj" path="res://assets/shaders/terminal.gdshader" id="1_3msla"]
 [ext_resource type="Script" uid="uid://dchkkmdbcvv7c" path="res://scripts/singletons/NewTerminal.gd" id="1_d1vgd"]
 [ext_resource type="Shader" uid="uid://diqgvkyp0v8rm" path="res://assets/shaders/blur_horizontal.gdshader" id="3_31kv5"]
 [ext_resource type="Shader" uid="uid://cbxktt0naliy6" path="res://assets/shaders/blur_vertical.gdshader" id="4_jdn8h"]
-[ext_resource type="Script" uid="uid://bpbaqt3f4n3k6" path="res://scripts/fps.gd" id="5_x802j"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_d1vgd"]
 shader = ExtResource("1_3msla")
@@ -77,16 +76,3 @@ offset_top = 98.0
 offset_right = 181.0
 offset_bottom = 121.0
 text = "Hello Nigga"
-
-[node name="FPS" type="RichTextLabel" parent="CanvasLayer/CanvasLayer2/blur_vertical"]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -200.0
-offset_bottom = 50.0
-grow_horizontal = 0
-theme_override_colors/default_color = Color(0.842094, 0.000559857, 0.842088, 1)
-text = "tuff"
-scroll_active = false
-script = ExtResource("5_x802j")
