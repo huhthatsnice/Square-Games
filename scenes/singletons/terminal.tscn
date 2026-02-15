@@ -32,6 +32,7 @@ anchor_bottom = 1.0
 offset_top = 32.0
 grow_horizontal = 2
 grow_vertical = 2
+bbcode_enabled = true
 scroll_following = true
 
 [node name="LineEdit" type="LineEdit" parent="."]

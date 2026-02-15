@@ -40,6 +40,7 @@ CommandLoader="*res://scripts/singletons/CommandLoader.gd"
 AudioManager="*res://scripts/singletons/AudioManager.gd"
 SteamHandler="*res://scripts/singletons/SteamHandler.gd"
 NewTerminal="*res://scenes/singletons/new_terminal.tscn"
+NewSteamHandler="*res://scripts/singletons/NewSteamHandler.gd"
 
 [debug]
 

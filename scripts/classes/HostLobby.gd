@@ -1,0 +1,81 @@
+extends Node
+class_name HostLobby
+
+var discoverability: Steam.LobbyType
+
+var user_data: Dictionary[int, Dictionary]
+
+enum HOST_PACKET {
+	CHAT_MESSAGE
+}
+
+func send_chat_message(message: String) -> void:
+	var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
+	for user_id_2: int in user_data:
+		sorted_user_ids.append(user_id_2)
+	sorted_user_ids.sort()
+
+	Terminal.print_console("{0}{1} ({2}){3}: {4}".format([
+		"[color=yellow]",
+		Steam.getPersonaName(),
+		"user"+str(sorted_user_ids.find(NewSteamHandler.local_steam_id)),
+		"[/color]",
+		message,
+	]))
+
+	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, message.to_utf8_buffer())
+
+func _init(lobby_discoverability: Steam.LobbyType) -> void:
+	lobby_discoverability = discoverability
+
+	if NewSteamHandler.current_lobby_id == 0:
+		NewSteamHandler.create_lobby(lobby_discoverability)
+	elif lobby_discoverability != -1:
+		Steam.setLobbyType(NewSteamHandler.current_lobby_id, lobby_discoverability)
+
+	NewSteamHandler.player_joined.connect(func(user_id: int) -> void:
+		user_data[user_id] = {
+			alive = false,
+
+			cursor_replication_data = [],
+			note_hit_data = [],
+		}
+	)
+
+	NewSteamHandler.player_left.connect(func(user_id: int) -> void:
+		user_data.erase(user_id)
+	)
+
+	NewSteamHandler.user_data_updated.connect(func(user_id: int) -> void:
+		if user_data.has(user_id):
+			user_data[user_id].settings = str_to_var(Steam.getLobbyMemberData(NewSteamHandler.current_lobby_id, user_id, "settings"))
+	)
+
+	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
+		match packet_type:
+			HOST_PACKET.CHAT_MESSAGE:
+				var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
+				for user_id_2: int in user_data:
+					sorted_user_ids.append(user_id_2)
+				sorted_user_ids.sort()
+
+				Terminal.print_console("{0} ({1}): {2}".format([
+					NewSteamHandler.lobby_users[user_id].name,
+					"user"+str(sorted_user_ids.find(user_id)),
+					packet_data.get_string_from_utf8()
+				]))
+
+				NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, packet_data)
+			_:
+				print("unknown packet type ", packet_type)
+	)
+
+	NewSteamHandler.host_changed.connect(func(user_id: int) -> void:
+		if user_id != NewSteamHandler.local_steam_id:
+			var new_lobby: ClientLobby = ClientLobby.new(NewSteamHandler.current_lobby_id)
+
+			SSCS.host_lobby = null
+			SSCS.client_lobby = new_lobby
+			self.queue_free()
+
+	)

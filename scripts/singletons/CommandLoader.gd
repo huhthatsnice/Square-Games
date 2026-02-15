@@ -304,3 +304,20 @@ func _ready() -> void:
 				SSCS.modifiers = SSCS.true_modifiers
 
 	,["rp","replay"]))
+
+	register_command(Command.new(func() -> void:
+		var new_lobby: HostLobby = HostLobby.new(Steam.LobbyType.LOBBY_TYPE_PUBLIC)
+		SSCS.host_lobby = new_lobby
+	,["ncl"]))
+
+	register_command(Command.new(func(id: String) -> void:
+		var new_lobby: ClientLobby = ClientLobby.new(id.to_int())
+		SSCS.client_lobby = new_lobby
+	,["njl"]))
+
+	register_command(Command.new(func(...msg: Array) -> void:
+		if SSCS.host_lobby != null:
+			SSCS.host_lobby.send_chat_message(" ".join(msg))
+		elif SSCS.client_lobby != null:
+			SSCS.client_lobby.send_chat_message(" ".join(msg))
+	,["nmsg"]))

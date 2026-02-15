@@ -94,6 +94,9 @@ var game_handler: GameHandler
 var map_cache: Dictionary[String, MapLoader.Map] = {}
 var url_cache: Dictionary[String, Dictionary] = {}
 
+var host_lobby: HostLobby
+var client_lobby: ClientLobby
+
 var setting_parse_overrides: Dictionary[String,Callable] = {
 	color_set = func(value: String) -> Array:
 		var new_value: Array[Color] = []
