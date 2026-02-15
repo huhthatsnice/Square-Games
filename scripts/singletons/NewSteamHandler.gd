@@ -21,23 +21,32 @@ signal user_data_updated(user_id: int)
 signal packet_received(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary)
 
 func join_lobby(lobby_id: int) -> void:
-	Steam.joinLobby(lobby_id)
+	print("attempt to join lobby")
+	if current_lobby_id != 0:
+		Steam.joinLobby(lobby_id)
 
 func create_lobby(type: Steam.LobbyType) -> void:
+	print("attempt to create lobby")
 	if current_lobby_id == 0:
 		Steam.createLobby(type, 16)
 
 func leave_lobby() -> void:
+	print("attempt to leave lobby")
 	if current_lobby_id != 0:
 		Steam.leaveLobby(current_lobby_id)
 
 func send_message(user_id: int, packet_type: int, data: PackedByteArray) -> void:
+	print("send message")
+	print(user_id)
+	print(packet_type)
 	data.append(packet_type)
 	if lobby_users.has(user_id) and lobby_users[user_id].has("connection"):
+		print("actually send")
 		Steam.sendMessageToConnection(lobby_users[user_id].connection, data, Steam.NETWORKING_SEND_RELIABLE)
 	data.remove_at(len(data)-1)
 
 func send_message_to_users(user_ids: Array[int], packet_type: int, data:PackedByteArray, exclude: bool = true) -> void:
+	print("send message to multiple")
 	if exclude:
 		for user_id in lobby_users:
 			if !(user_id in user_ids):
@@ -122,6 +131,10 @@ func _ready() -> void:
 					is_host = user_id == host_id,
 				}
 			lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
+
+			print("connected to lobby")
+			print(host_id)
+			print()
 		else:
 			print("Failed to join lobby: ", response)
 	)
@@ -134,8 +147,10 @@ func _ready() -> void:
 			else:
 				lobby_users.erase(user_id)
 			player_left.emit(user_id)
+			print("player left")
 		elif user_id != local_steam_id:
 			if update == Steam.ChatMemberStateChange.CHAT_MEMBER_STATE_CHANGE_ENTERED:
+				print("player entered")
 				lobby_users[user_id] = {
 					user_id = user_id,
 					name = Steam.getFriendPersonaName(user_id),
@@ -148,7 +163,12 @@ func _ready() -> void:
 		if success == 1:
 			if lobby_id != user_id and user_id != local_steam_id:
 				user_data_updated.emit(user_id)
+				print("user data updated")
 			else: #no clue if this works since idk if host update is considered a lobby data or user data update
+				var new_host_id: int = Steam.getLobbyOwner(lobby_id)
+				if new_host_id == host_id: return
+
+				print("host changed")
 				for user_id_2: int in lobby_users:
 					lobby_users[user_id_2].host = false
 					if lobby_users[user_id_2].has("connection"):
@@ -157,7 +177,7 @@ func _ready() -> void:
 				accepting_connections = false
 				is_host = false
 
-				host_id = Steam.getLobbyOwner(lobby_id)
+				host_id = new_host_id
 
 				if host_id == local_steam_id:
 					is_host = true
@@ -166,6 +186,8 @@ func _ready() -> void:
 					lobby_users[host_id].host = true
 					lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
 				host_changed.emit(host_id)
+				print("new host")
+				print(host_id)
 	)
 
 	SSCS.setting_updated.connect(func() -> void:
@@ -184,5 +206,9 @@ func _process(_dt: float) -> void:
 				var packet_data: PackedByteArray = packet.payload
 				var packet_type: int = packet_data[-1]
 				packet_data.remove_at(len(packet_data)-1)
+
+				print("received packet")
+				print(user_id)
+				print(packet_type)
 
 				packet_received.emit(user_id, packet_type, packet_data, packet)
