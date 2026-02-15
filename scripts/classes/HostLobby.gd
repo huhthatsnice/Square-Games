@@ -20,7 +20,7 @@ func send_chat_message(message: String) -> void:
 		message,
 	]))
 
-	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, message.to_utf8_buffer())
+	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, var_to_bytes([NewSteamHandler.local_steam_id, message]))
 
 func _init(lobby_discoverability: Steam.LobbyType) -> void:
 	lobby_discoverability = discoverability
