@@ -28,11 +28,13 @@ static func get_data_from_replay(raw_data: PackedByteArray) -> Dictionary:
 
 	var replay_settings: SSCS.Settings = SSCS.Settings.new()
 	for i: String in data.settings:
-		replay_settings[i] = data.settings[i]
+		if replay_settings.get(i) != null:
+			replay_settings[i] = data.settings[i]
 
 	var replay_modifiers: SSCS.Modifiers = SSCS.Modifiers.new()
 	for i: String in data.modifiers:
-		replay_modifiers[i] = data.modifiers[i]
+		if replay_modifiers.get(i) != null:
+			replay_modifiers[i] = data.modifiers[i]
 
 	SSCS.settings = replay_settings
 	SSCS.modifiers = replay_modifiers

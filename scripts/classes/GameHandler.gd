@@ -283,7 +283,7 @@ func play(from: float) -> void:
 			recorded_replay_note_hit_data[note_id] = 1
 		)
 
-		note_hit.connect(func(note_id: int) -> void:
+		note_missed.connect(func(note_id: int) -> void:
 			recorded_replay_note_hit_data.resize(max(len(recorded_replay_note_hit_data), note_id + 1))
 			recorded_replay_note_hit_data[note_id] = 0
 		)
