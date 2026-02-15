@@ -10,7 +10,7 @@ enum CLIENT_PACKET {
 func send_chat_message(message: String) -> void:
 	var user_index: int = NewSteamHandler.get_user_index(NewSteamHandler.local_steam_id)
 
-	Terminal.print_console("{1} ({2}): {3}".format([
+	Terminal.print_console("{0} ({1}): {2}".format([
 		Steam.getPersonaName(),
 		"user" + str(user_index),
 		message,
