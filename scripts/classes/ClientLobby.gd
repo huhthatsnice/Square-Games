@@ -21,6 +21,7 @@ func send_chat_message(message: String) -> void:
 func _init(lobby_id: int = 0) -> void:
 
 	if NewSteamHandler.current_lobby_id == 0:
+		print("do the join")
 		NewSteamHandler.join_lobby(lobby_id)
 
 	NewSteamHandler.player_joined.connect(func(user_id: int) -> void:

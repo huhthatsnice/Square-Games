@@ -28,6 +28,7 @@ func join_lobby(lobby_id: int) -> void:
 func create_lobby(type: Steam.LobbyType) -> void:
 	print("attempt to create lobby")
 	if current_lobby_id == 0:
+		accepting_connections = true
 		Steam.createLobby(type, 16)
 
 func leave_lobby() -> void:
@@ -80,6 +81,7 @@ func _ready() -> void:
 		match connection_data.connection_state:
 			Steam.CONNECTION_STATE_CONNECTING:
 				if accepting_connections:
+					print("receive connection attempt")
 					Steam.acceptConnection(connection_handle)
 				else:
 					for i: int in range(0,10):
