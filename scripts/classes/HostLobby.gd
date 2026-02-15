@@ -10,15 +10,12 @@ enum HOST_PACKET {
 }
 
 func send_chat_message(message: String) -> void:
-	var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
-	for user_id_2: int in user_data:
-		sorted_user_ids.append(user_id_2)
-	sorted_user_ids.sort()
+	var user_index: int = NewSteamHandler.get_user_index(NewSteamHandler.local_steam_id)
 
 	Terminal.print_console("{0}{1} ({2}){3}: {4}".format([
 		"[color=yellow]",
 		Steam.getPersonaName(),
-		"user"+str(sorted_user_ids.find(NewSteamHandler.local_steam_id)),
+		"user" + str(user_index),
 		"[/color]",
 		message,
 	]))
@@ -54,14 +51,11 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
 		match packet_type:
 			HOST_PACKET.CHAT_MESSAGE:
-				var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
-				for user_id_2: int in user_data:
-					sorted_user_ids.append(user_id_2)
-				sorted_user_ids.sort()
+				var user_index: int = NewSteamHandler.get_user_index(user_id)
 
 				Terminal.print_console("{0} ({1}): {2}".format([
 					NewSteamHandler.lobby_users[user_id].name,
-					"user"+str(sorted_user_ids.find(user_id)),
+					"user" + str(user_index),
 					packet_data.get_string_from_utf8()
 				]))
 

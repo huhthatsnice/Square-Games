@@ -46,6 +46,13 @@ func send_message_to_users(user_ids: Array[int], packet_type: int, data:PackedBy
 		for user_id in user_ids:
 			send_message(user_id, packet_type, data)
 
+func get_user_index(user_id: int) -> int:
+	var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
+	for user_id_2: int in lobby_users:
+		sorted_user_ids.append(user_id_2)
+	sorted_user_ids.sort()
+	return sorted_user_ids.find(user_id)
+
 func _ready() -> void:
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(game_id)
