@@ -45,6 +45,8 @@ func _init(lobby_id: int = 0) -> void:
 	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
 		match packet_type:
 			CLIENT_PACKET.CHAT_MESSAGE:
+				var data: Array = bytes_to_var(packet_data)
+				user_id = data[0]
 				var user_index: int = NewSteamHandler.get_user_index(user_id)
 
 				Terminal.print_console("{0}{1} ({2}){3}: {4}\n".format([
@@ -52,7 +54,7 @@ func _init(lobby_id: int = 0) -> void:
 					NewSteamHandler.lobby_users[user_id].name,
 					"user" + str(user_index),
 					"[/color]" if NewSteamHandler.lobby_users[user_id].is_host else "",
-					packet_data.get_string_from_utf8(),
+					data[1],
 				]))
 			_:
 				print("unknown packet type ", packet_type)

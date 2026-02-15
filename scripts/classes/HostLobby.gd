@@ -59,7 +59,7 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 					packet_data.get_string_from_utf8()
 				]))
 
-				NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, packet_data)
+				NewSteamHandler.send_message_to_users([user_id], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, var_to_bytes([user_id, packet_data.get_string_from_utf8()]))
 			_:
 				print("unknown packet type ", packet_type)
 	)
