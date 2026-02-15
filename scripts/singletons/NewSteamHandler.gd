@@ -106,7 +106,6 @@ func _ready() -> void:
 
 			current_lobby_id = lobby_id
 			host_id = Steam.getLobbyOwner(lobby_id)
-			lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
 
 			var user_count: int = Steam.getNumLobbyMembers(current_lobby_id)
 
@@ -120,8 +119,9 @@ func _ready() -> void:
 				lobby_users[user_id] = {
 					user_id = user_id,
 					name = Steam.getFriendPersonaName(user_id),
-					is_host = user_id == host_id
+					is_host = user_id == host_id,
 				}
+			lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
 		else:
 			print("Failed to join lobby: ", response)
 	)
