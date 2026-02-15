@@ -22,7 +22,8 @@ signal packet_received(user_id: int, packet_type: int, packet_data: PackedByteAr
 
 func join_lobby(lobby_id: int) -> void:
 	print("attempt to join lobby")
-	if current_lobby_id != 0:
+	print(lobby_id)
+	if current_lobby_id == 0:
 		Steam.joinLobby(lobby_id)
 
 func create_lobby(type: Steam.LobbyType) -> void:
