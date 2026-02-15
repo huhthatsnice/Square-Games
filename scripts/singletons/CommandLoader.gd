@@ -320,4 +320,4 @@ func _ready() -> void:
 			SSCS.host_lobby.send_chat_message(" ".join(msg))
 		elif SSCS.client_lobby != null:
 			SSCS.client_lobby.send_chat_message(" ".join(msg))
-	,["nmsg"]))
+	,["nmsg"], -1, true, false))

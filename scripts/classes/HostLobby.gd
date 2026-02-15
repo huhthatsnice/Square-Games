@@ -12,7 +12,7 @@ enum HOST_PACKET {
 func send_chat_message(message: String) -> void:
 	var user_index: int = NewSteamHandler.get_user_index(NewSteamHandler.local_steam_id)
 
-	Terminal.print_console("{0}{1} ({2}){3}: {4}".format([
+	Terminal.print_console("{0}{1} ({2}){3}: {4}\n".format([
 		"[color=yellow]",
 		Steam.getPersonaName(),
 		"user" + str(user_index),
@@ -53,7 +53,7 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 			HOST_PACKET.CHAT_MESSAGE:
 				var user_index: int = NewSteamHandler.get_user_index(user_id)
 
-				Terminal.print_console("{0} ({1}): {2}".format([
+				Terminal.print_console("{0} ({1}): {2}\n".format([
 					NewSteamHandler.lobby_users[user_id].name,
 					"user" + str(user_index),
 					packet_data.get_string_from_utf8()
