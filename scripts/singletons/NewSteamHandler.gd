@@ -59,11 +59,20 @@ func send_message_to_users(user_ids: Array[int], packet_type: int, data:PackedBy
 			send_message(user_id, packet_type, data)
 
 func get_user_index(user_id: int) -> int:
-	var sorted_user_ids: Array[int] = [NewSteamHandler.local_steam_id]
+	var sorted_user_ids: Array[int] = [local_steam_id]
+
 	for user_id_2: int in lobby_users:
 		sorted_user_ids.append(user_id_2)
+
 	sorted_user_ids.sort()
+
 	return sorted_user_ids.find(user_id)
+
+func get_user_display_name(user_id: int) -> String:
+	return "{0} ({1})".format([
+		Steam.getPersonaName() if user_id == local_steam_id else lobby_users[user_id].name,
+		"user" + str(get_user_index(user_id))
+	])
 
 func _ready() -> void:
 	print("Attempt to initialize steam...")

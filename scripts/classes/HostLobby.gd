@@ -6,16 +6,14 @@ var discoverability: Steam.LobbyType
 var user_data: Dictionary[int, Dictionary]
 
 enum HOST_PACKET {
-	CHAT_MESSAGE
+	CHAT_MESSAGE,
+	CHANGE_SELECTED_MAP
 }
 
 func send_chat_message(message: String) -> void:
-	var user_index: int = NewSteamHandler.get_user_index(NewSteamHandler.local_steam_id)
-
-	Terminal.print_console("{0}{1} ({2}){3}: {4}\n".format([
+	Terminal.print_console("{0}{1}{3}: {4}\n".format([
 		"[color=yellow]",
-		Steam.getPersonaName(),
-		"user" + str(user_index),
+		NewSteamHandler.get_user_display_name(NewSteamHandler.local_steam_id),
 		"[/color]",
 		message,
 	]))
@@ -51,15 +49,14 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
 		match packet_type:
 			HOST_PACKET.CHAT_MESSAGE:
-				var user_index: int = NewSteamHandler.get_user_index(user_id)
-
-				Terminal.print_console("{0} ({1}): {2}\n".format([
-					NewSteamHandler.lobby_users[user_id].name,
-					"user" + str(user_index),
+				Terminal.print_console("{0}: {1}\n".format([
+					NewSteamHandler.get_user_display_name(user_id),
 					packet_data.get_string_from_utf8()
 				]))
 
 				NewSteamHandler.send_message_to_users([user_id], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, var_to_bytes([user_id, packet_data.get_string_from_utf8()]))
+			HOST_PACKET.CHANGE_SELECTED_MAP:
+				Terminal.print_console("")
 			_:
 				print("unknown packet type ", packet_type)
 	)

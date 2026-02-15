@@ -4,15 +4,15 @@ class_name ClientLobby
 var user_data: Dictionary[int, Dictionary]
 
 enum CLIENT_PACKET {
-	CHAT_MESSAGE
+	CHAT_MESSAGE,
+	SELECTED_MAP_CHANGED
 }
 
 func send_chat_message(message: String) -> void:
 	var user_index: int = NewSteamHandler.get_user_index(NewSteamHandler.local_steam_id)
 
 	Terminal.print_console("{0} ({1}): {2}\n".format([
-		Steam.getPersonaName(),
-		"user" + str(user_index),
+		NewSteamHandler.get_user_display_name(NewSteamHandler.local_steam_id),
 		message,
 	]))
 
@@ -47,12 +47,10 @@ func _init(lobby_id: int = 0) -> void:
 			CLIENT_PACKET.CHAT_MESSAGE:
 				var data: Array = bytes_to_var(packet_data)
 				user_id = data[0]
-				var user_index: int = NewSteamHandler.get_user_index(user_id)
 
 				Terminal.print_console("{0}{1} ({2}){3}: {4}\n".format([
 					"[color=yellow]" if NewSteamHandler.lobby_users[user_id].is_host else "",
-					NewSteamHandler.lobby_users[user_id].name,
-					"user" + str(user_index),
+					NewSteamHandler.get_user_display_name(user_id),
 					"[/color]" if NewSteamHandler.lobby_users[user_id].is_host else "",
 					data[1],
 				]))
