@@ -11,6 +11,7 @@ var host_id: int
 
 var lobby_users: Dictionary[int, Dictionary] = {}
 
+var listen_socket: int
 var accepting_connections: bool = false
 
 signal player_joined(user_id: int)
@@ -65,6 +66,8 @@ func get_user_index(user_id: int) -> int:
 	return sorted_user_ids.find(user_id)
 
 func _ready() -> void:
+	listen_socket = Steam.createListenSocketP2P(0,{})
+
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(game_id)
 
@@ -81,8 +84,8 @@ func _ready() -> void:
 	Steam.network_connection_status_changed.connect(func(connection_handle: int, connection_data: Dictionary, _old_state: int) -> void:
 		match connection_data.connection_state:
 			Steam.CONNECTION_STATE_CONNECTING:
+				print("receive connection attempt")
 				if accepting_connections:
-					print("receive connection attempt")
 					Steam.acceptConnection(connection_handle)
 				else:
 					for i: int in range(0,10):
