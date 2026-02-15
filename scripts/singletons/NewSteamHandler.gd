@@ -163,8 +163,8 @@ func _ready() -> void:
 					is_host = true
 					accepting_connections = true
 				else:
-					lobby_users[user_id].host = true
-					lobby_users[user_id].connect = Steam.connectP2P(user_id, 0, {})
+					lobby_users[host_id].host = true
+					lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
 				host_changed.emit(host_id)
 	)
 
