@@ -66,8 +66,6 @@ func get_user_index(user_id: int) -> int:
 	return sorted_user_ids.find(user_id)
 
 func _ready() -> void:
-	listen_socket = Steam.createListenSocketP2P(0,{})
-
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(game_id)
 
@@ -78,6 +76,8 @@ func _ready() -> void:
 		print("Steam initialized successfully")
 
 	if !steam_enabled: return
+
+	listen_socket = Steam.createListenSocketP2P(0,{})
 
 	local_steam_id = Steam.getSteamID()
 
