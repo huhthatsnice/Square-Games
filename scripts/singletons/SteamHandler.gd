@@ -77,6 +77,7 @@ func send_message(connection_handle: int, packet_id: int, data: PackedByteArray)
 
 
 func _ready() -> void:
+	return
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(480)
 
@@ -111,6 +112,7 @@ func _ready() -> void:
 	)
 
 func _process(_dt: float) -> void:
+	return
 	Steam.run_callbacks()
 
 	for client_id: int in clients:

@@ -183,6 +183,6 @@ func _process(_dt: float) -> void:
 			for packet: Dictionary in packets:
 				var packet_data: PackedByteArray = packet.payload
 				var packet_type: int = packet_data[-1]
-				packet_data.remove_at(-1)
+				packet_data.remove_at(len(packet_data)-1)
 
 				packet_received.emit(user_id, packet_type, packet_data, packet)
