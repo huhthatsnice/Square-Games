@@ -199,11 +199,14 @@ func _ready() -> void:
 	)
 
 
+var i: int = 0
 func _process(_dt: float) -> void:
 	Steam.run_callbacks()
-
+	i += 1
 	for user_id: int in lobby_users:
 		if lobby_users[user_id].has("connection"):
+			if i%500 == 0:
+				print("user %s has connection" % str(user_id))
 			var packets: Array = Steam.receiveMessagesOnConnection(lobby_users[user_id].connection, 64)
 			for packet: Dictionary in packets:
 				var packet_data: PackedByteArray = packet.payload
