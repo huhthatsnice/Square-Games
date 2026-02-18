@@ -44,14 +44,14 @@ class Settings:
 			fullscreen = x
 			DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN if fullscreen else DisplayServer.WINDOW_MODE_WINDOWED)
 
-	var map_volume: float = 0.2:
+	var map_volume: float = 1:
 		set(x):
 			map_volume = x
 			if AudioManager.player != null:
-				AudioManager.player.volume_linear = map_volume
+				AudioManager.player.volume_linear = map_volume * 0.15
 
-	var hit_sound_volume: float = 0.2
-	var miss_sound_volume: float = 0.2
+	var hit_sound_volume: float = 1
+	var miss_sound_volume: float = 1
 
 	var disable_pausing: bool = false
 

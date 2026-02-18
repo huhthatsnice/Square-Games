@@ -190,7 +190,7 @@ func _ready() -> void:
 
 	hit_sound_player = AudioStreamPlayer.new()
 	hit_sound_player.max_polyphony = 50
-	hit_sound_player.volume_linear = SSCS.settings.hit_sound_volume
+	hit_sound_player.volume_linear = SSCS.settings.hit_sound_volume * 0.15
 	hit_sound_player.bus = &"Sounds"
 
 	var custom_hit_sound_resource: String = SSCS.get_arbitrary_exension("user://hitsound", ["mp3","wav"])
@@ -204,7 +204,7 @@ func _ready() -> void:
 
 	miss_sound_player = AudioStreamPlayer.new()
 	miss_sound_player.max_polyphony = 50
-	miss_sound_player.volume_linear = SSCS.settings.miss_sound_volume
+	miss_sound_player.volume_linear = SSCS.settings.miss_sound_volume * 0.15
 	miss_sound_player.bus = &"Sounds"
 
 	var custom_miss_sound_resource: String = SSCS.get_arbitrary_exension("user://misssound", ["mp3","wav"])
