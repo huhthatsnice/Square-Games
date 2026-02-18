@@ -80,8 +80,8 @@ var vertical_flip: bool = SSCS.modifiers.vertical_flip
 var end_replay_on_end_of_data: bool = false
 
 signal ended
-signal note_hit
-signal note_missed
+signal note_hit(note_id: int)
+signal note_missed(note_id: int)
 
 @warning_ignore("shadowed_variable")
 func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = [], end_replay_on_end_of_data: bool = false) -> void:

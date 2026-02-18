@@ -38,6 +38,10 @@ func leave_lobby() -> void:
 	if current_lobby_id != 0:
 		Steam.leaveLobby(current_lobby_id)
 
+		current_lobby_id = 0
+		lobby_users.clear()
+		player_left.emit(local_steam_id)
+
 func send_message(user_id: int, packet_type: int, data: PackedByteArray) -> void:
 	print("send message")
 	print(user_id)
@@ -97,7 +101,7 @@ func _ready() -> void:
 				if accepting_connections:
 					Steam.acceptConnection(connection_handle)
 				else:
-					for i: int in range(0,10):
+					for _i: int in range(0,10): #extra window you can connect in so that swapping hosts doesnt accidentally result in lost connections
 						await get_tree().create_timer(0.1).timeout
 						if accepting_connections:
 							Steam.acceptConnection(connection_handle)
@@ -156,11 +160,7 @@ func _ready() -> void:
 
 	Steam.lobby_chat_update.connect(func(lobby_id: int, user_id: int, user_id_2: int, update: int) -> void:
 		if update == Steam.ChatMemberStateChange.CHAT_MEMBER_STATE_CHANGE_LEFT or update == Steam.ChatMemberStateChange.CHAT_MEMBER_STATE_CHANGE_KICKED:
-			if user_id == local_steam_id:
-				current_lobby_id = 0
-				lobby_users.clear()
-			else:
-				lobby_users.erase(user_id)
+			lobby_users.erase(user_id)
 			player_left.emit(user_id)
 			print("player left")
 		elif user_id != local_steam_id:

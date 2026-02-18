@@ -321,3 +321,17 @@ func _ready() -> void:
 		elif SSCS.client_lobby != null:
 			SSCS.client_lobby.send_chat_message(" ".join(msg))
 	,["nmsg"], -1, true, false))
+
+	register_command(Command.new(func() -> void:
+		NewSteamHandler.leave_lobby()
+		await SSCS.wait(1)
+		print(SSCS.host_lobby)
+	,["nll"]))
+
+	register_command(Command.new(func() -> void:
+		SSCS.host_lobby.start_lobby(0)
+	,["nsl"]))
+
+	register_command(Command.new(func(...name: Array) -> void:
+		SSCS.host_lobby.change_map(SSCS.load_map_from_name(" ".join(name)))
+	,["nsls"]))

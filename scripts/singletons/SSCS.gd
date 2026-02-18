@@ -59,10 +59,6 @@ class Settings:
 
 	var record_replays: bool = true
 	var smooth_replays: bool = true
-	var replay_cursor_fps: int = 240:
-		set(x):
-			replay_cursor_fps = x
-			Engine.physics_ticks_per_second = replay_cursor_fps
 	var use_replay_settings: bool = true
 
 	var cursor_scale: float = 1
@@ -166,6 +162,9 @@ func encode_class(obj: Variant) -> Dictionary:
 			encoded[p.name]=obj.get(p.name)
 
 	return encoded
+
+func wait(time: float) -> void:
+	await get_tree().create_timer(time).timeout
 
 func get_map_file_path_from_name(map_name: String) -> String:
 	var map: String
