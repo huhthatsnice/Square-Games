@@ -63,7 +63,11 @@ func start_lobby(from: float = 0) -> void:
 				all_ready = false
 				break
 
-	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.MAP_START, [])
+	var start_from_encoded: PackedByteArray
+	start_from_encoded.resize(8)
+	start_from_encoded.encode_double(0, from)
+
+	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.MAP_START, start_from_encoded)
 
 	var game_handler: GameHandler = GameHandler.new(selected_map)
 
@@ -161,7 +165,7 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 
 					selected_map = new_map
 			HOST_PACKET.PLAYER_READY:
-				user_data[packet_data.decode_s64(0)].ready = true
+				user_data[user_id].ready = true
 			_:
 				print("unknown packet type ", packet_type)
 	)

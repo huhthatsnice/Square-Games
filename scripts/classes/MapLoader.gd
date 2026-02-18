@@ -27,19 +27,31 @@ class Map:
 		#y = y_arg
 		#t = t_arg
 
-static func _parse_data(data: String) -> Array[Array]:
+static func _parse_data(data: String, offset: bool = true) -> Array[Array]:
 	var output_data: Array[Array] = []
 
-	for v: String in data.split(","):
-		var split: PackedStringArray = v.split("|")
-		if len(split) == 3:
-			var new_note_data: Array = [
-				1.0 - split[0].to_float(),
-				1.0 - split[1].to_float(),
-				split[2].to_int()
-			]
+	if offset:
+		for v: String in data.split(","):
+			var split: PackedStringArray = v.split("|")
+			if len(split) == 3:
+				var new_note_data: Array = [
+					1.0 - split[0].to_float(),
+					1.0 - split[1].to_float(),
+					split[2].to_int()
+				]
 
-			output_data.append(new_note_data)
+				output_data.append(new_note_data)
+	else:
+		for v: String in data.split(","):
+			var split: PackedStringArray = v.split("|")
+			if len(split) == 3:
+				var new_note_data: Array = [
+					split[0].to_float(),
+					split[1].to_float(),
+					split[2].to_int()
+				]
+
+				output_data.append(new_note_data)
 
 	return output_data
 

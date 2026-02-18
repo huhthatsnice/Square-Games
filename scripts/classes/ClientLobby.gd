@@ -67,7 +67,7 @@ func _init(lobby_id: int = 0) -> void:
 				var data: Array = bytes_to_var(packet_data)
 				user_id = data[0]
 
-				Terminal.print_console("{0}{1} ({2}){3}: {4}\n".format([
+				Terminal.print_console("{0}{1}{2}: {3}\n".format([
 					"[color=yellow]" if NewSteamHandler.lobby_users[user_id].is_host else "",
 					NewSteamHandler.get_user_display_name(user_id),
 					"[/color]" if NewSteamHandler.lobby_users[user_id].is_host else "",
