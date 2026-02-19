@@ -159,6 +159,8 @@ func _ready() -> void:
 					name = Steam.getFriendPersonaName(user_id),
 					is_host = user_id == host_id,
 				}
+
+				player_joined.emit(user_id)
 			lobby_users[host_id].connect = Steam.connectP2P(host_id, 0, {})
 
 			print("connected to lobby")
