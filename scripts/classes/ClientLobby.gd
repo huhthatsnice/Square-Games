@@ -230,6 +230,9 @@ func _process(_delta: float) -> void:
 
 		local_cursor_pos_data.append_array(cursor_data)
 
+		print(current_tick)
+		print(last_replication_flush)
+
 		if current_tick - last_replication_flush > 500:
 			print("flush data")
 			last_replication_flush = current_tick
