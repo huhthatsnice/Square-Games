@@ -130,7 +130,8 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	for i: int in range(len(map.data)):
 		note_scores[i] = 50
 
-	if len(replay_cursor_pos_data) > 0:
+	if len(replay_cursor_pos_data) > 0 or end_replay_on_end_of_data == false:
+		print("we are replay")
 		self.is_replay = true
 		self.replay_cursor_pos_data = replay_cursor_pos_data
 		self.replay_note_hit_data = replay_note_hit_data

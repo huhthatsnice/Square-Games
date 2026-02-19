@@ -196,6 +196,7 @@ func _init(lobby_discoverability: int) -> void:
 	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, _raw_packet: Dictionary) -> void:
 		match packet_type:
 			HOST_PACKET.REPLICATION_DATA_UPDATE:
+				print("got replication data")
 				var data: Array = bytes_to_var(packet_data)
 
 				var cursor_replication_data: PackedByteArray = data[0]

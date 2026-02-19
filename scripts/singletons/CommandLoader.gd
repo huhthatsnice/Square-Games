@@ -339,6 +339,8 @@ func _ready() -> void:
 	register_command(Command.new(func(...user_name: Array) -> void:
 		var user_id: int = NewSteamHandler.get_user_id_from_name(" ".join(user_name))
 
+		print("try spec")
+		print(user_id)
 		if user_id != -1:
 			if SSCS.host_lobby != null:
 				SSCS.host_lobby.spectate_user(user_id)
