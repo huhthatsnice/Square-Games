@@ -116,13 +116,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				print("stack found ", top_note[2])
 				print(stack_length)
 
-				var prev_note_2: Array = preprocessed_data[top_note_i - 2]
-				var prev_note_1: Array = preprocessed_data[top_note_i - 1]
+				var _prev_note_2: Array = preprocessed_data[top_note_i - 2]
+				var _prev_note_1: Array = preprocessed_data[top_note_i - 1]
 
 				var end_note: Array = preprocessed_data[i-1]
 
-				var past_note_1: Array = preprocessed_data[i]
-				var past_note_2: Array = preprocessed_data[i + 1]
+				var _past_note_1: Array = preprocessed_data[i]
+				var _past_note_2: Array = preprocessed_data[i + 1]
 
 				var tests: Array[Array] = []
 

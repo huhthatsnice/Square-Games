@@ -91,7 +91,7 @@ func _init(lobby_id: int = 0) -> void:
 			user_data[user_id].settings = str_to_var(Steam.getLobbyMemberData(NewSteamHandler.current_lobby_id, user_id, "settings"))
 	)
 
-	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
+	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, _raw_packet: Dictionary) -> void:
 		match packet_type:
 			CLIENT_PACKET.REPLICATION_DATA_UPDATE:
 				var data: Array = bytes_to_var(packet_data)

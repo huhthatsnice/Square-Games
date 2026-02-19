@@ -137,7 +137,7 @@ func _ready() -> void:
 			Steam.setLobbyMemberData(lobby_id, "settings", var_to_str(SSCS.encode_class(SSCS.settings)))
 	)
 
-	Steam.lobby_joined.connect(func(lobby_id: int, permissions: int, locked: bool, response: int) -> void:
+	Steam.lobby_joined.connect(func(lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
 		if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
 			print("successfully entered lobby")
 			if is_host: return
@@ -168,7 +168,7 @@ func _ready() -> void:
 			print("Failed to join lobby: ", response)
 	)
 
-	Steam.lobby_chat_update.connect(func(lobby_id: int, user_id: int, user_id_2: int, update: int) -> void:
+	Steam.lobby_chat_update.connect(func(_lobby_id: int, user_id: int, _user_id_2: int, update: int) -> void:
 		if update == Steam.ChatMemberStateChange.CHAT_MEMBER_STATE_CHANGE_LEFT or update == Steam.ChatMemberStateChange.CHAT_MEMBER_STATE_CHANGE_KICKED:
 			lobby_users.erase(user_id)
 			player_left.emit(user_id)
@@ -215,20 +215,16 @@ func _ready() -> void:
 				print(host_id)
 	)
 
-	SSCS.setting_updated.connect(func(setting: String, old: Variant, new: Variant) -> void:
+	SSCS.setting_updated.connect(func(_setting: String, _old: Variant, _new: Variant) -> void:
 		if current_lobby_id != 0:
 			Steam.setLobbyMemberData(current_lobby_id, "settings", var_to_str(SSCS.encode_class(SSCS.settings)))
 	)
 
 
-var i: int = 0
 func _process(_dt: float) -> void:
 	Steam.run_callbacks()
-	i += 1
 	for user_id: int in lobby_users:
 		if lobby_users[user_id].has("connection"):
-			if i%500 == 0:
-				print("user %s has connection" % str(user_id))
 			var packets: Array = Steam.receiveMessagesOnConnection(lobby_users[user_id].connection, 64)
 			for packet: Dictionary in packets:
 				var packet_data: PackedByteArray = packet.payload

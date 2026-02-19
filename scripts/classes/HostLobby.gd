@@ -142,7 +142,7 @@ func spectate_user(user_id: int) -> void:
 	Terminal.visible = true
 	Terminal.is_accepting_input = true
 
-func _init(lobby_discoverability: Steam.LobbyType) -> void:
+func _init(lobby_discoverability: int) -> void:
 	lobby_discoverability = discoverability
 
 	if NewSteamHandler.current_lobby_id == 0:
@@ -178,7 +178,7 @@ func _init(lobby_discoverability: Steam.LobbyType) -> void:
 			user_data[user_id].settings = str_to_var(Steam.getLobbyMemberData(NewSteamHandler.current_lobby_id, user_id, "settings"))
 	)
 
-	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
+	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, _raw_packet: Dictionary) -> void:
 		match packet_type:
 			HOST_PACKET.REPLICATION_DATA_UPDATE:
 				var data: Array = bytes_to_var(packet_data)

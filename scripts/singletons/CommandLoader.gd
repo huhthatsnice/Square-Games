@@ -6,7 +6,7 @@ class Command:
 	var argument_count:int
 	var echoes: bool
 
-	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, variadic_arg: bool = false, echoes_arg: bool = true) -> void:
+	func _init(function_arg:Callable,names_arg:Array[String], argument_count_arg: int = -1, _variadic_arg: bool = false, echoes_arg: bool = true) -> void:
 		function=function_arg
 		names=names_arg
 		argument_count = function.get_argument_count() if argument_count_arg == -1 else argument_count_arg
@@ -332,12 +332,12 @@ func _ready() -> void:
 		SSCS.host_lobby.start_lobby(0)
 	,["nsl"]))
 
-	register_command(Command.new(func(...name: Array) -> void:
-		SSCS.host_lobby.change_map(SSCS.load_map_from_name(" ".join(name)))
+	register_command(Command.new(func(...song_name: Array) -> void:
+		SSCS.host_lobby.change_map(SSCS.load_map_from_name(" ".join(song_name)))
 	,["nsls"]))
 
-	register_command(Command.new(func(...name: Array) -> void:
-		var user_id: int = NewSteamHandler.get_user_id_from_name(" ".join(name))
+	register_command(Command.new(func(...user_name: Array) -> void:
+		var user_id: int = NewSteamHandler.get_user_id_from_name(" ".join(user_name))
 
 		if user_id != -1:
 			if SSCS.host_lobby != null:
