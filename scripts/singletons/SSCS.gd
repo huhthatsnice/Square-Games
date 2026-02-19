@@ -118,9 +118,10 @@ func set_setting(setting: String, value: Variant, generic: bool = false) -> bool
 
 		if typeof(new_value) != typeof(cur_value):
 			if typeof(cur_value) == TYPE_INT:
-				new_value = int(cur_value)
+				new_value = int(new_value)
 			elif typeof(cur_value) == TYPE_FLOAT:
-				new_value = float(cur_value)
+				new_value = float(new_value)
+
 			if typeof(new_value) != typeof(cur_value):
 				return false
 
@@ -138,13 +139,19 @@ func set_setting(setting: String, value: Variant, generic: bool = false) -> bool
 
 func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bool:
 	var cur_value: Variant = modifiers.get(modifier)
-	if cur_value==null: return false
+	if cur_value == null: return false
 
 	if generic and value is String:
 		var new_value: Variant = str_to_var(value)
 
 		if typeof(new_value) != typeof(cur_value):
-			return false
+			if typeof(cur_value) == TYPE_INT:
+				new_value = int(new_value)
+			elif typeof(cur_value) == TYPE_FLOAT:
+				new_value = float(new_value)
+
+			if typeof(new_value) != typeof(cur_value):
+				return false
 
 		if cur_value is Array and cur_value.is_typed():
 			new_value = Array(new_value, cur_value.get_typed_builtin(), cur_value.get_typed_class_name(), cur_value.get_typed_script())
