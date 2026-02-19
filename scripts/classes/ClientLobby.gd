@@ -128,8 +128,14 @@ func _init(lobby_id: int = 0) -> void:
 				]))
 			CLIENT_PACKET.SELECTED_MAP_CHANGED:
 				print("selected map changed")
+				var data: Dictionary = bytes_to_var(packet_data)
 				selected_map = null
-				var map: MapLoader.Map = await SSCS.get_map_from_url(packet_data.get_string_from_utf8())
+
+				var map: MapLoader.Map
+				if FileAccess.file_exists(SSCS.get_map_file_path_from_name(data.name)) and SSCS.get_map_hash(data.name) == data.hash:
+					map = SSCS.load_map_from_name(data.name)
+				else:
+					map = await SSCS.get_map_from_url(data.url)
 				selected_map = map
 				NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.PLAYER_READY, [])
 			CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED:
