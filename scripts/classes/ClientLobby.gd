@@ -210,6 +210,8 @@ func _init(lobby_id: int = 0) -> void:
 			print("turning into host")
 			var new_lobby: HostLobby = HostLobby.new(-1)
 
+			$"/root/Game".add_child(new_lobby)
+
 			SSCS.client_lobby = null
 			SSCS.host_lobby = new_lobby
 			self.queue_free()

@@ -272,6 +272,7 @@ func _init(lobby_discoverability: int) -> void:
 		if user_id != NewSteamHandler.local_steam_id:
 			print("turning into client")
 			var new_lobby: ClientLobby = ClientLobby.new(NewSteamHandler.current_lobby_id)
+			$"/root/Game".add_child(new_lobby)
 
 			SSCS.host_lobby = null
 			SSCS.client_lobby = new_lobby
@@ -296,9 +297,6 @@ func _physics_process(_delta: float) -> void:
 		last_cursor_update = current_tick
 
 		local_cursor_pos_data.append_array(cursor_data)
-
-		print(current_tick)
-		print(last_replication_flush)
 
 		if current_tick - last_replication_flush > 500:
 			print("flush data")
