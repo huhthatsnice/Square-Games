@@ -50,7 +50,11 @@ func change_map(new_map: MapLoader.Map, url: String = "") -> void:
 
 	map_url = url
 
-	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, url.to_utf8_buffer())
+	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
+		name = new_map.map_name,
+		hash = SSCS.get_map_hash(new_map.map_name),
+		url = url
+	}))
 
 func start_lobby(from: float = 0) -> void:
 	var all_ready: bool = true
@@ -161,7 +165,11 @@ func _init(lobby_discoverability: int) -> void:
 			ready = false
 		}
 
-		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, map_url.to_utf8_buffer())
+		NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
+			name = selected_map.map_name,
+			hash = SSCS.get_map_hash(selected_map.map_name),
+			url = map_url
+		}))
 		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.modifiers))
 	)
 
