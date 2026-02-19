@@ -231,6 +231,7 @@ func _process(_delta: float) -> void:
 		local_cursor_pos_data.append_array(cursor_data)
 
 		if current_tick - last_replication_flush > 500:
+			print("flush data")
 			last_replication_flush = current_tick
 
 			NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.REPLICATION_DATA_UPDATE, var_to_bytes([local_cursor_pos_data, local_note_hit_data]))
