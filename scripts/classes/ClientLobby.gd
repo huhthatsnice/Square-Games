@@ -28,7 +28,7 @@ enum CLIENT_PACKET {
 }
 
 func send_chat_message(message: String) -> void:
-	Terminal.print_console("{0} ({1}): {2}\n".format([
+	Terminal.print_console("{0}: {1}\n".format([
 		NewSteamHandler.get_user_display_name(NewSteamHandler.local_steam_id),
 		message,
 	]))

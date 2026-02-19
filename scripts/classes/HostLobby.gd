@@ -28,7 +28,7 @@ enum HOST_PACKET {
 }
 
 func send_chat_message(message: String) -> void:
-	Terminal.print_console("{0}{1}{3}: {4}\n".format([
+	Terminal.print_console("{0}{1}{2}: {3}\n".format([
 		"[color=yellow]",
 		NewSteamHandler.get_user_display_name(NewSteamHandler.local_steam_id),
 		"[/color]",
