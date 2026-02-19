@@ -335,7 +335,7 @@ func _load_notes() -> void:
 	while last_loaded_note_id < len(map.data):
 		var note_data: Array = map.data[last_loaded_note_id]
 		if note_data[2] <= threshold:
-			var new_note:Note = spawn_note(last_loaded_note_id, Vector2(note_data[0], note_data[1]), float(note_data[2]) / 1000)
+			var new_note: Note = spawn_note(last_loaded_note_id, Vector2(note_data[0], note_data[1]), float(note_data[2]) / 1000)
 
 			notes.append(new_note)
 
@@ -405,7 +405,7 @@ func _check_hitreg() -> void:
 			var note_t: float = note.t
 			if note_t < elapsed:
 				if note_t < boundary:
-					if note.note_id >= len(replay_note_hit_data): return
+					if note.note_id >= len(replay_note_hit_data): break
 
 					if replay_note_hit_data[note.note_id] == 0:
 						misses += 1
