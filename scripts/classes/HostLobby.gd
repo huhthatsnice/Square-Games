@@ -216,7 +216,7 @@ func _init(lobby_discoverability: int) -> void:
 				var user_note_hit_data: PackedByteArray = user_data[user_id].note_hit_data
 				for note_id: int in note_hit_data:
 					if note_id > len(user_note_hit_data):
-						user_note_hit_data.resize(note_id)
+						user_note_hit_data.resize(note_id + 1)
 					user_note_hit_data[note_id] = note_hit_data[note_id]
 
 				NewSteamHandler.send_message_to_users([user_id], ClientLobby.CLIENT_PACKET.REPLICATION_DATA_UPDATE, var_to_bytes([user_id, cursor_replication_data, note_hit_data]))

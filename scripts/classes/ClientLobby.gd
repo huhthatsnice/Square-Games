@@ -114,7 +114,7 @@ func _init(lobby_id: int = 0) -> void:
 				var user_note_hit_data: PackedByteArray = user_data[replication_user_id].note_hit_data
 				for note_id: int in note_hit_data:
 					if note_id > len(user_note_hit_data):
-						user_note_hit_data.resize(note_id)
+						user_note_hit_data.resize(note_id + 1)
 					user_note_hit_data[note_id] = note_hit_data[note_id]
 			CLIENT_PACKET.CHAT_MESSAGE:
 				var data: Array = bytes_to_var(packet_data)
