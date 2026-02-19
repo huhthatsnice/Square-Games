@@ -215,7 +215,7 @@ func _ready() -> void:
 				print(host_id)
 	)
 
-	SSCS.setting_updated.connect(func() -> void:
+	SSCS.setting_updated.connect(func(setting: String, old: Variant, new: Variant) -> void:
 		if current_lobby_id != 0:
 			Steam.setLobbyMemberData(current_lobby_id, "settings", var_to_str(SSCS.encode_class(SSCS.settings)))
 	)
