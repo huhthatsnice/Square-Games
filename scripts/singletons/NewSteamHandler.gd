@@ -78,6 +78,16 @@ func get_user_display_name(user_id: int) -> String:
 		"user" + str(get_user_index(user_id))
 	])
 
+func get_user_id_from_name(user_name: String) -> int:
+	user_name = user_name.to_lower()
+
+	for user_id: int in lobby_users:
+		var current_user_name: String = lobby_users[user_id].name
+		if current_user_name.to_lower().begins_with(user_name) or ("user" + str(get_user_index(user_id)) == user_name):
+			return user_id
+
+	return -1
+
 func _ready() -> void:
 	print("Attempt to initialize steam...")
 	var init_success: Dictionary = Steam.steamInitEx(game_id)

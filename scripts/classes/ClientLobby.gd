@@ -8,11 +8,13 @@ var selected_map: MapLoader.Map
 var local_note_hit_data: Dictionary
 var local_cursor_pos_data: PackedByteArray
 
-var replication_start: int
+var lobby_start: int
 var last_replication_flush: int
 var last_cursor_update: int
 
 var cursor: Cursor
+
+var spectated_user: int = -1
 
 var lobby_modifiers: SSCS.Modifiers = SSCS.Modifiers.new()
 
@@ -21,7 +23,8 @@ enum CLIENT_PACKET {
 	SELECTED_MAP_CHANGED,
 	SELECTED_MODIFIERS_CHANGED,
 	MAP_START,
-	REPLICATION_DATA_UPDATE
+	REPLICATION_DATA_UPDATE,
+	PLAYER_DIED
 }
 
 func send_chat_message(message: String) -> void:
@@ -31,6 +34,32 @@ func send_chat_message(message: String) -> void:
 	]))
 
 	NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.CHAT_MESSAGE, message.to_utf8_buffer())
+
+func spectate_user(user_id: int) -> void:
+	if !user_data.has(user_id) or spectated_user != -1 or !user_data[user_id].alive: return
+
+	spectated_user = user_id
+
+	var game_handler: GameHandler = GameHandler.new(selected_map, user_data[user_id].note_hit_data, user_data[user_id].cursor_replication_data, false)
+
+	SSCS.game_handler = game_handler
+
+	SSCS.get_node("/root/Game").add_child(game_handler)
+
+	cursor = game_handler.cursor
+
+	game_handler.hud.update_info_top(NewSteamHandler.get_user_display_name(user_id))
+
+	Terminal.is_accepting_input = false
+	Terminal.visible = false
+
+	game_handler.play(((Time.get_ticks_msec() - lobby_start) / 1000.0) - 0.5)
+
+	await game_handler.ended
+
+	game_handler.queue_free()
+	Terminal.visible = true
+	Terminal.is_accepting_input = true
 
 func _init(lobby_id: int = 0) -> void:
 
@@ -42,8 +71,9 @@ func _init(lobby_id: int = 0) -> void:
 		user_data[user_id] = {
 			alive = false,
 
-			cursor_replication_data = [],
-			note_hit_data = [],
+			cursor_replication_offset = 0,
+			cursor_replication_data = PackedVector3Array(),
+			note_hit_data = PackedByteArray(),
 		}
 	)
 
@@ -63,6 +93,29 @@ func _init(lobby_id: int = 0) -> void:
 
 	NewSteamHandler.packet_received.connect(func(user_id: int, packet_type: int, packet_data: PackedByteArray, raw_packet: Dictionary) -> void:
 		match packet_type:
+			CLIENT_PACKET.REPLICATION_DATA_UPDATE:
+				var data: Array = bytes_to_var(packet_data)
+
+				var replication_user_id: int = data[0]
+				var cursor_replication_data: PackedByteArray = data[1]
+				var note_hit_data: Dictionary = data[2]
+
+				var cursor_replication_offset: int = user_data[replication_user_id].cursor_replication_offset
+
+				var user_cursor_replication_data: PackedVector3Array = user_data[replication_user_id].cursor_replication_data
+				for offset: int in range(0, len(cursor_replication_data) / 4):
+					var x: float = remap(cursor_replication_data.decode_u16(offset + 0), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
+					var y: float = remap(cursor_replication_data.decode_u16(offset + 2), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
+					var t: int = cursor_replication_offset + cursor_replication_data.decode_u16(offset + 4)
+
+					user_cursor_replication_data.append(Vector3(x, y, t))
+					cursor_replication_offset = t
+
+				var user_note_hit_data: PackedByteArray = user_data[replication_user_id].note_hit_data
+				for note_id: int in note_hit_data:
+					if note_id > len(user_note_hit_data):
+						user_note_hit_data.resize(note_id)
+					user_note_hit_data[note_id] = note_hit_data[note_id]
 			CLIENT_PACKET.CHAT_MESSAGE:
 				var data: Array = bytes_to_var(packet_data)
 				user_id = data[0]
@@ -99,7 +152,15 @@ func _init(lobby_id: int = 0) -> void:
 				)
 
 				last_replication_flush = Time.get_ticks_msec()
-				replication_start = last_replication_flush
+				lobby_start = last_replication_flush
+
+				local_cursor_pos_data.clear()
+				local_note_hit_data.clear()
+
+				for user_id_2: int in user_data:
+					user_data[user_id_2].cursor_replication_offset = 0
+					user_data[user_id_2].cursor_replication_data.clear()
+					user_data[user_id_2].note_hit_data.clear()
 
 				SSCS.game_handler = game_handler
 
@@ -114,10 +175,23 @@ func _init(lobby_id: int = 0) -> void:
 
 				await game_handler.ended
 
+				var died_packet: PackedByteArray = [0,0,0,0]
+				died_packet.encode_float(0, (Time.get_ticks_msec() - lobby_start) / 1000.0)
+				NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.PLAYER_DIED, died_packet)
+
 				SSCS.modifiers = SSCS.true_modifiers
 				game_handler.queue_free()
 				Terminal.visible = true
 				Terminal.is_accepting_input = true
+			CLIENT_PACKET.PLAYER_DIED:
+				var died_user_id: int = packet_data.decode_u64(0)
+
+				await SSCS.wait(packet_data.decode_float(8) - AudioManager.elapsed)
+
+				user_data[died_user_id].alive = false
+
+				if spectated_user == died_user_id:
+					SSCS.game_handler.stop()
 			_:
 				print("unknown packet type ", packet_type)
 	)
@@ -149,7 +223,7 @@ func _process(_delta: float) -> void:
 		if current_tick - last_replication_flush > 500:
 			last_replication_flush = current_tick
 
-			NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.REPLICATION_DATA_UPDATE, var_to_bytes([local_cursor_pos_data, local_note_hit_data]))
+			NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.REPLICATION_DATA_UPDATE, var_to_bytes([local_cursor_pos_data, local_note_hit_data]))
 
 			local_cursor_pos_data.clear()
 			local_note_hit_data.clear()

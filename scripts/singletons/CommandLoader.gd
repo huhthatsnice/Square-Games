@@ -335,3 +335,11 @@ func _ready() -> void:
 	register_command(Command.new(func(...name: Array) -> void:
 		SSCS.host_lobby.change_map(SSCS.load_map_from_name(" ".join(name)))
 	,["nsls"]))
+
+	register_command(Command.new(func(...name: Array) -> void:
+		var user_id: int = NewSteamHandler.get_user_id_from_name(" ".join(name))
+
+		if user_id != -1:
+			if SSCS.host_lobby != null:
+				SSCS.host_lobby.spectate_user(user_id)
+	,["nsp"]))
