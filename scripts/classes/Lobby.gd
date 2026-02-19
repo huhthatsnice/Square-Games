@@ -221,7 +221,7 @@ func start_lobby(map: MapLoader.Map) -> bool:
 func start_spectate(user_id: int) -> void: #should be called only when there isnt currently a GameHandler since it creates its own
 	if is_spectating or current_map == null or !lobby_users.has(user_id) or !lobby_users[user_id].alive: return
 
-	var game_handler: GameHandler = GameHandler.new(current_map, lobby_users[user_id].note_hit_data, lobby_users[user_id].cursor_pos_data)
+	var game_handler: GameHandler = GameHandler.new(current_map, true, lobby_users[user_id].note_hit_data, lobby_users[user_id].cursor_pos_data)
 
 	SSCS.game_handler = game_handler
 	$"/root/Game".add_child(game_handler)

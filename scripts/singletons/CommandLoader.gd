@@ -285,7 +285,7 @@ func _ready() -> void:
 					SSCS.settings = replay_data.settings
 				SSCS.modifiers = replay_data.modifiers
 
-				var game_handler: GameHandler = GameHandler.new(replay_data.map, replay_data.replay_note_hit_data, replay_data.replay_cursor_pos_data, true)
+				var game_handler: GameHandler = GameHandler.new(replay_data.map, true, replay_data.replay_note_hit_data, replay_data.replay_cursor_pos_data, true)
 
 				SSCS.game_handler = game_handler
 				$"/root/Game".add_child(game_handler)

@@ -84,7 +84,7 @@ signal note_hit(note_id: int)
 signal note_missed(note_id: int)
 
 @warning_ignore("shadowed_variable")
-func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = [], end_replay_on_end_of_data: bool = false) -> void:
+func _init(map_arg: MapLoader.Map, is_replay: bool = false, replay_note_hit_data: PackedByteArray = [], replay_cursor_pos_data: PackedVector3Array = [], end_replay_on_end_of_data: bool = false) -> void:
 	map = map_arg
 
 	var benchmark_start_1: int = Time.get_ticks_usec()
@@ -130,9 +130,9 @@ func _init(map_arg: MapLoader.Map, replay_note_hit_data: PackedByteArray = [], r
 	for i: int in range(len(map.data)):
 		note_scores[i] = 50
 
-	if len(replay_cursor_pos_data) > 0 or end_replay_on_end_of_data == false:
+	if is_replay:
 		print("we are replay")
-		self.is_replay = true
+		self.is_replay = is_replay
 		self.replay_cursor_pos_data = replay_cursor_pos_data
 		self.replay_note_hit_data = replay_note_hit_data
 		self.end_replay_on_end_of_data = end_replay_on_end_of_data

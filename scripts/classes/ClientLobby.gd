@@ -40,7 +40,7 @@ func spectate_user(user_id: int) -> void:
 
 	spectated_user = user_id
 
-	var game_handler: GameHandler = GameHandler.new(selected_map, user_data[user_id].note_hit_data, user_data[user_id].cursor_replication_data, false)
+	var game_handler: GameHandler = GameHandler.new(selected_map, true, user_data[user_id].note_hit_data, user_data[user_id].cursor_replication_data, false)
 
 	SSCS.game_handler = game_handler
 
