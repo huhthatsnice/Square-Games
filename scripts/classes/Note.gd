@@ -11,7 +11,7 @@ var multimesh: MultiMesh
 var multimesh_index: int
 var note_transform: Transform3D
 
-var color_set:Array[Color]=SSCS.settings.color_set
+var color_set: Array = SSCS.settings.color_set
 var grid_distance:float = SSCS.settings.grid_distance
 
 var note_scale: float = SSCS.settings.note_scale

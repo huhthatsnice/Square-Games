@@ -198,6 +198,7 @@ func _init(lobby_id: int = 0) -> void:
 
 	NewSteamHandler.host_changed.connect(func(user_id: int) -> void:
 		if user_id == NewSteamHandler.local_steam_id:
+			print("turning into host")
 			var new_lobby: HostLobby = HostLobby.new(-1)
 
 			SSCS.client_lobby = null

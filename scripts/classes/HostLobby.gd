@@ -254,6 +254,7 @@ func _init(lobby_discoverability: int) -> void:
 
 	NewSteamHandler.host_changed.connect(func(user_id: int) -> void:
 		if user_id != NewSteamHandler.local_steam_id:
+			print("turning into client")
 			var new_lobby: ClientLobby = ClientLobby.new(NewSteamHandler.current_lobby_id)
 
 			SSCS.host_lobby = null
