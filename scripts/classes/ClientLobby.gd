@@ -194,6 +194,9 @@ func _init(lobby_id: int = 0) -> void:
 
 				await SSCS.wait(packet_data.decode_float(8) - AudioManager.elapsed)
 
+				print(died_user_id)
+				print(user_data.get(died_user_id))
+
 				user_data[died_user_id].alive = false
 
 				if spectated_user == died_user_id:

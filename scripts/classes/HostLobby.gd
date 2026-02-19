@@ -121,8 +121,11 @@ func start_lobby(from: float = 0) -> void:
 	Terminal.is_accepting_input = true
 
 func spectate_user(user_id: int) -> void:
-	if !user_data.has(user_id) or spectated_user != -1 or !user_data[user_id].alive: return
+	if !user_data.has(user_id) or spectated_user != -1 or !user_data[user_id].alive: print("bad"); return
 
+	print("start spectate")
+	print(user_id)
+	print(user_data[user_id])
 	spectated_user = user_id
 
 	var game_handler: GameHandler = GameHandler.new(selected_map, user_data[user_id].note_hit_data, user_data[user_id].cursor_replication_data, false)
@@ -141,6 +144,8 @@ func spectate_user(user_id: int) -> void:
 	game_handler.play(((Time.get_ticks_msec() - lobby_start) / 1000.0) - 0.5)
 
 	await game_handler.ended
+
+	print("dieded")
 
 	spectated_user = -1
 	game_handler.queue_free()
@@ -165,11 +170,12 @@ func _init(lobby_discoverability: int) -> void:
 			ready = false
 		}
 
-		NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
-			name = selected_map.map_name,
-			hash = SSCS.get_map_hash(selected_map.map_name),
-			url = map_url
-		}))
+		if selected_map != null:
+			NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
+				name = selected_map.map_name,
+				hash = SSCS.get_map_hash(selected_map.map_name),
+				url = map_url
+			}))
 		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.modifiers))
 	)
 
@@ -291,6 +297,7 @@ func _process(_delta: float) -> void:
 		local_cursor_pos_data.append_array(cursor_data)
 
 		if current_tick - last_replication_flush > 500:
+			print("flush data")
 			last_replication_flush = current_tick
 
 			NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.REPLICATION_DATA_UPDATE, var_to_bytes([NewSteamHandler.local_steam_id, local_cursor_pos_data, local_note_hit_data]))
