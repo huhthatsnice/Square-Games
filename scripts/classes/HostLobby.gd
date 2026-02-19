@@ -100,7 +100,7 @@ func start_lobby(from: float = 0) -> void:
 
 	SSCS.game_handler = game_handler
 
-	SSCS.get_node("/root/Game").add_child(game_handler)
+	$"/root/Game".add_child(game_handler)
 
 	cursor = game_handler.cursor
 
@@ -132,7 +132,7 @@ func spectate_user(user_id: int) -> void:
 
 	SSCS.game_handler = game_handler
 
-	SSCS.get_node("/root/Game").add_child(game_handler)
+	$"/root/Game".add_child(game_handler)
 
 	cursor = game_handler.cursor
 
@@ -282,12 +282,12 @@ func _init(lobby_discoverability: int) -> void:
 		NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.modifiers))
 	)
 
-func _process(_delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if SSCS.game_handler != null:
 		var current_tick: int = Time.get_ticks_msec()
 
 		var cursor_data: PackedByteArray
-		cursor_data.resize(2 + 2 + 1)
+		cursor_data.resize(2 + 2 + 2)
 
 		cursor_data.encode_u16(0, roundi(remap(cursor.pos.x, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
 		cursor_data.encode_u16(2, roundi(remap(cursor.pos.y, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
@@ -296,6 +296,9 @@ func _process(_delta: float) -> void:
 		last_cursor_update = current_tick
 
 		local_cursor_pos_data.append_array(cursor_data)
+
+		print(current_tick)
+		print(last_replication_flush)
 
 		if current_tick - last_replication_flush > 500:
 			print("flush data")

@@ -307,11 +307,13 @@ func _ready() -> void:
 
 	register_command(Command.new(func() -> void:
 		var new_lobby: HostLobby = HostLobby.new(Steam.LobbyType.LOBBY_TYPE_PUBLIC)
+		$"/root/Game".add_child(new_lobby)
 		SSCS.host_lobby = new_lobby
 	,["ncl"]))
 
 	register_command(Command.new(func(id: String) -> void:
 		var new_lobby: ClientLobby = ClientLobby.new(id.to_int())
+		$"/root/Game".add_child(new_lobby)
 		SSCS.client_lobby = new_lobby
 	,["njl"]))
 

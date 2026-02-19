@@ -44,7 +44,7 @@ func spectate_user(user_id: int) -> void:
 
 	SSCS.game_handler = game_handler
 
-	SSCS.get_node("/root/Game").add_child(game_handler)
+	$"/root/Game".add_child(game_handler)
 
 	cursor = game_handler.cursor
 
@@ -170,7 +170,7 @@ func _init(lobby_id: int = 0) -> void:
 
 				SSCS.game_handler = game_handler
 
-				SSCS.get_node("/root/Game").add_child(game_handler)
+				$"/root/Game".add_child(game_handler)
 
 				cursor = game_handler.cursor
 
@@ -215,7 +215,7 @@ func _init(lobby_id: int = 0) -> void:
 			self.queue_free()
 	)
 
-func _process(_delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	if SSCS.game_handler != null:
 		var current_tick: int = Time.get_ticks_msec()
 
