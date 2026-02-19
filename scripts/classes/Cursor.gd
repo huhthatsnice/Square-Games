@@ -27,6 +27,8 @@ var hit_plane: Plane = Plane(Vector3(0, 0, 1), Vector3(0, 0, SSCS.settings.grid_
 
 var cursor_scale: float = SSCS.settings.cursor_scale
 
+var camera_push_forward: float = 1.0 / 4.0 if SSCS.settings.sound_space_accurate_camera else 0
+
 func update_position() -> void:
 	pos_world.x=pos.x
 	pos_world.y=pos.y
@@ -70,6 +72,8 @@ func _input(event: InputEvent) -> void:
 
 				camera.look_at_from_position(Vector3(pos.x*parallax, pos.y*parallax, 0), pos_world)
 
+				camera.position += camera.basis.z * camera_push_forward
+
 		else:
 			if absolute:
 				pos = ((screen_center - event.position) * inverted_pixels_per_grid_unit).clampf(-GRID_MAX, GRID_MAX)
@@ -80,7 +84,7 @@ func _input(event: InputEvent) -> void:
 			pos_world.x = pos.x
 			pos_world.y = pos.y
 			position = pos_world
-			camera.position = Vector3(pos.x*parallax, pos.y*parallax, 0)
+			camera.position = Vector3(pos.x*parallax, pos.y*parallax, 0) + camera.basis.z * camera_push_forward
 
 			if semi_spin:
 				camera.look_at(position)

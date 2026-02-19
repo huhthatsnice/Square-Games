@@ -64,6 +64,8 @@ class Settings:
 	var cursor_scale: float = 1
 	var note_scale: float = 1
 
+	var sound_space_accurate_camera: bool = false
+
 
 
 class Modifiers:
