@@ -138,6 +138,7 @@ func spectate_user(user_id: int) -> void:
 
 	await game_handler.ended
 
+	spectated_user = -1
 	game_handler.queue_free()
 	Terminal.visible = true
 	Terminal.is_accepting_input = true
