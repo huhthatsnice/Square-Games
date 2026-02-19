@@ -27,13 +27,17 @@ var hit_plane: Plane = Plane(Vector3(0, 0, 1), Vector3(0, 0, SSCS.settings.grid_
 
 var cursor_scale: float = SSCS.settings.cursor_scale
 
-var camera_push_forward: float = 1.0 / 4.0 if SSCS.settings.sound_space_accurate_camera else 0
+var camera_push_forward: float = 1.0 / 4.0 if SSCS.settings.sound_space_accurate_camera else 0.0
 
 func update_position() -> void:
-	pos_world.x=pos.x
-	pos_world.y=pos.y
-	self.position=pos_world
-	camera.position=Vector3(pos.x*parallax,pos.y*parallax,0)
+	pos_world.x = pos.x
+	pos_world.y = pos.y
+	self.position = pos_world
+	camera.position = Vector3(pos.x * parallax, pos.y * parallax, 0)
+
+	if true_spin or semi_spin:
+		print("rotate")
+		camera.look_at(pos_world)
 
 func _ready() -> void:
 	var custom_cursor_resource: String = SSCS.get_arbitrary_exension("user://cursor", ["png","jpg"])
