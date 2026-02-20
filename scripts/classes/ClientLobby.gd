@@ -115,7 +115,7 @@ func _init(lobby_id: int = 0) -> void:
 				for note_id: int in note_hit_data:
 					if note_id > len(user_note_hit_data):
 						user_note_hit_data.resize(note_id + 1)
-					user_note_hit_data[note_id] = note_hit_data[note_id]
+					user_note_hit_data[note_id] = 1 if note_hit_data[note_id] else 0
 			CLIENT_PACKET.CHAT_MESSAGE:
 				var data: Array = bytes_to_var(packet_data)
 				user_id = data[0]
@@ -222,7 +222,7 @@ func _physics_process(_delta: float) -> void:
 		var current_tick: int = Time.get_ticks_msec()
 
 		var cursor_data: PackedByteArray
-		cursor_data.resize(2 + 2 + 1)
+		cursor_data.resize(2 + 2 + 2)
 
 		cursor_data.encode_u16(0, roundi(remap(cursor.pos.x, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
 		cursor_data.encode_u16(2, roundi(remap(cursor.pos.y, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
