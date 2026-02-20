@@ -7,7 +7,7 @@ var camera: Camera3D
 
 const GRID_MAX: float = (3 - 0.28) / 2.0 #(grid size - cursor size) / 2
 
-var screen_center: Vector2 = DisplayServer.window_get_size() / 2
+var screen_center: Vector2 = DisplayServer.window_get_size() / 2.0
 
 var grid_distance: float = SSCS.settings.grid_distance
 var pixels_per_grid_unit: float = SSCS.settings.pixels_per_grid_unit
@@ -28,6 +28,8 @@ var hit_plane: Plane = Plane(Vector3(0, 0, 1), Vector3(0, 0, SSCS.settings.grid_
 var cursor_scale: float = SSCS.settings.cursor_scale
 
 var camera_push_forward: float = 1.0 / 4.0 if SSCS.settings.sound_space_accurate_camera else 0.0
+
+var previous_position: Vector2 = screen_center
 
 func update_position() -> void:
 	pos_world.x = pos.x
@@ -70,24 +72,40 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion:
 		if true_spin:
 			if absolute:
-				camera.rotation = (screen_center - event.position) * degrees_per_pixel
+				var relative: Vector2 = event.position - previous_position
+				print(relative)
+				var mouse_rotation: Vector3 = Vector3(-relative.y, -relative.x, 0) * degrees_per_pixel
+				camera.rotation += mouse_rotation
 			else:
 				var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * degrees_per_pixel
 				camera.rotation += mouse_rotation
 
-			var intersection: Vector3 = hit_plane.intersects_ray(camera.position, -camera.basis.z)
+			previous_position = event.position
 
-			if intersection != null:
-				pos_world = intersection.clamp(Vector3(-GRID_MAX, -GRID_MAX, -INF), Vector3(GRID_MAX, GRID_MAX, INF))
+			var intersection_raw: Variant = hit_plane.intersects_ray(camera.position, -camera.basis.z)
 
-				pos.x = pos_world.x
-				pos.y = pos_world.y
+			var intersection: Vector3 = Vector3() if intersection_raw == null else intersection_raw
 
-				position = pos_world
+			pos_world = intersection.clamp(Vector3(-GRID_MAX, -GRID_MAX, -INF), Vector3(GRID_MAX, GRID_MAX, INF))
 
-				camera.look_at_from_position(Vector3(pos.x*parallax, pos.y*parallax, 0), pos_world)
+			pos.x = pos_world.x
+			pos.y = pos_world.y
 
-				camera.position += camera.basis.z * camera_push_forward
+			position = pos_world
+
+			camera.position = Vector3(pos.x * parallax, pos.y * parallax, 0)
+
+			var intersection_raw_2: Variant = hit_plane.intersects_ray(camera.position, -camera.basis.z)
+			var intersection_2: Vector3 = Vector3() if intersection_raw == null else intersection_raw_2
+
+			pos_world = intersection_2.clamp(Vector3(-GRID_MAX, -GRID_MAX, -INF), Vector3(GRID_MAX, GRID_MAX, INF))
+
+			pos.x = pos_world.x
+			pos.y = pos_world.y
+
+			position = pos_world
+
+			camera.position += camera.basis.z * camera_push_forward
 
 		else:
 			if absolute:
