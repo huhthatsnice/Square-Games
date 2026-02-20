@@ -1,13 +1,13 @@
 extends Sprite3D
 class_name Cursor
 
-var pos: Vector2 = Vector2(0,0)
-var pos_world: Vector3 = Vector3(0,0,0)
+var pos: Vector2 = Vector2(0, 0)
+var pos_world: Vector3 = Vector3(0, 0, grid_distance)
 var camera: Camera3D
 
-const GRID_MAX = (3-0.28)/2 #(grid size - cursor size) / 2
+const GRID_MAX: float = (3 - 0.28) / 2.0 #(grid size - cursor size) / 2
 
-var screen_center: Vector2 = DisplayServer.window_get_size()/2
+var screen_center: Vector2 = DisplayServer.window_get_size() / 2
 
 var grid_distance: float = SSCS.settings.grid_distance
 var pixels_per_grid_unit: float = SSCS.settings.pixels_per_grid_unit
@@ -36,8 +36,13 @@ func update_position() -> void:
 	camera.position = Vector3(pos.x * parallax, pos.y * parallax, 0)
 
 	if true_spin or semi_spin:
-		print("rotate")
 		camera.look_at(pos_world)
+
+	camera.position += camera.basis.z * camera_push_forward
+
+	if !camera.position.is_finite():
+		print("AWOOGA")
+
 
 func _ready() -> void:
 	var custom_cursor_resource: String = SSCS.get_arbitrary_exension("user://cursor", ["png","jpg"])
@@ -50,20 +55,26 @@ func _ready() -> void:
 
 	camera = $"/root/Game/Camera"
 
-	pos_world = Vector3(pos.x,pos.y,grid_distance)
+	pos_world = Vector3(pos.x, pos.y, grid_distance)
 	position = pos_world
 	camera.position = Vector3(pos.x*parallax,pos.y*parallax,0)
 
 	camera.look_at(Vector3(0, 0, 1))
-	if semi_spin:
-		camera.look_at(position)
+	if semi_spin or true_spin:
+		camera.look_at(pos_world)
+
+	camera.position += camera.basis.z * camera_push_forward
 
 func _input(event: InputEvent) -> void:
 	if !accepts_input: return
 	if event is InputEventMouseMotion:
 		if true_spin:
-			var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * degrees_per_pixel
-			camera.rotation += mouse_rotation
+			if absolute:
+				camera.rotation = (screen_center - event.position) * degrees_per_pixel
+			else:
+				var mouse_rotation: Vector3 = Vector3(-event.relative.y, -event.relative.x, 0) * degrees_per_pixel
+				camera.rotation += mouse_rotation
+
 			var intersection: Vector3 = hit_plane.intersects_ray(camera.position, -camera.basis.z)
 
 			if intersection != null:

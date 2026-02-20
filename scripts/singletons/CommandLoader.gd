@@ -296,12 +296,16 @@ func _ready() -> void:
 
 				await game_handler.ended
 
+				print("done")
+
 				Terminal.visible = true
 				Terminal.is_accepting_input = true
 
 				game_handler.queue_free()
 				SSCS.settings = SSCS.true_settings
 				SSCS.modifiers = SSCS.true_modifiers
+
+				break
 
 	,["rp","replay"]))
 
