@@ -38,7 +38,7 @@ func send_chat_message(message: String) -> void:
 	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, var_to_bytes([NewSteamHandler.local_steam_id, message]))
 
 func change_map(new_map: MapLoader.Map, url: String = "") -> void:
-	if selected_map == new_map: return
+	if selected_map == new_map or !new_map.loaded_successfully: return
 
 	selected_map = new_map
 
