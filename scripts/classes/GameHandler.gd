@@ -237,8 +237,13 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 		#print(new_index)
 
 	allocated_notes[new_index]=1
-	var new_note:Note = note_stockpile.pop_back() #Note.new(note_id, pos, t, multimesh, new_index)
-	new_note.reinitialize(note_id, pos, t, new_index)
+	var new_note: Note = note_stockpile.pop_back() #Note.new(note_id, pos, t, multimesh, new_index)
+
+	if new_note == null:
+		new_note = Note.new(note_id, pos, t, multimesh, new_index)
+		note_stockpile.append(new_note)
+	else:
+		new_note.reinitialize(note_id, pos, t, new_index)
 
 	return new_note
 
@@ -296,9 +301,14 @@ func play(from: float) -> void:
 		)
 
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
-	while last_loaded_note_id<len(map.data):
+	while last_loaded_note_id < len(map.data):
 		var note_data: Array = map.data[last_loaded_note_id]
 		if note_data[2] <= threshold:
+			if is_replay:
+				if replay_note_hit_data[last_loaded_note_id] == 1:
+					hits += 1
+				else:
+					misses += 1
 			last_loaded_note_id += 1
 		else:
 			break
@@ -404,7 +414,9 @@ func _check_hitreg() -> void:
 			var note_t: float = note.t
 			if note_t < elapsed:
 				if note_t < boundary:
-					if note.note_id >= len(replay_note_hit_data) or replay_note_hit_data[note.note_id] == 0:
+					if note.note_id >= len(replay_note_hit_data): break
+
+					if replay_note_hit_data[note.note_id] == 0:
 						misses += 1
 						health = clamp(health - 1, 0, 5)
 						if use_miss_sound: miss_sound_player.play(0)
