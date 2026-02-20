@@ -131,12 +131,13 @@ func set_setting(setting: String, value: Variant, generic: bool = false) -> bool
 			new_value = Array(new_value, cur_value.get_typed_builtin(), cur_value.get_typed_class_name(), cur_value.get_typed_script())
 
 		settings.set(setting, new_value)
+		setting_updated.emit(setting, cur_value, new_value)
 	else:
 		if typeof(cur_value) != typeof(value):
 			return false
 		settings.set(setting, value)
+		setting_updated.emit(setting, cur_value, value)
 
-	setting_updated.emit(setting, cur_value, value)
 	return true
 
 func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bool:
@@ -159,12 +160,13 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 			new_value = Array(new_value, cur_value.get_typed_builtin(), cur_value.get_typed_class_name(), cur_value.get_typed_script())
 
 		modifiers.set(modifier, new_value)
+		modifier_updated.emit(modifier, cur_value, new_value)
 	else:
-		if typeof(cur_value)!=typeof(value):
+		if typeof(cur_value) != typeof(value):
 			return false
-		modifiers.set(modifier,value)
+		modifiers.set(modifier, value)
+		modifier_updated.emit(modifier, cur_value, value)
 
-	modifier_updated.emit(modifier,cur_value,value)
 	return true
 
 const blacklisted_properties: Array[String] = ["RefCounted","script","Built-in script"]
