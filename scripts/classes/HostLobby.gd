@@ -170,6 +170,8 @@ func _init(lobby_discoverability: int) -> void:
 			ready = false
 		}
 
+		while not NewSteamHandler.lobby_users[user_id].has("connection"): await SSCS.wait(0.15)
+
 		if selected_map != null:
 			NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
 				name = selected_map.map_name,
