@@ -351,3 +351,50 @@ func _ready() -> void:
 			if SSCS.host_lobby != null:
 				SSCS.host_lobby.spectate_user(user_id)
 	,["nsp"]))
+
+	register_command(Command.new(func() -> void:
+		print(ProjectSettings.globalize_path("%appdata%/SoundSpacePlus/settings.json"))
+
+		var settings_path: String
+		match OS.get_name().to_lower():
+			"linux": settings_path = "/home/%s/.local/share/SoundSpacePlus/settings.json" % OS.get_environment("USER")
+			"windows": settings_path = "%s/SoundSpacePlus/settings.json" % OS.get_environment("appdata").replace("\\","/")
+
+		var settings_file: FileAccess = FileAccess.open(settings_path, FileAccess.READ)
+
+		var settings_data: Dictionary = JSON.parse_string(settings_file.get_as_text())
+
+		SSCS.set_setting("fov", settings_data.fov)
+		SSCS.set_setting("grid_distance", 3.5)
+		SSCS.set_setting("vanish_distance", 0.1 if settings_data.do_note_pushback else INF)
+		SSCS.set_setting("parallax", settings_data.parallax/40)
+		SSCS.set_setting("pixels_per_grid_unit", (1 / ((settings_data.sensitivity / settings_data.render_scale) * 0.018)) * (settings_data.absolute_scale if settings_data.absolute_mode else 1))
+		SSCS.set_setting("approach_rate", settings_data.approach_rate)
+		SSCS.set_setting("spawn_distance", settings_data.spawn_distance)
+		if settings_data.half_ghost:
+			SSCS.set_setting("note_fade_out_begin", ((12.0 / 50.0) * settings_data.approach_rate) / settings_data.spawn_distance)
+			SSCS.set_setting("note_fade_out_end", ((3.0 / 50.0) * settings_data.approach_rate) / settings_data.spawn_distance)
+			SSCS.set_setting("note_end_transparency", (1 - settings_data.note_opacity) * 0.8)
+		else:
+			SSCS.set_setting("note_fade_out_begin", 0)
+			SSCS.set_setting("note_fade_out_end", 0)
+			SSCS.set_setting("note_end_transparency", (1 - settings_data.note_opacity))
+		SSCS.set_setting("map_volume", (db_to_linear(settings_data.music_volume) * db_to_linear(settings_data.master_volume)) / 0.15)
+		SSCS.set_setting("hit_sound_volume", (db_to_linear(settings_data.hit_volume) * db_to_linear(settings_data.master_volume)) / 0.15)
+		SSCS.set_setting("miss_sound_volume", (db_to_linear(settings_data.miss_volume) * db_to_linear(settings_data.master_volume)) / 0.15)
+		if settings_data.glow > 0 or settings_data.bloom > 0:
+			SSCS.set_setting("glow_enabled", true)
+			SSCS.set_setting("glow_bloom", settings_data.bloom)
+			SSCS.set_setting("glow_strength", settings_data.glow)
+		else:
+			SSCS.set_setting("glow_enabled", false)
+		SSCS.set_setting("cursor_scale", settings_data.cursor_scale)
+		SSCS.set_setting("note_scale", settings_data.note_size)
+		SSCS.set_setting("absolute_input", settings_data.absolute_mode)
+		SSCS.set_setting("note_transparency", 1 - settings_data.note_opacity)
+		SSCS.set_setting("note_fade_in_begin", 1)
+		SSCS.set_setting("note_fade_in_end", 1 - settings_data.fade_length)
+		SSCS.set_setting("semi_spin", false)
+		SSCS.set_setting("cam_unlock", settings_data.cam_unlock)
+
+	,["importsettings"]))
