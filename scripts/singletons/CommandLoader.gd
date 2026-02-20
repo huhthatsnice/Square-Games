@@ -398,3 +398,13 @@ func _ready() -> void:
 		SSCS.set_setting("cam_unlock", settings_data.cam_unlock)
 
 	,["importsettings"]))
+
+	register_command(Command.new(func() -> void:
+		Steam.addRequestLobbyListDistanceFilter(Steam.LobbyDistanceFilter.LOBBY_DISTANCE_FILTER_WORLDWIDE)
+		Steam.addRequestLobbyListStringFilter("identifier", "SSCS", Steam.LobbyComparison.LOBBY_COMPARISON_EQUAL)
+		Steam.requestLobbyList()
+
+		var data: Array = await Steam.lobby_match_list
+
+		print(data)
+	,["ngl"]))

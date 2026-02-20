@@ -135,6 +135,7 @@ func _ready() -> void:
 			accepting_connections = true
 
 			Steam.setLobbyMemberData(lobby_id, "settings", var_to_str(SSCS.encode_class(SSCS.settings)))
+			Steam.setLobbyData(lobby_id, "identifier", "SSCS")
 	)
 
 	Steam.lobby_joined.connect(func(lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
