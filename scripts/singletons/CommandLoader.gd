@@ -367,14 +367,14 @@ func _ready() -> void:
 		SSCS.set_setting("fov", settings_data.fov)
 		SSCS.set_setting("grid_distance", 3.5)
 		SSCS.set_setting("vanish_distance", 0.1 if settings_data.do_note_pushback else INF)
-		SSCS.set_setting("parallax", settings_data.parallax/40)
+		SSCS.set_setting("parallax", settings_data.parallax / 40.0)
 		SSCS.set_setting("pixels_per_grid_unit", (1 / ((settings_data.sensitivity / settings_data.render_scale) * 0.018)) * (settings_data.absolute_scale if settings_data.absolute_mode else 1))
 		SSCS.set_setting("approach_rate", settings_data.approach_rate)
 		SSCS.set_setting("spawn_distance", settings_data.spawn_distance)
 		if settings_data.half_ghost:
 			SSCS.set_setting("note_fade_out_begin", ((12.0 / 50.0) * settings_data.approach_rate) / settings_data.spawn_distance)
 			SSCS.set_setting("note_fade_out_end", ((3.0 / 50.0) * settings_data.approach_rate) / settings_data.spawn_distance)
-			SSCS.set_setting("note_end_transparency", (1 - settings_data.note_opacity) * 0.8)
+			SSCS.set_setting("note_end_transparency", (1 - settings_data.note_opacity * 0.8))
 		else:
 			SSCS.set_setting("note_fade_out_begin", 0)
 			SSCS.set_setting("note_fade_out_end", 0)
