@@ -473,7 +473,7 @@ func _process(_dt: float) -> void:
 			else:
 				print("you a foreteller bro")
 				pause()
-				await get_tree().create_timer((1.0 / Engine.physics_ticks_per_second) * 30).timeout
+				await get_tree().create_timer(0.75).timeout
 				unpause()
 
 		if smooth_replays:
