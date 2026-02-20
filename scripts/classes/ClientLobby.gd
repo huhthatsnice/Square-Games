@@ -136,7 +136,15 @@ func _init(lobby_id: int = 0) -> void:
 					map = SSCS.load_map_from_name(data.name)
 				else:
 					map = await SSCS.get_map_from_url(data.url)
+					map.map_name = data.name
+
+				SSCS.url_cache[data.name] = {
+					url = data.url,
+					time = data.url_end
+				}
+
 				selected_map = map
+
 				NewSteamHandler.send_message(NewSteamHandler.host_id, HostLobby.HOST_PACKET.PLAYER_READY, [])
 			CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED:
 				var data: Dictionary = bytes_to_var(packet_data)
@@ -210,6 +218,9 @@ func _init(lobby_id: int = 0) -> void:
 		if user_id == NewSteamHandler.local_steam_id:
 			print("turning into host")
 			var new_lobby: HostLobby = HostLobby.new(-1)
+
+			if selected_map != null:
+				new_lobby.selected_map = selected_map
 
 			$"/root/Game".add_child(new_lobby)
 

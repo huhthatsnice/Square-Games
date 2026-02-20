@@ -6,7 +6,6 @@ var discoverability: Steam.LobbyType
 var user_data: Dictionary[int, Dictionary]
 
 var selected_map: MapLoader.Map
-var map_url: String
 
 var local_note_hit_data: Dictionary
 var local_cursor_pos_data: PackedByteArray
@@ -37,7 +36,7 @@ func send_chat_message(message: String) -> void:
 
 	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.CHAT_MESSAGE, var_to_bytes([NewSteamHandler.local_steam_id, message]))
 
-func change_map(new_map: MapLoader.Map, url: String = "") -> void:
+func change_map(new_map: MapLoader.Map) -> void:
 	if selected_map == new_map or !new_map.loaded_successfully: return
 
 	selected_map = new_map
@@ -45,15 +44,13 @@ func change_map(new_map: MapLoader.Map, url: String = "") -> void:
 	for user_id: int in user_data:
 		user_data[user_id].ready = false
 
-	if url == "":
-		url = await SSCS.get_temporary_map_download_link(new_map)
-
-	map_url = url
+	var url: String = await SSCS.get_temporary_map_download_link(new_map)
 
 	NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
 		name = new_map.map_name,
 		hash = SSCS.get_map_hash(new_map.map_name),
-		url = url
+		url = url,
+		url_end = SSCS.url_cache[new_map.map_name].time
 	}))
 
 func start_lobby(from: float = 0) -> void:
@@ -173,10 +170,13 @@ func _init(lobby_discoverability: int) -> void:
 		while not NewSteamHandler.lobby_users[user_id].has("connection"): await SSCS.wait(0.15)
 
 		if selected_map != null:
+			var url: String = await SSCS.get_temporary_map_download_link(selected_map)
+
 			NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MAP_CHANGED, var_to_bytes({
 				name = selected_map.map_name,
 				hash = SSCS.get_map_hash(selected_map.map_name),
-				url = map_url
+				url = url,
+				url_end = SSCS.url_cache[selected_map.map_name].time
 			}))
 		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.encode_class(SSCS.modifiers)))
 	)
