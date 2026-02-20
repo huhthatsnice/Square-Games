@@ -86,16 +86,15 @@ func start_lobby(from: float = 0) -> void:
 		local_note_hit_data[note_id] = false
 	)
 
-	last_replication_flush = Time.get_ticks_msec()
-	lobby_start = last_replication_flush
-	last_cursor_update = lobby_start
+	lobby_start = Time.get_ticks_msec()
+	last_replication_flush = 0
+	last_cursor_update = 0
 
 	local_cursor_pos_data.clear()
 	local_note_hit_data.clear()
 
 	for user_id_2: int in user_data:
 		user_data[user_id_2].alive = true
-		user_data[user_id_2].cursor_replication_offset = 0
 		user_data[user_id_2].cursor_replication_data.clear()
 		user_data[user_id_2].note_hit_data.clear()
 
@@ -203,25 +202,20 @@ func _init(lobby_discoverability: int) -> void:
 				var cursor_replication_data: PackedByteArray = data[0]
 				var note_hit_data: Dictionary = data[1]
 
-				var cursor_replication_offset: int = user_data[user_id].cursor_replication_offset
-
 				var user_cursor_replication_data: PackedVector3Array = user_data[user_id].cursor_replication_data
 				print("data")
-				for offset: int in range(0, len(cursor_replication_data) / 6):
-					var real_offset: int = offset * 6
+				for offset: int in range(0, len(cursor_replication_data) / 8):
+					var real_offset: int = offset * 8
 
 					var x: float = remap(cursor_replication_data.decode_u16(real_offset + 0), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
 					var y: float = remap(cursor_replication_data.decode_u16(real_offset + 2), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
-					var t: int = cursor_replication_offset + cursor_replication_data.decode_u16(real_offset + 4)
+					var t: int = cursor_replication_data.decode_s32(real_offset + 4)
 
 					print(x)
 					print(y)
 					print(t)
 
 					user_cursor_replication_data.append(Vector3(x, y, t / 1000.0))
-
-					cursor_replication_offset = t
-				user_data[user_id].cursor_replication_offset = cursor_replication_offset
 
 				var user_note_hit_data: PackedByteArray = user_data[user_id].note_hit_data
 				for note_id: int in note_hit_data:
@@ -299,14 +293,14 @@ func _init(lobby_discoverability: int) -> void:
 
 func _physics_process(_delta: float) -> void:
 	if SSCS.game_handler != null and cursor != null:
-		var current_tick: int = Time.get_ticks_msec()
+		var current_tick: int = floori(AudioManager.elapsed * 1000)
 
 		var cursor_data: PackedByteArray
-		cursor_data.resize(2 + 2 + 2)
+		cursor_data.resize(2 + 2 + 4)
 
 		cursor_data.encode_u16(0, roundi(remap(cursor.pos.x, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
 		cursor_data.encode_u16(2, roundi(remap(cursor.pos.y, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
-		cursor_data.encode_u16(4, current_tick - last_cursor_update)
+		cursor_data.encode_s32(4, current_tick)
 
 		last_cursor_update = current_tick
 
