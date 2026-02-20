@@ -215,6 +215,7 @@ func _init(lobby_discoverability: int) -> void:
 
 					print(x)
 					print(y)
+					print(t)
 
 					user_cursor_replication_data.append(Vector3(x, y, t / 1000.0))
 					cursor_replication_offset = t
@@ -266,6 +267,10 @@ func _init(lobby_discoverability: int) -> void:
 
 				await SSCS.wait(died_at - AudioManager.elapsed)
 
+				if !user_data.has(user_id):
+					print("man.")
+					return
+
 				user_data[user_id].alive = false
 
 				if spectated_user == user_id:
@@ -298,7 +303,7 @@ func _physics_process(_delta: float) -> void:
 
 		cursor_data.encode_u16(0, roundi(remap(cursor.pos.x, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
 		cursor_data.encode_u16(2, roundi(remap(cursor.pos.y, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
-		cursor_data.encode_u16(4, last_cursor_update - current_tick)
+		cursor_data.encode_u16(4, current_tick - last_cursor_update)
 
 		last_cursor_update = current_tick
 

@@ -228,7 +228,7 @@ func _physics_process(_delta: float) -> void:
 
 		cursor_data.encode_u16(0, roundi(remap(cursor.pos.x, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
 		cursor_data.encode_u16(2, roundi(remap(cursor.pos.y, -Cursor.GRID_MAX, Cursor.GRID_MAX, 0, 0xffff)))
-		cursor_data.encode_u16(4, last_cursor_update - current_tick)
+		cursor_data.encode_u16(4, current_tick - last_cursor_update)
 
 		last_cursor_update = current_tick
 
