@@ -108,7 +108,7 @@ func _init(lobby_id: int = 0) -> void:
 					var y: float = remap(cursor_replication_data.decode_u16(offset + 2), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
 					var t: int = cursor_replication_offset + cursor_replication_data.decode_u16(offset + 4)
 
-					user_cursor_replication_data.append(Vector3(x, y, t))
+					user_cursor_replication_data.append(Vector3(x, y, t / 1000.0))
 					cursor_replication_offset = t
 
 				var user_note_hit_data: PackedByteArray = user_data[replication_user_id].note_hit_data
