@@ -82,7 +82,7 @@ func start_lobby(from: float = 0) -> void:
 		local_note_hit_data[note_id] = true
 	)
 
-	game_handler.note_hit.connect(func(note_id: int) -> void:
+	game_handler.note_missed.connect(func(note_id: int) -> void:
 		local_note_hit_data[note_id] = false
 	)
 
