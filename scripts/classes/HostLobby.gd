@@ -88,6 +88,7 @@ func start_lobby(from: float = 0) -> void:
 
 	last_replication_flush = Time.get_ticks_msec()
 	lobby_start = last_replication_flush
+	last_cursor_update = lobby_start
 
 	local_cursor_pos_data.clear()
 	local_note_hit_data.clear()
