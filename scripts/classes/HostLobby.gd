@@ -205,7 +205,7 @@ func _init(lobby_discoverability: int) -> void:
 				var cursor_replication_offset: int = user_data[user_id].cursor_replication_offset
 
 				var user_cursor_replication_data: PackedVector3Array = user_data[user_id].cursor_replication_data
-				for offset: int in range(0, len(cursor_replication_data) / 4):
+				for offset: int in range(0, len(cursor_replication_data) / 6):
 					var real_offset: int = offset * 6
 
 					var x: float = remap(cursor_replication_data.decode_u16(real_offset + 0), 0, 0xffff, -cursor.GRID_MAX, cursor.GRID_MAX)
@@ -286,7 +286,7 @@ func _init(lobby_discoverability: int) -> void:
 	)
 
 func _physics_process(_delta: float) -> void:
-	if SSCS.game_handler != null:
+	if SSCS.game_handler != null and cursor != null:
 		var current_tick: int = Time.get_ticks_msec()
 
 		var cursor_data: PackedByteArray

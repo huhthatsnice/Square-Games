@@ -103,7 +103,7 @@ func _init(lobby_id: int = 0) -> void:
 				var cursor_replication_offset: int = user_data[replication_user_id].cursor_replication_offset
 
 				var user_cursor_replication_data: PackedVector3Array = user_data[replication_user_id].cursor_replication_data
-				for offset: int in range(0, len(cursor_replication_data) / 4):
+				for offset: int in range(0, len(cursor_replication_data) / 6):
 					var real_offset: int = offset * 6
 
 					var x: float = remap(cursor_replication_data.decode_u16(real_offset + 0), 0, 0xffff, -cursor.GRID_MAX, cursor.GRID_MAX)
