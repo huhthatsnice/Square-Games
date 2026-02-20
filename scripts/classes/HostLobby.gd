@@ -178,7 +178,7 @@ func _init(lobby_discoverability: int) -> void:
 				hash = SSCS.get_map_hash(selected_map.map_name),
 				url = map_url
 			}))
-		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.modifiers))
+		NewSteamHandler.send_message(user_id, ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.encode_class(SSCS.modifiers)))
 	)
 
 	NewSteamHandler.player_left.connect(func(user_id: int) -> void:
@@ -290,7 +290,7 @@ func _init(lobby_discoverability: int) -> void:
 	)
 
 	SSCS.modifier_updated.connect(func() -> void:
-		NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.modifiers))
+		NewSteamHandler.send_message_to_users([], ClientLobby.CLIENT_PACKET.SELECTED_MODIFIERS_CHANGED, var_to_bytes(SSCS.encode_class(SSCS.modifiers)))
 	)
 
 func _physics_process(_delta: float) -> void:
