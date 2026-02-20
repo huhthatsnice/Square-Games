@@ -73,7 +73,6 @@ func _input(event: InputEvent) -> void:
 		if true_spin:
 			if absolute:
 				var relative: Vector2 = event.position - previous_position
-				print(relative)
 				var mouse_rotation: Vector3 = Vector3(-relative.y, -relative.x, 0) * degrees_per_pixel
 				camera.rotation += mouse_rotation
 			else:
