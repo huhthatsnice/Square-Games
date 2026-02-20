@@ -410,3 +410,9 @@ func _ready() -> void:
 			var lobby_name: String = Steam.getLobbyData(lobby_id, "name")
 			Terminal.print_console("{0} ({1})\n".format([lobby_name, lobby_id]))
 	,["ngl"]))
+
+	register_command(Command.new(func(...user_name: Array) -> void:
+		var user_id: int = NewSteamHandler.get_user_id_from_name(" ".join(user_name))
+		if user_id != -1 and user_id != NewSteamHandler.local_steam_id:
+			Steam.setLobbyOwner(NewSteamHandler.current_lobby_id, user_id)
+	,["nso"]))
