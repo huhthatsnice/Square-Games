@@ -101,6 +101,7 @@ func _init(lobby_id: int = 0) -> void:
 				var note_hit_data: Dictionary = data[2]
 
 				var user_cursor_replication_data: PackedVector3Array = user_data[replication_user_id].cursor_replication_data
+
 				for offset: int in range(0, len(cursor_replication_data) / 8):
 					var real_offset: int = offset * 8
 

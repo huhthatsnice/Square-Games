@@ -152,7 +152,7 @@ func _ready() -> void:
 			for i: int in range(0, user_count):
 				var user_id: int = Steam.getLobbyMemberByIndex(current_lobby_id, i)
 
-				if user_id == current_lobby_id: continue
+				if user_id == current_lobby_id or user_id == local_steam_id: continue
 
 				lobby_users[user_id] = {
 					user_id = user_id,
@@ -165,7 +165,6 @@ func _ready() -> void:
 
 			print("connected to lobby")
 			print(host_id)
-			print()
 		else:
 			print("Failed to join lobby: ", response)
 	)
