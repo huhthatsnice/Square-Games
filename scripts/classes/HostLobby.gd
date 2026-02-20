@@ -209,17 +209,18 @@ func _init(lobby_discoverability: int) -> void:
 				for offset: int in range(0, len(cursor_replication_data) / 6):
 					var real_offset: int = offset * 6
 
-					var x: float = remap(cursor_replication_data.decode_u16(real_offset + 0), 0, 0xffff, -cursor.GRID_MAX, cursor.GRID_MAX)
-					var y: float = remap(cursor_replication_data.decode_u16(real_offset + 2), 0, 0xffff, -cursor.GRID_MAX, cursor.GRID_MAX)
+					var x: float = remap(cursor_replication_data.decode_u16(real_offset + 0), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
+					var y: float = remap(cursor_replication_data.decode_u16(real_offset + 2), 0, 0xffff, -Cursor.GRID_MAX, Cursor.GRID_MAX)
 					var t: int = cursor_replication_offset + cursor_replication_data.decode_u16(real_offset + 4)
 
-					#print(x)
-					#print(y)
-					#print(t)
+					print(x)
+					print(y)
+					print(t)
 
 					user_cursor_replication_data.append(Vector3(x, y, t / 1000.0))
 
-					user_data[user_id].cursor_replication_offset = t
+					cursor_replication_offset = t
+				user_data[user_id].cursor_replication_offset = cursor_replication_offset
 
 				var user_note_hit_data: PackedByteArray = user_data[user_id].note_hit_data
 				for note_id: int in note_hit_data:
