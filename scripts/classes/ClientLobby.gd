@@ -111,7 +111,8 @@ func _init(lobby_id: int = 0) -> void:
 					var t: int = cursor_replication_offset + cursor_replication_data.decode_u16(real_offset + 4)
 
 					user_cursor_replication_data.append(Vector3(x, y, t / 1000.0))
-					cursor_replication_offset = t
+
+					user_data[user_id].cursor_replication_offset = t
 
 				var user_note_hit_data: PackedByteArray = user_data[replication_user_id].note_hit_data
 				for note_id: int in note_hit_data:
