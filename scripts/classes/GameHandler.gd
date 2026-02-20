@@ -326,7 +326,7 @@ func unpause() -> void:
 #region note functionality
 
 func _check_death() -> void:
-	if (health == 0 and !no_fail) or (AudioManager.elapsed > (map.data[-1][2] / 1000.0) + 1000):
+	if (health == 0 and !no_fail and !is_replay) or (AudioManager.elapsed > (map.data[-1][2] / 1000.0) + 1000):
 		stop()
 
 var last_load:float = 0
@@ -405,9 +405,7 @@ func _check_hitreg() -> void:
 			var note_t: float = note.t
 			if note_t < elapsed:
 				if note_t < boundary:
-					if note.note_id >= len(replay_note_hit_data): break
-
-					if replay_note_hit_data[note.note_id] == 0:
+					if note.note_id >= len(replay_note_hit_data) or replay_note_hit_data[note.note_id] == 0:
 						misses += 1
 						health = clamp(health - 1, 0, 5)
 						if use_miss_sound: miss_sound_player.play(0)
