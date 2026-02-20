@@ -406,5 +406,7 @@ func _ready() -> void:
 
 		var data: Array = await Steam.lobby_match_list
 
-		print(data)
+		for lobby_id: int in data:
+			var lobby_name: String = Steam.getLobbyData(lobby_id, "name")
+			Terminal.print_console("{0} ({1})\n".format([lobby_name, lobby_id]))
 	,["ngl"]))

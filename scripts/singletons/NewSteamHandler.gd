@@ -135,6 +135,9 @@ func _ready() -> void:
 			accepting_connections = true
 
 			Steam.setLobbyJoinable(lobby_id, true)
+			Steam.setLobbyType(lobby_id, Steam.LobbyType.LOBBY_TYPE_PUBLIC)
+
+			Steam.setLobbyData(NewSteamHandler.current_lobby_id, "name", Steam.getPersonaName())
 			Steam.setLobbyMemberData(lobby_id, "settings", var_to_str(SSCS.encode_class(SSCS.settings)))
 			Steam.setLobbyData(lobby_id, "identifier", "SSCS")
 	)
@@ -142,6 +145,7 @@ func _ready() -> void:
 	Steam.lobby_joined.connect(func(lobby_id: int, _permissions: int, _locked: bool, response: int) -> void:
 		if response == Steam.CHAT_ROOM_ENTER_RESPONSE_SUCCESS:
 			print("successfully entered lobby")
+			print(Steam.getLobbyData(lobby_id, "identifier"))
 			if is_host: return
 
 			current_lobby_id = lobby_id

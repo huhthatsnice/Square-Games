@@ -156,6 +156,8 @@ func _init(lobby_discoverability: int) -> void:
 		NewSteamHandler.create_lobby(lobby_discoverability)
 	elif lobby_discoverability != -1:
 		Steam.setLobbyType(NewSteamHandler.current_lobby_id, lobby_discoverability)
+		Steam.setLobbyData(NewSteamHandler.current_lobby_id, "name", Steam.getPersonaName())
+
 
 	NewSteamHandler.player_joined.connect(func(user_id: int) -> void:
 		user_data[user_id] = {
