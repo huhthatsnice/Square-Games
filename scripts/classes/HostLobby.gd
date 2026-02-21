@@ -288,6 +288,9 @@ func _init(lobby_discoverability: int) -> void:
 			if selected_map != null:
 				new_lobby.selected_map = selected_map
 
+			for user_id_2: int in user_data:
+				NewSteamHandler.player_joined.emit(user_id_2)
+
 			$"/root/Game".add_child(new_lobby)
 
 			SSCS.host_lobby = null
