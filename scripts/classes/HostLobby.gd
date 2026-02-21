@@ -284,6 +284,10 @@ func _init(lobby_discoverability: int) -> void:
 		if user_id != NewSteamHandler.local_steam_id:
 			print("turning into client")
 			var new_lobby: ClientLobby = ClientLobby.new(NewSteamHandler.current_lobby_id)
+
+			if selected_map != null:
+				new_lobby.selected_map = selected_map
+
 			$"/root/Game".add_child(new_lobby)
 
 			SSCS.host_lobby = null
