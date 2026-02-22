@@ -57,7 +57,16 @@ grow_vertical = 2
 color = Color(0, 0, 0, 0)
 
 [node name="CanvasLayer2" type="CanvasLayer" parent="CanvasLayer"]
+layer = 2
 visible = false
+
+[node name="Label" type="Label" parent="CanvasLayer/CanvasLayer2"]
+z_index = 5
+offset_left = 78.0
+offset_top = 116.0
+offset_right = 167.0
+offset_bottom = 139.0
+text = "Hello Nigga"
 
 [node name="blur_vertical" type="ColorRect" parent="CanvasLayer/CanvasLayer2"]
 material = SubResource("ShaderMaterial_x802j")
@@ -67,12 +76,3 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(1, 1, 1, 0)
-
-[node name="Label" type="Label" parent="CanvasLayer/CanvasLayer2/blur_vertical"]
-z_index = 5
-layout_mode = 0
-offset_left = 92.0
-offset_top = 98.0
-offset_right = 181.0
-offset_bottom = 121.0
-text = "Hello Nigga"
