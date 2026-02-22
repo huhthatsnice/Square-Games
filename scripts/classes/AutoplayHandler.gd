@@ -44,7 +44,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		while i < notes_len:
 			var v2: Array = notes[i]
-			if v2 and abs(v2[2]-v[2]) <= 3 and max(abs(v2[0] - v[0]),abs(v2[1] - v[1])) < 1*1:
+			if v2 and abs(v2[2] - v[2]) <= 3 and max(abs(v2[0] - v[0]),abs(v2[1] - v[1])) < 1*1:
 				collected.append(v2)
 				i += 1
 			else:
@@ -80,6 +80,12 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			v[2]
 		]
 
+		var v_prev: Array = notes[i - 2]
+		if v_prev != null and v[0] == v_prev[0] and v[1] == v_prev[1]:
+			print("stack old avg")
+			new_note_data[0] = preprocessed_data[-1][0]
+			new_note_data[1] = preprocessed_data[-1][1]
+
 		preprocessed_data.append(new_note_data)
 
 	print("begin aggressive stack compressing")
@@ -94,6 +100,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		secondary_preprocessed_data.append(preprocessed_data[0])
 		secondary_preprocessed_data.append(preprocessed_data[1])
 
+		var merged: bool = false
 		while i + 3 < preprocessed_data_len:
 
 			var stack_length: int = 1
@@ -116,60 +123,22 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				print("stack found ", top_note[2])
 				print(stack_length)
 
-				var _prev_note_2: Array = preprocessed_data[top_note_i - 2]
-				var _prev_note_1: Array = preprocessed_data[top_note_i - 1]
-
 				var end_note: Array = preprocessed_data[i-1]
 
-				var _past_note_1: Array = preprocessed_data[i]
-				var _past_note_2: Array = preprocessed_data[i + 1]
-
-				var tests: Array[Array] = []
-
-				var new_note_1: Array = [
-					top_note[0],
-					top_note[1],
-					floor((top_note[2] + end_note[2]) / 2.0)
-				]
-				tests.append(new_note_1)
-
-				var new_note_2: Array = [
-					top_note[0],
-					top_note[1],
-					top_note[2]
-				]
-
-				tests.append(new_note_2)
-
-				var new_note_3: Array = [
-					top_note[0],
-					top_note[1],
-					end_note[2]
-				]
-
-				tests.append(new_note_3)
-
 				var valid: bool = false
-
-				#for new_note: MapLoader.NoteDataMinimal in tests:
-					#if _check_hit(top_note, SplineManager._get_position(prev_note_2, prev_note_1, new_note, past_note_1, top_note.t), SSCS.modifiers.hitbox_size) and _check_hit(end_note, SplineManager._get_position(prev_note_1, new_note, past_note_1, past_note_2, end_note.t), SSCS.modifiers.hitbox_size):
-						#secondary_preprocessed_data.append(new_note)
-						#print("merge")
-						#valid = true
-						#break
 
 				if !valid:
 					print("stackify")
 					secondary_preprocessed_data.append(top_note)
-					secondary_preprocessed_data.append(top_note)
+					var top_note_shifted: Array = top_note.duplicate()
+					top_note_shifted[2] += 10
+					secondary_preprocessed_data.append(top_note_shifted)
 
+					var end_note_shifted: Array = end_note.duplicate()
+					end_note_shifted[2] -= 10
+					secondary_preprocessed_data.append(end_note_shifted)
 					secondary_preprocessed_data.append(end_note)
-					#secondary_preprocessed_data.append(end_note)
 
-					#for i2: int in range(top_note_i, i):
-						#print("add")
-						#secondary_preprocessed_data.append(preprocessed_data[i2])
-						#secondary_preprocessed_data.append(preprocessed_data[i2])
 			else:
 				secondary_preprocessed_data.append(top_note)
 
@@ -194,6 +163,12 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		var note_2: Array = secondary_preprocessed_data[i]
 		var note_3: Array = secondary_preprocessed_data[i+1]
 		var note_4: Array = secondary_preprocessed_data[min(i+2,secondary_preprocessed_data_len-1)]
+
+		if (note_2[0] == note_3[0] and note_2[1] == note_3[1]) or (note_2[0] == note_1[0] and note_2[1] == note_1[1]):
+			print("ignore")
+			processed_data.append(note_2)
+			i += 1
+			continue
 
 		var pos: Vector2 = SplineManager._get_position(note_0, note_1, note_3, note_4, note_2[2])
 
