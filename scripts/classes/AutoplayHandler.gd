@@ -81,7 +81,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		]
 
 		var v_prev: Array = notes[i - 2]
-		if v_prev != null and v[0] == v_prev[0] and v[1] == v_prev[1]:
+		if v_prev != null and v[0] == v_prev[0] and v[1] == v_prev[1] and len(preprocessed_data) > 0:
 			print("stack old avg")
 			new_note_data[0] = preprocessed_data[-1][0]
 			new_note_data[1] = preprocessed_data[-1][1]
@@ -130,13 +130,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				if !valid:
 					print("stackify")
 					secondary_preprocessed_data.append(top_note)
-					var top_note_shifted: Array = top_note.duplicate()
-					top_note_shifted[2] += 10
-					secondary_preprocessed_data.append(top_note_shifted)
+					#var top_note_shifted: Array = top_note.duplicate()
+					#top_note_shifted[2] += 10
+					#secondary_preprocessed_data.append(top_note_shifted)
 
-					var end_note_shifted: Array = end_note.duplicate()
-					end_note_shifted[2] -= 10
-					secondary_preprocessed_data.append(end_note_shifted)
+					#var end_note_shifted: Array = end_note.duplicate()
+					#end_note_shifted[2] -= 10
+					#secondary_preprocessed_data.append(end_note_shifted)
 					secondary_preprocessed_data.append(end_note)
 
 			else:
@@ -166,7 +166,28 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		if (note_2[0] == note_3[0] and note_2[1] == note_3[1]) or (note_2[0] == note_1[0] and note_2[1] == note_1[1]):
 			print("ignore")
-			processed_data.append(note_2)
+			var desired: Vector2 = Vector2(
+				((processed_data[-1] if len(processed_data) > 0 else note_1)[0] + note_2[0] + note_3[0]) / 3.0,
+				((processed_data[-1] if len(processed_data) > 0 else note_1)[1] + note_2[1] + note_3[1]) / 3.0,
+			)
+
+			var shift_vec: Vector2 = desired - Vector2(note_2[0], note_2[1])
+
+			if shift_vec.x==0 or shift_vec.y==0:
+				shift_vec = shift_vec.clampf(-SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5)
+			else:
+				shift_vec = shift_vec * clamp(shift_vec.x, -SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5)/shift_vec.x
+				shift_vec = shift_vec * clamp(shift_vec.y, -SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5)/shift_vec.y
+
+			print(shift_vec)
+
+			var new_note: Array = [
+				note_2[0] + shift_vec.x,
+				note_2[1] + shift_vec.y,
+				note_2[2]
+			]
+
+			processed_data.append(new_note)
 			i += 1
 			continue
 
