@@ -142,8 +142,9 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			else:
 				secondary_preprocessed_data.append(top_note)
 
-		secondary_preprocessed_data.append(preprocessed_data[-1])
+		secondary_preprocessed_data.append(preprocessed_data[-3])
 		secondary_preprocessed_data.append(preprocessed_data[-2])
+		secondary_preprocessed_data.append(preprocessed_data[-1])
 	else:
 		secondary_preprocessed_data = preprocessed_data
 
