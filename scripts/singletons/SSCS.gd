@@ -387,11 +387,15 @@ func _ready() -> void:
 	DirAccess.make_dir_absolute("user://phoenyxmaps")
 	DirAccess.make_dir_absolute("user://replays")
 
-	var raw_settings_data: PackedByteArray = FileAccess.get_file_as_bytes("user://settings.txt")
+	var settings_file: FileAccess = FileAccess.open("user://settings.txt", FileAccess.READ)
 
-	if len(raw_settings_data)>=4:
+	if settings_file != null and settings_file.get_length() >= 4:
 		print("decode")
+
+		var raw_settings_data: PackedByteArray = settings_file.get_buffer(settings_file.get_length())
+
 		var settings_data: Dictionary = bytes_to_var(raw_settings_data)
+
 		for setting: String in settings_data:
 			var value: Variant = settings_data[setting]
 			settings.set(setting, value)
