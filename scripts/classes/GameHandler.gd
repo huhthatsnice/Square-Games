@@ -335,7 +335,7 @@ func unpause() -> void:
 #region note functionality
 
 func _check_death() -> void:
-	if (health == 0 and !no_fail and !is_replay) or (AudioManager.elapsed > (map.data[-1][2] / 1000.0) + 1000):
+	if (health == 0 and !no_fail and !is_replay) or (AudioManager.elapsed > (map.data[-1][2] / 1000.0) + 1.0):
 		stop()
 
 var last_load:float = 0
