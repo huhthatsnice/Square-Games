@@ -503,7 +503,7 @@ func _process(_dt: float) -> void:
 	_load_notes()
 	_check_death()
 
-	if note_removed==last_top_note_id:
+	if note_removed == last_top_note_id:
 		var top_note_id: int = allocated_notes.rfind(1)
 		last_top_note_id = top_note_id
 		self.multimesh.visible_instance_count=top_note_id+1
