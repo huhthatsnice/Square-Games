@@ -98,7 +98,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var secondary_preprocessed_data: Array[Array] = []
 
-	if preprocessed_data_len > 5 and false:
+	if preprocessed_data_len > 5 and true:
 
 		secondary_preprocessed_data.append(preprocessed_data[0])
 		secondary_preprocessed_data.append(preprocessed_data[1])
@@ -133,13 +133,13 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				if !valid:
 					print("stackify")
 					secondary_preprocessed_data.append(top_note)
-					#var top_note_shifted: Array = top_note.duplicate()
-					#top_note_shifted[2] += 10
-					#secondary_preprocessed_data.append(top_note_shifted)
+					var top_note_shifted: Array = top_note.duplicate()
+					top_note_shifted[2] += 10
+					secondary_preprocessed_data.append(top_note_shifted)
 
-					#var end_note_shifted: Array = end_note.duplicate()
-					#end_note_shifted[2] -= 10
-					#secondary_preprocessed_data.append(end_note_shifted)
+					var end_note_shifted: Array = end_note.duplicate()
+					end_note_shifted[2] -= 10
+					secondary_preprocessed_data.append(end_note_shifted)
 					secondary_preprocessed_data.append(end_note)
 
 			else:
@@ -231,10 +231,22 @@ func get_cursor_position() -> Vector2:
 		else:
 			last_loaded_note+=1
 
-	var note_0: Array = processed_data[max(last_loaded_note-1,0)]
+	var note_0: Array = processed_data[max(last_loaded_note - 1,0)]
 	var note_1: Array = processed_data[last_loaded_note]
-	var note_2: Array = processed_data[min(last_loaded_note+1,len(processed_data)-1)]
-	var note_3: Array = processed_data[min(last_loaded_note+2,len(processed_data)-1)]
+	var note_2: Array = processed_data[min(last_loaded_note + 1, len(processed_data) - 1)]
+	var note_3: Array = processed_data[min(last_loaded_note + 2, len(processed_data) - 1)]
+
+	var offset_forward: int = 1
+	while _check_hit(note_2, note_3, SSCS.modifiers.hitbox_size * 0.5 + 0.01) and last_loaded_note + 2 + offset_forward < len(processed_data):
+		#print('forward ', offset_forward)
+		note_3 = processed_data[min(last_loaded_note + 2 + offset_forward, len(processed_data) - 1)]
+		offset_forward += 1
+
+	#var offset_backward: int = 1
+	#while _check_hit(note_1, note_0, 0.5) and last_loaded_note - 1 - offset_backward >= 0:
+		##print('backward')
+		#note_0 = processed_data[max(last_loaded_note - 1 - offset_backward,0)]
+		#offset_backward += 1
 
 	var return_pos: Vector2 = SplineManager._get_position(note_0, note_1, note_2, note_3, elapsed).clampf(-cursor.GRID_MAX,cursor.GRID_MAX)
 
