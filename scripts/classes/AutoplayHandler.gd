@@ -44,7 +44,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 		while i < notes_len:
 			var v2: Array = notes[i]
-			if v2 and abs(v2[2] - v[2]) <= 3 and max(abs(v2[0] - v[0]),abs(v2[1] - v[1])) < 1*1:
+			if v2 and abs(v2[2] - v[2]) <= 5 and _check_hit(v, v2, SSCS.modifiers.hitbox_size * 0.9):
 				collected.append(v2)
 				i += 1
 			else:
@@ -65,7 +65,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 			var speed: float = (prev_data_pos - avg_pos).length() / (time_elapsed * 100)
 			avg_pos *= 0.8 + (sigmoid(speed * 5) - 0.5) * 2 * 0.2
 
-			if i > 2:
+			if i > 2 and len(preprocessed_data) >= 2:
 				var prev_prev_data: Array = preprocessed_data[-2]
 				var prev_prev_data_pos: Vector2 = Vector2(prev_prev_data[0], prev_prev_data[1])
 
@@ -81,7 +81,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		]
 
 		var v_prev: Array = notes[i - 2]
-		if v_prev != null and v[0] == v_prev[0] and v[1] == v_prev[1] and len(preprocessed_data) > 0:
+		if v_prev != null and len(collected) == 1 and v[0] == v_prev[0] and v[1] == v_prev[1] and len(preprocessed_data) > 0:
 			print("stack old avg")
 			new_note_data[0] = preprocessed_data[-1][0]
 			new_note_data[1] = preprocessed_data[-1][1]
@@ -95,7 +95,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var secondary_preprocessed_data: Array[Array] = []
 
-	if preprocessed_data_len > 5:
+	if preprocessed_data_len > 5 and false:
 
 		secondary_preprocessed_data.append(preprocessed_data[0])
 		secondary_preprocessed_data.append(preprocessed_data[1])
