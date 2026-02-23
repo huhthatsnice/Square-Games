@@ -14,13 +14,13 @@ signal ended
 
 func _ready() -> void:
 	player = AudioStreamPlayer.new()
-	player.bus=&"Music"
-	player.pitch_scale=playback_speed
+	player.bus = &"Music"
+	player.pitch_scale = playback_speed
 	player.volume_linear = SSCS.settings.map_volume * 0.15
 	player.finished.connect(func() -> void:
 		print("audio ended")
-		playing=false
-		audio_began=false
+		playing = false
+		audio_began = false
 		ended.emit()
 	)
 	self.add_child(player)
@@ -29,18 +29,18 @@ func _ready() -> void:
 
 func set_stream(new_stream: AudioStream) -> void:
 	stream = new_stream
-	player.stream=stream
+	player.stream = stream
 
 func set_playback_speed(speed: float) -> void:
-	playback_speed=speed
-	player.pitch_scale=speed
+	playback_speed = speed
+	player.pitch_scale = speed
 
-func play(from:float) -> void:
+func play(from: float) -> void:
 	playing = true
-	if from>=0:
+	if from >= 0:
 		player.play(from)
 		audio_began = true
-	elapsed=from
+	elapsed = from
 	last_update = Time.get_ticks_usec()
 
 func stop() -> void:
@@ -48,7 +48,7 @@ func stop() -> void:
 	player.stop()
 
 func full_stop() -> void:
-	audio_began=false
+	audio_began = false
 	playing = false
 	player.stop()
 
@@ -60,6 +60,6 @@ func _process(_dt: float) -> void:
 	var current_update: int = Time.get_ticks_usec()
 	elapsed += (float(current_update - last_update) / 1_000_000.0) * playback_speed
 	last_update = current_update
-	if !audio_began and elapsed>=0:
+	if !audio_began and elapsed >= 0:
 		play(elapsed)
 	RenderingServer.global_shader_parameter_set("elapsed_time",elapsed)
