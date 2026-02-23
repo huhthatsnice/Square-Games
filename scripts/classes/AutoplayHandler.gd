@@ -29,8 +29,11 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var i: int = 0
 
-	var notes: Array[Array] = map.data
+	var notes: Array[Array] = map.data.duplicate(true)
 	var notes_len: int = len(notes)
+
+	for note: Array in notes:
+		note[2] /= SSCS.modifiers.speed
 
 	var preprocessed_data: Array[Array] = []
 
@@ -220,7 +223,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 
 func get_cursor_position() -> Vector2:
-	var elapsed: int = int(AudioManager.elapsed*1000.0)
+	var elapsed: int = int(AudioManager.elapsed * 1000.0 / SSCS.modifiers.speed)
 	while last_loaded_note+1<len(processed_data):
 		var note: Array = processed_data[last_loaded_note+1]
 		if note[2] > elapsed:
