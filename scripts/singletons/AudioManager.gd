@@ -58,7 +58,7 @@ func resume() -> void:
 func _process(_dt: float) -> void:
 	if not playing: return
 	var current_update: int = Time.get_ticks_usec()
-	elapsed += (float(current_update-last_update)/1_000_000.0)*playback_speed
+	elapsed += (float(current_update - last_update) / 1_000_000.0) * playback_speed
 	last_update = current_update
 	if !audio_began and elapsed>=0:
 		play(elapsed)
