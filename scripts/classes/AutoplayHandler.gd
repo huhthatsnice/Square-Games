@@ -242,11 +242,11 @@ func get_cursor_position() -> Vector2:
 		note_3 = processed_data[min(last_loaded_note + 2 + offset_forward, len(processed_data) - 1)]
 		offset_forward += 1
 
-	#var offset_backward: int = 1
-	#while _check_hit(note_1, note_0, 0.5) and last_loaded_note - 1 - offset_backward >= 0:
-		##print('backward')
-		#note_0 = processed_data[max(last_loaded_note - 1 - offset_backward,0)]
-		#offset_backward += 1
+	var offset_backward: int = 1
+	while _check_hit(note_1, note_0, 0.5) and last_loaded_note - 1 - offset_backward >= 0:
+		#print('backward')
+		note_0 = processed_data[max(last_loaded_note - 1 - offset_backward,0)]
+		offset_backward += 1
 
 	var return_pos: Vector2 = SplineManager._get_position(note_0, note_1, note_2, note_3, elapsed).clampf(-cursor.GRID_MAX,cursor.GRID_MAX)
 
