@@ -98,7 +98,7 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 
 	var secondary_preprocessed_data: Array[Array] = []
 
-	if preprocessed_data_len > 5 and false:
+	if preprocessed_data_len > 5 and true:
 
 		secondary_preprocessed_data.append(preprocessed_data[0])
 		secondary_preprocessed_data.append(preprocessed_data[1])
@@ -129,9 +129,53 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				var end_note: Array = preprocessed_data[i-1]
 
 				var valid: bool = false
+				var valid_test: Array
 
-				if !valid:
-					print("stackify")
+				var tests: Array[Array] = []
+
+				var test_width: float = SSCS.modifiers.hitbox_size * 0.5
+				const test_width_fidelity: int = 3
+				const test_count: int = 11
+				for i2: int in range(0, test_count):
+					tests.append([
+						top_note[0],
+						top_note[1],
+						lerp(top_note[2], end_note[2], i2 / (test_count - 1.0)),
+					])
+					for x: int in range(-test_width_fidelity, test_width_fidelity+1):
+						for y: int in range(-test_width_fidelity, test_width_fidelity+1):
+							if y == 0 and x == 0: continue
+							var offset: Vector2 = (Vector2(x,y) / float(test_width_fidelity)) * test_width
+							tests.append([
+								top_note[0] + offset.x,
+								top_note[1] + offset.y,
+								lerp(top_note[2], end_note[2], i2 / (test_count - 1.0)),
+							])
+
+				var notes_to_check: Array[Array] = preprocessed_data.slice(i - stack_length - 6, i + 7)
+
+				var cursor_position_notes: Array[Array] = secondary_preprocessed_data.slice(-stack_length - 9)
+				var cursor_position_notes_end: Array[Array] = preprocessed_data.slice(i, i + 10)
+
+
+				for test: Array in tests:
+					var current_valid: bool = true
+					var test_validation_array: Array = cursor_position_notes + [test] + cursor_position_notes_end
+
+					for note: Array in notes_to_check:
+						if !_check_hit(note, _get_cursor_position_from_notes_and_elapsed(test_validation_array, note[2] + 5), SSCS.modifiers.hitbox_size * 0.8):
+							current_valid = false
+							break
+					if current_valid:
+						valid = true
+						valid_test = test
+						print("VALID STACK ATTEMPT WTF!?!?!")
+						break
+
+				if valid:
+					secondary_preprocessed_data.append(valid_test)
+				else:
+					print("invalid stack attempt")
 					secondary_preprocessed_data.append(top_note)
 					var top_note_shifted: Array = top_note.duplicate()
 					top_note_shifted[2] += 10
@@ -166,6 +210,8 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 		var note_3: Array = secondary_preprocessed_data[i+1]
 		var note_4: Array = secondary_preprocessed_data[min(i+2,secondary_preprocessed_data_len-1)]
 
+		var shift_vec: Vector2
+
 		if (note_2[0] == note_3[0] and note_2[1] == note_3[1]):
 			print("ignore")
 			var desired: Vector2 = Vector2(
@@ -173,146 +219,83 @@ func _init(map_arg: MapLoader.Map, cursor_arg: Cursor) -> void:
 				((processed_data[-1] if len(processed_data) > 0 else note_1)[1] + note_2[1] * 0.5 + note_3[1]) / 2.5,
 			)
 
-			var shift_vec: Vector2 = desired - Vector2(note_2[0], note_2[1])
+			shift_vec = desired - Vector2(note_2[0], note_2[1])
 
 			if shift_vec.x == 0 or shift_vec.y == 0:
 				shift_vec = shift_vec.clampf(-SSCS.modifiers.hitbox_size * 0.75, SSCS.modifiers.hitbox_size * 0.75)
 			else:
 				shift_vec = shift_vec * clamp(shift_vec.x, -SSCS.modifiers.hitbox_size * 0.75, SSCS.modifiers.hitbox_size * 0.75)/shift_vec.x
 				shift_vec = shift_vec * clamp(shift_vec.y, -SSCS.modifiers.hitbox_size * 0.75, SSCS.modifiers.hitbox_size * 0.75)/shift_vec.y
+		else:
+			var pos: Vector2 = SplineManager._get_position(note_0, note_1, note_3, note_4, note_2[2])
 
-			print(shift_vec)
+			shift_vec = pos - Vector2(note_2[0], note_2[1])
 
+			if shift_vec.x == 0 or shift_vec.y == 0:
+				shift_vec = shift_vec.clampf(-max_range, max_range)
+			else:
+				shift_vec = shift_vec * clamp(shift_vec.x, -max_range, max_range) / shift_vec.x
+				shift_vec = shift_vec * clamp(shift_vec.y, -max_range, max_range) / shift_vec.y
+
+		#var new_note: Array = [
+			#note_2[0] + shift_vec.x,
+			#note_2[1] + shift_vec.y,
+			#note_2[2]
+		#]
+
+		#if _check_hit(SplineManager._get_position(note_1, new_note, note_3, note_4, new_note[2]), note_2, SSCS.modifiers.hitbox_size):
+			#processed_data.append(new_note)
+		#else:
+			#processed_data.append(note_2)
+
+		var valid: bool = false
+		for i2: int in range(0,1):
+			var shift_multi: float = (10 - i2) / 10.0
 			var new_note: Array = [
-				note_2[0] + shift_vec.x,
-				note_2[1] + shift_vec.y,
+				note_2[0] + shift_vec.x * shift_multi,
+				note_2[1] + shift_vec.y * shift_multi,
 				note_2[2]
 			]
-
-			processed_data.append(new_note)
-			i += 1
-			continue
-
-			#var stack_size: int = 1
-			#var stack_start: int = i
-#
-			#i += 1
-			#while i < len(secondary_preprocessed_data):
-				#var next_note: Array = secondary_preprocessed_data[i]
-				#i += 1
-				#if _check_hit(next_note, note_2, 0.2):
-					#stack_size += 1
-				#else:
-					#break
-			#print(stack_size)
-#
-			#var end_note: Array = secondary_preprocessed_data[i - 2]
-			#var past_note_1: Array = secondary_preprocessed_data[min(i-1, len(secondary_preprocessed_data) - 1)]
-			#var past_note_2: Array = secondary_preprocessed_data[min(i, len(secondary_preprocessed_data) - 1)]
-#
-			#print(note_2)
-			#print(end_note)
-			#if end_note[2] - note_2[2] < 250:
-#
-				#var temp_note: Array = [
-					#note_2[0],
-					#note_2[1],
-					#(note_2[2] + end_note[2])/2
-				#]
-#
-				#print(temp_note)
-#
-				#var within: bool = false
-				#var start: float
-				#var end: float
-#
-				#for i2: int in range(0, 250):
-					#var t: float = i2 / 249.0
-					#var real_t: float = note_1[2] + (past_note_1[2] - note_1[2]) * t
-					#var pos: Vector2
-#
-					#if t < 0.5:
-						#pos = SplineManager._get_position(note_0, note_1, temp_note, past_note_1, real_t)
-					#else:
-						#pos = SplineManager._get_position(note_1, temp_note, past_note_1, past_note_2, real_t)
-#
-					#var current_within: bool = _check_hit(note_2, pos, SSCS.modifiers.hitbox_size * 0.9)
-#
-					#if current_within and !within:
-						#start = real_t
-					#elif !current_within and within:
-						#end = real_t
-					#within = current_within
-#
-				#print(start)
-				#print(end)
-#
-				#i = stack_start
-				#while i < len(secondary_preprocessed_data):
-					#var note: Array = secondary_preprocessed_data[i]
-#
-					#if !_check_hit(note, note_2, 0.2):
-						#break
-#
-					#var real_t: float = note[2]
-					#var t: float = remap(real_t, note_2[2], end_note[2], 0, 1)
-#
-					#var pos: Vector2
-#
-					#if t < 0.5:
-						#pos = SplineManager._get_position(note_0, note_1, temp_note, past_note_1, remap(real_t, note_2[2], end_note[2], start, end))
-					#else:
-						#pos = SplineManager._get_position(note_1, temp_note, past_note_1, past_note_2, remap(real_t, note_2[2], end_note[2], start, end))
-#
-					#var shift_vec: Vector2 = pos - Vector2(note[0], note[1])
-#
-					#if shift_vec.x == 0 or shift_vec.y == 0:
-						#shift_vec = shift_vec.clampf(-SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5)
-					#else:
-						#shift_vec = shift_vec * clamp(shift_vec.x, -SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5) / shift_vec.x
-						#shift_vec = shift_vec * clamp(shift_vec.y, -SSCS.modifiers.hitbox_size * 0.5, SSCS.modifiers.hitbox_size * 0.5) / shift_vec.y
-#
-					#var new_note: Array = [
-						#note[0] + shift_vec.x,
-						#note[1] + shift_vec.y,
-						#real_t
-					#]
-#
-					#processed_data.append(new_note)
-					#i += 1
-					#print("go")
-#
-				#print("done")
-			#continue
-
-		var pos: Vector2 = SplineManager._get_position(note_0, note_1, note_3, note_4, note_2[2])
-
-		var shift_vec: Vector2 = pos - Vector2(note_2[0], note_2[1])
-
-		if shift_vec.x == 0 or shift_vec.y == 0:
-			shift_vec = shift_vec.clampf(-max_range, max_range)
-		else:
-			shift_vec = shift_vec * clamp(shift_vec.x, -max_range, max_range) / shift_vec.x
-			shift_vec = shift_vec * clamp(shift_vec.y, -max_range, max_range) / shift_vec.y
-
-		var new_note: Array = [
-			note_2[0] + shift_vec.x,
-			note_2[1] + shift_vec.y,
-			note_2[2]
-		]
-
-		if _check_hit(SplineManager._get_position(note_1, new_note, note_3, note_4, new_note[2]), note_2, SSCS.modifiers.hitbox_size):
-			processed_data.append(new_note)
-		else:
+			var test_validation_array: Array = processed_data.slice(-15) + [new_note] + secondary_preprocessed_data.slice(i+1, i+16)
+			var current_valid: bool = true
+			for note: Array in map.data:
+				if note[2] >= test_validation_array[2][2] and note[2] <= test_validation_array[-3][2]:
+					if !(_check_hit(note, _get_cursor_position_from_notes_and_elapsed(test_validation_array, note[2]+1), SSCS.modifiers.hitbox_size * 0.9) or _check_hit(note, _get_cursor_position_from_notes_and_elapsed(test_validation_array, note[2]+5), SSCS.modifiers.hitbox_size * 0.9)):
+						current_valid = false
+						break
+			if current_valid:
+				valid = true
+				processed_data.append(new_note)
+				break
+		if !valid:
 			processed_data.append(note_2)
 		i += 1
 
 	processed_data.append(preprocessed_data[-1])
 
+	#processed_data = secondary_preprocessed_data
+
 	#map.data = processed_data
 
 	#processed_data = secondary_preprocessed_data
 
+func _get_cursor_position_from_notes_and_elapsed(note_data: Array, elapsed: int) -> Vector2:
+	var temp_last_loaded_note: int = 0
+	while temp_last_loaded_note + 1<len(note_data):
+		var note: Array = note_data[temp_last_loaded_note+1]
+		if note[2] > elapsed:
+			break
+		else:
+			temp_last_loaded_note+=1
+
+	var note_0: Array = note_data[max(temp_last_loaded_note - 1,0)]
+	var note_1: Array = note_data[temp_last_loaded_note]
+	var note_2: Array = note_data[min(temp_last_loaded_note + 1, len(note_data) - 1)]
+	var note_3: Array = note_data[min(temp_last_loaded_note + 2, len(note_data) - 1)]
+
+	var return_pos: Vector2 = SplineManager._get_position(note_0, note_1, note_2, note_3, elapsed).clampf(-cursor.GRID_MAX,cursor.GRID_MAX)
+
+	return return_pos
 
 func get_cursor_position() -> Vector2:
 	var elapsed: int = int(AudioManager.elapsed * 1000.0 / SSCS.modifiers.speed)
