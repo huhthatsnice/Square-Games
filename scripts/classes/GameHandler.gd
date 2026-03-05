@@ -228,15 +228,16 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 	var new_index: int = allocated_notes.find(0, lowest_hole)
 
 	lowest_hole = new_index
-
-	if new_index > note_added:
-		note_added = new_index
+	
+	note_added = maxi(note_added, new_index)
+	#if new_index > note_added:
+		#note_added = new_index
 
 	#if new_index<0 or new_index>=multimesh.instance_count:
 		#print("WOOAAHHH")
 		#print(new_index)
 
-	allocated_notes[new_index]=1
+	allocated_notes[new_index] = 1
 	var new_note: Note = note_stockpile.pop_back() #Note.new(note_id, pos, t, multimesh, new_index)
 
 	if new_note == null:
@@ -244,19 +245,22 @@ func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
 		note_stockpile.append(new_note)
 	else:
 		new_note.reinitialize(note_id, pos, t, new_index)
-
+ 
 	return new_note
 
 func remove_note(note: Note) -> void:
 	var index:int = note.multimesh_index
-
-	if index>note_removed:
-		note_removed = index
-		
-	if index < lowest_hole:
-		lowest_hole = index
+	
+	note_removed = maxi(note_removed, index)
+	#if index > note_removed:
+		#note_removed = index
+	
+	lowest_hole = mini(lowest_hole, index)
+	#if index < lowest_hole:
+		#lowest_hole = index
 
 	allocated_notes[index]=0
+
 	multimesh.set_instance_transform(index,nan_transform)
 
 	note_stockpile.append(note)
@@ -301,7 +305,8 @@ func play(from: float) -> void:
 		)
 
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
-	while last_loaded_note_id < len(map.data):
+	var map_data_len: int = len(map.data)
+	while last_loaded_note_id < map_data_len:
 		var note_data: Array = map.data[last_loaded_note_id]
 		if note_data[2] <= threshold:
 			if is_replay:
@@ -341,7 +346,8 @@ func _check_death() -> void:
 var last_load:float = 0
 func _load_notes() -> void:
 	var threshold: int = ceil( (AudioManager.elapsed + approach_time) * 1000)
-	while last_loaded_note_id < len(map.data):
+	var map_data_len: int = len(map.data)
+	while last_loaded_note_id < map_data_len:
 		var note_data: Array = map.data[last_loaded_note_id]
 		if note_data[2] <= threshold:
 			var new_note: Note = spawn_note(last_loaded_note_id, Vector2(note_data[0], note_data[1]), float(note_data[2]) / 1000)
@@ -370,6 +376,7 @@ func remove_notes(to_remove: PackedInt32Array) -> void:
 		notes = notes.slice(to_remove[-1] + 1)
 		return
 	#var notes_len: int = len(notes)
+	print("slow one")
 
 	new_notes.resize(to_remove[-1] - to_remove_len + 1)
 
@@ -388,6 +395,7 @@ func remove_notes(to_remove: PackedInt32Array) -> void:
 		else:
 			new_notes[i - shift] = note
 		i += 1
+	
 	
 	new_notes.append_array(notes.slice(to_remove[-1] + 1))
 
