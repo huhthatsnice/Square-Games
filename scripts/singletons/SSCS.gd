@@ -193,6 +193,8 @@ func set_modifier(modifier: String, value: Variant, generic: bool = false) -> bo
 const blacklisted_properties: Array[String] = ["RefCounted","script","Built-in script"]
 func encode_class(obj: Variant) -> Dictionary:
 	var encoded: Dictionary = {}
+	
+	
 
 	for p: Dictionary in obj.get_property_list():
 		if p.name not in blacklisted_properties:
@@ -468,6 +470,9 @@ func _ready() -> void:
 	load_unloaded_maps()
 
 	SSCS.selected_map = map_cache[map_cache.keys()[0]]
+	
+	#await get_tree().create_timer(1).timeout
+	#Terminal.line_entered.emit("play sing")
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:

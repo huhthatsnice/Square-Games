@@ -8,7 +8,7 @@ const hud_base: PackedScene = preload("res://scenes/prefabs/hud.tscn")
 const default_hit_sound: AudioStreamWAV = preload("res://assets/audio/hitsound.wav")
 const default_miss_sound: AudioStreamMP3 = preload("res://assets/audio/misssound.mp3")
 
-const nan_transform: Transform3D = Transform3D(Basis(),Vector3(-2^52,-2^52,-2^52))
+const invisible_transform: Transform3D = Transform3D(Basis(Vector3(), Vector3(), Vector3()), Vector3(-2^52, -2^52, -2^52))
 
 @onready var camera: Camera3D = $"/root/Game/Camera"
 
@@ -17,25 +17,25 @@ var map: MapLoader.Map
 var map_data: Array[Array]
 
 var notes: Array[Note] = []
+var note_rendering_array: Array[Note] = []
 var note_scores: Array[int] = []
-var allocated_notes: PackedByteArray = []
 var cursor: Cursor
 var hud: Hud
 
-var note_stockpile: Array[Note] = []
-
 var max_loaded_notes: int = 0
 
-var last_top_note_id: int = 0
+var tail: int = 0
+var head: int = 0
 
-var note_added: int = -1
-var note_removed: int = -1
+var note_rendering_array_size: int = 0
 
 var misses: int = 0
 var hits: int = 0
 var score: int = 0
 
-var last_loaded_note_id: int=0
+var last_loaded_note_id: int = 0
+
+var note_transform_base: Transform3D
 
 var ran: bool = false
 var stopped: bool = false
@@ -79,6 +79,12 @@ var miss_sound_player: AudioStreamPlayer
 var horizontal_flip: bool = SSCS.modifiers.horizontal_flip
 var vertical_flip: bool = SSCS.modifiers.vertical_flip
 
+var color_set: Array = SSCS.settings.color_set
+var color_set_len: int = len(color_set)
+var grid_distance:float = SSCS.settings.grid_distance
+
+var note_scale: float = SSCS.settings.note_scale
+
 var end_replay_on_end_of_data: bool = false
 
 signal ended
@@ -113,8 +119,8 @@ func _init(map_arg: MapLoader.Map, is_replay: bool = false, replay_note_hit_data
 			max_loaded_notes = current_note - note_counter
 
 	max_loaded_notes += 1
-	if max_loaded_notes > 10000: #holy shit visual map
-		max_loaded_notes *= 2
+	#if max_loaded_notes > 10000: #holy shit visual map
+		#max_loaded_notes *= 2
 
 	var benchmark_end_1: int = Time.get_ticks_usec()
 	print((benchmark_end_1 - benchmark_start_1)/1000.0)
@@ -125,9 +131,6 @@ func _init(map_arg: MapLoader.Map, is_replay: bool = false, replay_note_hit_data
 			note_data[1] = (-1 if vertical_flip else 1) * note_data[1]
 
 	print(max_loaded_notes)
-
-	allocated_notes.resize(max_loaded_notes)
-	allocated_notes.fill(0)
 
 	note_scores.resize(len(map.data))
 	for i: int in range(len(map.data)):
@@ -195,13 +198,16 @@ func _ready() -> void:
 	self.multimesh.use_custom_data=true
 
 	self.multimesh.instance_count = max_loaded_notes
-	self.multimesh.visible_instance_count = 1
-
-	note_stockpile.resize(max_loaded_notes)
-	var i: int = 0
-	while i < max_loaded_notes:
-		note_stockpile[i] = Note.new(0, Vector2(), 0.0, multimesh, 1)
-		i += 1
+	self.multimesh.visible_instance_count = 0
+	
+	self.multimesh.custom_aabb = AABB(Vector3(0, 0, 0), Vector3(1000, 1000, 1000))
+	
+	notes.resize(max_loaded_notes)
+	note_rendering_array.resize(max_loaded_notes)
+	
+	for i: int in range(max_loaded_notes):
+		multimesh.set_instance_transform(i, invisible_transform)
+		notes[i] = Note.new(multimesh)
 
 	hit_sound_player = AudioStreamPlayer.new()
 	hit_sound_player.max_polyphony = 50
@@ -230,55 +236,46 @@ func _ready() -> void:
 
 	self.add_child(miss_sound_player)
 
-
-
-
 #region note creation and deletion
 
-var lowest_hole: int = 0 #not actually guarunteed to be lowest hole, instead guarunteed to be lower than lowest hole
+func spawn_note(note_id: int, pos: Vector2, t: float) -> void:
+	var new_note: Note = notes[tail]
 
-func spawn_note(note_id: int, pos: Vector2, t: float) -> Note:
-
-	var new_index: int = allocated_notes.find(0, lowest_hole)
-
-	lowest_hole = new_index
-
-	note_added = maxi(note_added, new_index)
-	#if new_index > note_added:
-		#note_added = new_index
-
-	#if new_index<0 or new_index>=multimesh.instance_count:
-		#print("WOOAAHHH")
-		#print(new_index)
-
-	allocated_notes[new_index] = 1
-	var new_note: Note = note_stockpile.pop_back() #Note.new(note_id, pos, t, multimesh, new_index)
-
-	#if new_note == null:
-		#new_note = Note.new(note_id, pos, t, multimesh, new_index)
-		#note_stockpile.append(new_note)
-		#print("new one")
-	#else:
-	new_note.reinitialize(note_id, pos, t, new_index)
-
-	return new_note
+	new_note.initialize(note_id, pos, t, note_rendering_array_size)
+	
+	note_rendering_array[note_rendering_array_size] = new_note
+	
+	note_rendering_array_size += 1
+	
+	multimesh.visible_instance_count = note_rendering_array_size
+	
+	tail = (tail + 1) % max_loaded_notes
+	
+	#print("add")
+	#print(note_rendering_array)
+	#print(note_rendering_array_size)
 
 func remove_note(note: Note) -> void:
-	var index:int = note.multimesh_index
-
-	note_removed = maxi(note_removed, index)
-	#if index > note_removed:
-		#note_removed = index
-
-	lowest_hole = mini(lowest_hole, index)
-	#if index < lowest_hole:
-		#lowest_hole = index
-
-	allocated_notes[index]=0
-
-	multimesh.set_instance_transform(index,nan_transform)
-
-	note_stockpile.append(note)
+	note_rendering_array_size -= 1
+	
+	multimesh.visible_instance_count = note_rendering_array_size
+	
+	var replacement: Note = note_rendering_array[note_rendering_array_size]
+	
+	#note.initialize(replacement.note_id, replacement.pos, replacement.t, replacement.multimesh_index)
+	
+	replacement.multimesh_index = note.multimesh_index
+	replacement.reinitialize()
+	
+	note.dead = true
+	
+	note_rendering_array[note.multimesh_index] = replacement
+	
+	#note_rendering_array[note_rendering_array_size].deinitialize()
+	
+	#print("remove")
+	#print(note_rendering_array)
+	#print(note_rendering_array_size)
 
 
 func update_note_mesh(mesh: Mesh) -> void:
@@ -287,6 +284,11 @@ func update_note_mesh(mesh: Mesh) -> void:
 
 	new_note_mesh.surface_set_material(0, note_material)
 	self.multimesh.mesh=new_note_mesh
+	
+	var aabb:AABB = multimesh.mesh.get_aabb()
+	
+	#ensures note scaling is correct
+	note_transform_base = Transform3D(Basis.from_scale(aabb.size.inverse() * Vector3(1,1,0.2) * note_scale), Vector3())
 
 #endregion
 #region time control
@@ -372,104 +374,36 @@ func _load_notes() -> void:
 		var note_t: int = note_data[2]
 		#if note_t > threshold: break
 		if note_t <= threshold:
+			var new_note: Note = notes[tail]
 
-			#var new_note: Note = spawn_note(last_loaded_note_id, Vector2(note_data[0], note_data[1]), note_t / 1000.0)
-			var new_index: int = allocated_notes.find(0, lowest_hole)
-
-			lowest_hole = new_index
-
-			note_added = maxi(note_added, new_index)
-
-			allocated_notes[new_index] = 1
-
-			var new_note: Note = note_stockpile.pop_back()
-
-			new_note.reinitialize(last_loaded_note_id, Vector2(note_data[0], note_data[1]), note_t / 1000.0, new_index)
-
-			notes.append(new_note)
+			new_note.initialize(last_loaded_note_id, Vector2(note_data[0], note_data[1]), note_t / 1000.0, note_rendering_array_size)
+			
+			note_rendering_array[note_rendering_array_size] = new_note
+			
+			note_rendering_array_size += 1
+			
+			multimesh.visible_instance_count = note_rendering_array_size
+			
+			tail = (tail + 1) % max_loaded_notes
 
 			last_loaded_note_id += 1
 		else:
 			break
-
-var new_notes: Array[Note] #held externally for the sake of memory allocation efficiency(?) no clue if it works
-
-func remove_notes(to_remove: PackedInt32Array) -> void:
-	var to_remove_len: int = len(to_remove)
-	if to_remove[-1] == to_remove_len - 1:
-		for i: int in range(0, to_remove_len):
-			#remove_note(notes[i])
-			var note: Note = notes[i]
-			var index: int = note.multimesh_index
-
-			note_removed = maxi(note_removed, index)
-			lowest_hole = mini(lowest_hole, index)
-
-			allocated_notes[index]=0
-
-			multimesh.set_instance_transform(index,nan_transform)
-		note_stockpile.append_array(notes.slice(0, to_remove[-1] + 1))
-		notes = notes.slice(to_remove[-1] + 1)
-		return
-	#var notes_len: int = len(notes)
-	#print("slow one")
-
-	new_notes.resize(to_remove[-1] - to_remove_len + 1)
-
-	var shift: int = 0
-	var i: int = 0
-	var next_check: int = to_remove[0]
-
-	var note_stockpile_len: int = len(note_stockpile)
-	note_stockpile.resize(note_stockpile_len + to_remove_len)
-
-	for note: Note in notes:
-		if i == next_check:
-
-			var index: int = note.multimesh_index
-
-			note_removed = maxi(note_removed, index)
-			lowest_hole = mini(lowest_hole, index)
-
-			allocated_notes[index]=0
-
-			multimesh.set_instance_transform(index,nan_transform)
-
-			note_stockpile[note_stockpile_len + shift] = note
-			shift += 1
-			if shift < to_remove_len:
-				next_check = to_remove[shift]
-			else:
-				break
-		else:
-			new_notes[i - shift] = note
-		i += 1
-
-
-	new_notes.append_array(notes.slice(to_remove[-1] + 1))
-
-	#while i < notes_len:
-		#new_notes[i - shift] = notes[i]
-		#i += 1
-
-	var notes_temp: Array[Note] = notes
-
-	notes = new_notes
-	new_notes = notes_temp
 
 func _check_hitreg() -> void:
 	var elapsed: float = AudioManager.elapsed
 
 	var boundary: float = elapsed - hit_time
 
-	var to_remove: PackedInt32Array = []
-	var i: int = -1
+	var i: int = head
 
 	var cursor_pos: Vector2 = cursor.pos
 
 	if is_replay:
-		for note: Note in notes:
-			i+=1
+		while i != tail:
+			var note: Note = notes[i]
+			i = (i + 1) % max_loaded_notes
+			if note.dead: continue
 			var note_t: float = note.t
 			if note_t < elapsed:
 				if note_t < boundary:
@@ -480,29 +414,67 @@ func _check_hitreg() -> void:
 						health = health - 1
 						if use_miss_sound: miss_sound_player.play(0)
 						note_missed.emit(note)
-
-						to_remove.append(i)
+						
+						note_rendering_array_size -= 1
+	
+						multimesh.visible_instance_count = note_rendering_array_size
+						
+						var replacement: Note = note_rendering_array[note_rendering_array_size]
+						
+						replacement.multimesh_index = note.multimesh_index
+						replacement.reinitialize()
+						
+						note.dead = true
+						
+						note_rendering_array[note.multimesh_index] = replacement
 					else:
 						hits += 1
 						health = health + 0.5
 						if use_hit_sound: hit_sound_player.play(0)
 						note_hit.emit(note)
-
-						to_remove.append(i)
+						
+						note_rendering_array_size -= 1
+	
+						multimesh.visible_instance_count = note_rendering_array_size
+						
+						var replacement: Note = note_rendering_array[note_rendering_array_size]
+						
+						replacement.multimesh_index = note.multimesh_index
+						replacement.reinitialize()
+						
+						note.dead = true
+						
+						note_rendering_array[note.multimesh_index] = replacement
 			else:
 				break
 	else:
-		for note: Note in notes:
-			i += 1
+		while i != tail:
+			
+			var note: Note = notes[i]
+			i = (i + 1) % max_loaded_notes
+			if note.dead: continue
 			var note_t: float = note.t
+			
 			if note_t < elapsed:
 				if note_t < boundary:
+					print(note_t)
 					misses += 1
 					health -= 1.0
 					if use_miss_sound: miss_sound_player.play(0)
 					note_missed.emit(note)
-
-					to_remove.append(i)
+					
+					note_rendering_array_size -= 1
+	
+					multimesh.visible_instance_count = note_rendering_array_size
+					
+					var replacement: Note = note_rendering_array[note_rendering_array_size]
+					
+					replacement.multimesh_index = note.multimesh_index
+					replacement.reinitialize()
+					
+					note.dead = true
+					
+					note_rendering_array[note.multimesh_index] = replacement
 				else:
 					var diff: Vector2 = (note.pos - cursor_pos).abs()
 
@@ -511,15 +483,27 @@ func _check_hitreg() -> void:
 						health += 0.5
 						if use_hit_sound: hit_sound_player.play(0)
 						note_hit.emit(note)
-
-						to_remove.append(i)
+						
+						note_rendering_array_size -= 1
+	
+						multimesh.visible_instance_count = note_rendering_array_size
+						
+						var replacement: Note = note_rendering_array[note_rendering_array_size]
+						
+						replacement.multimesh_index = note.multimesh_index
+						replacement.reinitialize()
+						
+						note.dead = true
+						
+						note_rendering_array[note.multimesh_index] = replacement
 			else:
 				break
 
 	health = clampf(health, 0.0, 5.0)
-
-	if len(to_remove) > 0:
-		remove_notes(to_remove)
+	
+	while head != tail and notes[head].dead:
+		head = (head + 1) % max_loaded_notes
+		
 	#var shift: int = 0
 	#for v: int in to_remove:
 		#var note: Note = notes.pop_at(v-shift)
@@ -572,15 +556,8 @@ func _process(_dt: float) -> void:
 	_load_notes()
 	_check_death()
 
-	if note_removed == last_top_note_id:
-		var top_note_id: int = allocated_notes.rfind(1)
-		last_top_note_id = top_note_id
-		self.multimesh.visible_instance_count=top_note_id+1
-		hud.update_info_right(hits,misses)
-		hud.update_info_bottom(health)
-	elif note_added>last_top_note_id:
-		last_top_note_id = note_added
-		self.multimesh.visible_instance_count=note_added+1
+	hud.update_info_right(hits,misses)
+	hud.update_info_bottom(health)
 
 #endregion
 
